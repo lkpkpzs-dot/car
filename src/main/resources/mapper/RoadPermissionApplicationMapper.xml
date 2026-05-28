@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.lkp.car.mapper.RoadPermissionApplicationMapper">
+
+    <resultMap id="RoadPermissionApplicationVOMap" type="org.lkp.car.vo.RoadPermissionApplicationVO">
+        <id property="id" column="id"/>
+        <result property="enterpriseId" column="enterprise_id"/>
+        <result property="applicantId" column="applicant_id"/>
+        <result property="type" column="type"/>
+        <result property="status" column="status"/>
+        <result property="plateStatus" column="plate_status"/>
+        <result property="vehicleBrand" column="vehicle_brand"/>
+        <result property="vehicleModel" column="vehicle_model"/>
+        <result property="vin" column="vin"/>
+        <result property="testArea" column="test_area"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="testProjects" column="test_projects"/>
+        <result property="supportPlan" column="support_plan"/>
+        <result property="docVehicleCert" column="doc_vehicle_cert"/>
+        <result property="docOwnerId" column="doc_owner_id"/>
+        <result property="docSafetyInspection" column="doc_safety_inspection"/>
+        <result property="docInsurance" column="doc_insurance"/>
+        <result property="docOwnerProxy" column="doc_owner_proxy"/>
+        <result property="docAgentId" column="doc_agent_id"/>
+        <result property="docSafetyDeclaration" column="doc_safety_declaration"/>
+        <result property="docApplicationDoc" column="doc_application_doc"/>
+        <result property="reviewerId" column="reviewer_id"/>
+        <result property="auditComment" column="audit_comment"/>
+        <result property="rejectReason" column="reject_reason"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="enterpriseName" column="enterprise_name"/>
+    </resultMap>
+
+    <select id="listWithEnterpriseName" resultMap="RoadPermissionApplicationVOMap">
+        SELECT
+            r.*,
+            e.enterprise_name
+        FROM road_permission_application r
+        LEFT JOIN enterprise_info e
+            ON r.enterprise_id = e.enterprise_id
+        WHERE
+            (#{status} IS NULL OR r.status = #{status})
+            AND (#{type} IS NULL OR r.type = #{type})
+        ORDER BY r.create_time DESC
+    </select>
+
+</mapper>
