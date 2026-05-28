@@ -45,7 +45,15 @@ public class JwtUtils {
      */
     public boolean validateToken(String token) {
         try {
-            return JWTUtil.verify(token, KEY);
+            if (!JWTUtil.verify(token, KEY)) {
+                return false;
+            }
+            JWT jwt = JWTUtil.parseToken(token);
+            Object expiresAt = jwt.getPayload(JWT.EXPIRES_AT);
+            if (expiresAt instanceof Date) {
+                return ((Date) expiresAt).after(new Date());
+            }
+            return expiresAt != null;
         } catch (Exception e) {
             return false;
         }

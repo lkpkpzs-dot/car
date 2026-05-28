@@ -6,11 +6,14 @@ import org.lkp.car.common.Result;
 import org.lkp.car.dto.VehicleApplyRequest;
 import org.lkp.car.dto.VehicleAuditRequest;
 import org.lkp.car.dto.VehicleInspectionSubmitRequest;
+import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.VehicleInfoService;
+import org.lkp.car.utils.AuthContext;
 import org.lkp.car.vo.VehicleInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -26,31 +29,56 @@ public class VehicleInfoController {
 
     @PostMapping("/apply")
     @ApiOperation("提交/重新提交车辆查验申请（旧接口，保留向后兼容）")
-    public Result<Long> apply(@RequestBody VehicleApplyRequest applyRequest) {
+    public Result<Long> apply(@RequestBody VehicleApplyRequest applyRequest, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "请先完成企业资质认证和企业绑定");
+        }
+        applyRequest.setUserId(currentUser.getUserId());
+        applyRequest.setEnterpriseId(currentUser.getAuthEnterpriseId());
         return Result.success(vehicleInfoService.apply(applyRequest));
     }
 
     @PostMapping("/inspection/submit")
     @ApiOperation("提交车辆查验（新接口）")
-    public Result<Long> submitInspection(@RequestBody VehicleInspectionSubmitRequest request) {
-        return Result.success(vehicleInfoService.submitInspection(request));
+    public Result<Long> submitInspection(@RequestBody VehicleInspectionSubmitRequest submitRequest,
+                                         HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无车辆查验权限");
+        }
+        return Result.success(vehicleInfoService.submitInspection(submitRequest));
     }
 
     @GetMapping("/myList")
     @ApiOperation("获取我的车辆查验列表")
-    public Result<List<VehicleInfoVO>> myList(@RequestParam Long userId) {
-        return Result.success(vehicleInfoService.myList(userId));
+    public Result<List<VehicleInfoVO>> myList(HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        return Result.success(vehicleInfoService.myList(currentUser.getUserId()));
     }
 
     @PostMapping("/audit")
     @ApiOperation("民警审核车辆查验（旧接口，保留向后兼容）")
-    public Result<Boolean> audit(@RequestBody VehicleAuditRequest auditRequest) {
+    public Result<Boolean> audit(@RequestBody VehicleAuditRequest auditRequest, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无车辆查验审核权限");
+        }
+        auditRequest.setReviewerId(currentUser.getUserId());
         return Result.success(vehicleInfoService.audit(auditRequest));
     }
 
     @GetMapping("/detail")
     @ApiOperation("获取车辆查验详情")
-    public Result<VehicleInfoVO> detail(@RequestParam Long id) {
-        return Result.success(vehicleInfoService.detail(id));
+    public Result<VehicleInfoVO> detail(@RequestParam Long id, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        VehicleInfoVO detail = vehicleInfoService.detail(id);
+        if (detail == null) {
+            return Result.success(null);
+        }
+        if (!AuthContext.isPolice(currentUser)
+                && !currentUser.getUserId().equals(detail.getUserId())) {
+            return Result.error(403, "无车辆查验详情查看权限");
+        }
+        return Result.success(detail);
     }
 }

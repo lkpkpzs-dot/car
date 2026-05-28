@@ -3,12 +3,11 @@ package org.lkp.car.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.lkp.car.common.JwtUtils;
 import org.lkp.car.common.Result;
 import org.lkp.car.entity.LicenseApplication;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.LicenseApplicationService;
-import org.lkp.car.service.SysUserService;
+import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,36 +26,17 @@ public class LicenseApplicationController {
     @Autowired
     private LicenseApplicationService licenseApplicationService;
 
-    @Autowired
-    private SysUserService sysUserService;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
     /**
      * 获取当前登录企业的申请列表 (企业端首页统计使用)
      */
     @GetMapping("/myList")
     @ApiOperation("获取当前登录企业的申请列表")
     public Result<List<LicenseApplication>> myList(HttpServletRequest request) {
-        // 1. 从 Token 中解析用户 ID
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-        Long userId = jwtUtils.getUserId(token);
-        if (userId == null) {
-            return Result.error("未登录或登录已过期");
-        }
-
-        // 2. 查询用户信息，获取所属企业 ID
-        SysUser user = sysUserService.getById(userId);
+        SysUser user = AuthContext.currentUser(request);
         if (user == null || user.getAuthEnterpriseId() == null) {
-            // 如果用户未绑定企业，返回空列表
             return Result.success(Collections.emptyList());
         }
 
-        // 3. 根据企业 ID 查询所有的号牌申请记录
         List<LicenseApplication> applications = licenseApplicationService.list(
                 new LambdaQueryWrapper<LicenseApplication>()
                         .eq(LicenseApplication::getEnterpriseId, user.getAuthEnterpriseId())
@@ -71,7 +51,10 @@ public class LicenseApplicationController {
      */
     @GetMapping("/list")
     @ApiOperation("获取申请列表")
-    public Result<List<LicenseApplication>> list() {
+    public Result<List<LicenseApplication>> list(HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无申请列表查看权限");
+        }
         return Result.success(licenseApplicationService.list());
     }
 
@@ -80,8 +63,18 @@ public class LicenseApplicationController {
      */
     @GetMapping("/{id}")
     @ApiOperation("根据ID获取申请详情")
-    public Result<LicenseApplication> getById(@PathVariable Long id) {
-        return Result.success(licenseApplicationService.getById(id));
+    public Result<LicenseApplication> getById(@PathVariable Long id, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        LicenseApplication application = licenseApplicationService.getById(id);
+        if (application == null) {
+            return Result.success(null);
+        }
+        if (!AuthContext.isPolice(currentUser)
+                && (!AuthContext.hasEnterprise(currentUser)
+                || !currentUser.getAuthEnterpriseId().equals(application.getEnterpriseId()))) {
+            return Result.error(403, "无申请详情查看权限");
+        }
+        return Result.success(application);
     }
 
     /**
@@ -89,7 +82,12 @@ public class LicenseApplicationController {
      */
     @PostMapping("/save")
     @ApiOperation("提交/保存申请")
-    public Result<Boolean> save(@RequestBody LicenseApplication licenseApplication) {
+    public Result<Boolean> save(@RequestBody LicenseApplication licenseApplication, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "请先完成企业资质认证和企业绑定");
+        }
+        licenseApplication.setEnterpriseId(currentUser.getAuthEnterpriseId());
         return Result.success(licenseApplicationService.save(licenseApplication));
     }
 
@@ -98,7 +96,14 @@ public class LicenseApplicationController {
      */
     @PutMapping("/update")
     @ApiOperation("修改申请信息")
-    public Result<Boolean> update(@RequestBody LicenseApplication licenseApplication) {
+    public Result<Boolean> update(@RequestBody LicenseApplication licenseApplication, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser) && !AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "无申请修改权限");
+        }
+        if (!AuthContext.isPolice(currentUser)) {
+            licenseApplication.setEnterpriseId(currentUser.getAuthEnterpriseId());
+        }
         return Result.success(licenseApplicationService.updateById(licenseApplication));
     }
 
@@ -107,7 +112,10 @@ public class LicenseApplicationController {
      */
     @DeleteMapping("/{id}")
     @ApiOperation("删除申请")
-    public Result<Boolean> delete(@PathVariable Long id) {
+    public Result<Boolean> delete(@PathVariable Long id, HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无申请删除权限");
+        }
         return Result.success(licenseApplicationService.removeById(id));
     }
 }

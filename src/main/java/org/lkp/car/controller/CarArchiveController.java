@@ -1,15 +1,19 @@
 package org.lkp.car.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
 import org.lkp.car.dto.GenerateArchiveRequest;
 import org.lkp.car.dto.IssuePlateRequest;
 import org.lkp.car.entity.CarArchive;
+import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.CarArchiveService;
+import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -28,8 +32,16 @@ public class CarArchiveController {
      */
     @GetMapping("/list")
     @ApiOperation("获取车辆列表")
-    public Result<List<CarArchive>> list() {
-        return Result.success(carArchiveService.list());
+    public Result<List<CarArchive>> list(HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (AuthContext.isPolice(currentUser)) {
+            return Result.success(carArchiveService.list());
+        }
+        if (!AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "请先完成企业资质认证和企业绑定");
+        }
+        return Result.success(carArchiveService.list(new LambdaQueryWrapper<CarArchive>()
+                .eq(CarArchive::getEnterpriseId, currentUser.getAuthEnterpriseId())));
     }
 
     /**
@@ -37,8 +49,18 @@ public class CarArchiveController {
      */
     @GetMapping("/{vin}")
     @ApiOperation("根据VIN获取车辆详情")
-    public Result<CarArchive> getById(@PathVariable String vin) {
-        return Result.success(carArchiveService.getById(vin));
+    public Result<CarArchive> getById(@PathVariable String vin, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        CarArchive archive = carArchiveService.getById(vin);
+        if (archive == null) {
+            return Result.success(null);
+        }
+        if (!AuthContext.isPolice(currentUser)
+                && (!AuthContext.hasEnterprise(currentUser)
+                || !currentUser.getAuthEnterpriseId().equals(archive.getEnterpriseId()))) {
+            return Result.error(403, "无车辆档案查看权限");
+        }
+        return Result.success(archive);
     }
 
     /**
@@ -46,7 +68,10 @@ public class CarArchiveController {
      */
     @PostMapping("/save")
     @ApiOperation("新增车辆档案")
-    public Result<Boolean> save(@RequestBody CarArchive carArchive) {
+    public Result<Boolean> save(@RequestBody CarArchive carArchive, HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无车辆档案维护权限");
+        }
         return Result.success(carArchiveService.save(carArchive));
     }
 
@@ -55,7 +80,10 @@ public class CarArchiveController {
      */
     @PutMapping("/update")
     @ApiOperation("修改车辆档案")
-    public Result<Boolean> update(@RequestBody CarArchive carArchive) {
+    public Result<Boolean> update(@RequestBody CarArchive carArchive, HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无车辆档案维护权限");
+        }
         return Result.success(carArchiveService.updateById(carArchive));
     }
 
@@ -64,7 +92,10 @@ public class CarArchiveController {
      */
     @DeleteMapping("/{vin}")
     @ApiOperation("删除车辆档案")
-    public Result<Boolean> delete(@PathVariable String vin) {
+    public Result<Boolean> delete(@PathVariable String vin, HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无车辆档案维护权限");
+        }
         return Result.success(carArchiveService.removeById(vin));
     }
 
@@ -73,8 +104,12 @@ public class CarArchiveController {
      */
     @PostMapping("/generateFromInspection")
     @ApiOperation("从查验生成车辆档案")
-    public Result<CarArchive> generateFromInspection(@RequestBody GenerateArchiveRequest request) {
-        return Result.success(carArchiveService.generateFromInspection(request));
+    public Result<CarArchive> generateFromInspection(@RequestBody GenerateArchiveRequest archiveRequest,
+                                                     HttpServletRequest request) {
+        if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
+            return Result.error(403, "无车辆档案生成权限");
+        }
+        return Result.success(carArchiveService.generateFromInspection(archiveRequest));
     }
 
     /**
@@ -82,7 +117,12 @@ public class CarArchiveController {
      */
     @PostMapping("/issuePlate")
     @ApiOperation("民警发牌")
-    public Result<Boolean> issuePlate(@RequestBody IssuePlateRequest request) {
-        return Result.success(carArchiveService.issuePlate(request));
+    public Result<Boolean> issuePlate(@RequestBody IssuePlateRequest issueRequest, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无发牌权限");
+        }
+        issueRequest.setIssuerId(currentUser.getUserId());
+        return Result.success(carArchiveService.issuePlate(issueRequest));
     }
 }
