@@ -1,0 +1,45 @@
+<view class="page">
+  <view class="list-container">
+    <view class="empty-state" wx:if="{{list.length === 0}}">
+      <image src="/assets/images/empty.png" mode="aspectFit" />
+      <text>暂无申请记录</text>
+    </view>
+
+    <view class="apply-card card" wx:for="{{list}}" wx:key="id" bindtap="onDetail" data-item="{{item}}">
+      <view class="card-header">
+        <text class="apply-type">{{item.typeLabel}}</text>
+        <view class="status-capsule status-{{item.status}}">
+          {{item.statusLabel}}
+        </view>
+      </view>
+      
+      <view class="card-body">
+        <view class="info-row">
+          <text class="label">车辆信息：</text>
+          <text class="value">{{item.vehicleBrand}} {{item.vehicleModel}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">测试区域：</text>
+          <text class="value">{{item.testArea}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">申请日期：</text>
+          <text class="value">{{item.createTime}}</text>
+        </view>
+      </view>
+
+      <view class="card-footer" wx:if="{{item.status === 3}}">
+        <view class="reject-reason">
+          <text class="reason-label">驳回原因：</text>
+          <text class="reason-text">{{item.rejectReason || '材料不齐'}}</text>
+        </view>
+        <button class="re-apply-btn" catchtap="onDetail" data-item="{{item}}">重新修改</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="fab-btn" bindtap="onAdd">
+    <text class="plus">+</text>
+    <text class="btn-text">发起申请</text>
+  </view>
+</view>

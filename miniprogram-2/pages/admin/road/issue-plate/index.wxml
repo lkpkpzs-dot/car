@@ -1,0 +1,124 @@
+<view class="issue-plate-page">
+  <!-- 申请信息 -->
+  <view class="section card" wx:if="{{application}}">
+    <view class="section-header">
+      <text class="section-title">申请信息</text>
+    </view>
+    <view class="info-list">
+      <view class="info-item">
+        <text class="label">申请企业</text>
+        <text class="value">{{application.enterpriseName || '未知'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">申请类型</text>
+        <text class="value">{{application.typeLabel || '未知'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">车辆品牌</text>
+        <text class="value">{{application.vehicleBrand}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">车辆型号</text>
+        <text class="value">{{application.vehicleModel}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">VIN码</text>
+        <text class="value">{{application.vin}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发牌表单 -->
+  <view class="section card">
+    <view class="section-header">
+      <text class="section-title">发牌信息</text>
+    </view>
+    <view class="form-list">
+      <view class="form-item">
+        <text class="form-label required">VIN码</text>
+        <input 
+          class="form-input" 
+          type="text" 
+          placeholder="请输入VIN码" 
+          value="{{formData.vin}}"
+          disabled
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label required">牌照类型</text>
+        <picker 
+          mode="selector" 
+          range="{{plateTypeOptions}}" 
+          range-key="label" 
+          bindchange="onPlateTypeChange"
+          value="{{formData.plateType - 1}}"
+        >
+          <view class="form-picker">
+            {{plateTypeOptions[formData.plateType - 1].label}}
+          </view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label required">车牌号</text>
+        <input 
+          class="form-input" 
+          type="text" 
+          placeholder="请输入车牌号，如沪A12345" 
+          value="{{formData.plateNumber}}"
+          data-field="plateNumber"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">发牌日期</text>
+        <picker 
+          mode="date" 
+          value="{{formData.issueDate}}"
+          data-field="issueDate"
+          bindchange="onDateChange"
+        >
+          <view class="form-picker">{{formData.issueDate}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">到期日期</text>
+        <picker 
+          mode="date" 
+          value="{{formData.expiryDate}}"
+          data-field="expiryDate"
+          bindchange="onDateChange"
+        >
+          <view class="form-picker">{{formData.expiryDate}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label required">发牌民警ID</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入发牌民警ID" 
+          value="{{formData.issuerId}}"
+          data-field="issuerId"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">发牌备注</text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入发牌备注（可选）" 
+          value="{{formData.issueComment}}"
+          data-field="issueComment"
+          bindinput="onInput"
+          maxlength="200"
+          auto-height
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提交 -->
+  <view class="footer-action">
+    <button class="btn-submit" bindtap="onSubmit">确认发牌</button>
+  </view>
+</view>

@@ -1,0 +1,80 @@
+<view class="scan-container">
+  <view class="header-section">
+    <view class="header-title">
+      <text class="title">执法核验</text>
+      <text class="subtitle">扫描车辆二维码进行核验</text>
+    </view>
+  </view>
+
+  <view class="scan-section" wx:if="{{!hasScanned}}">
+    <view class="scan-card">
+      <view class="scan-icon-container" bindtap="onScanTap">
+        <image src="/assets/images/scan-icon.png" mode="aspectFit" class="scan-icon"></image>
+        <view class="scan-ring"></view>
+      </view>
+      <text class="scan-text">点击扫描车辆二维码</text>
+      <text class="scan-hint">将车辆上的二维码放入扫描框内</text>
+    </view>
+  </view>
+
+  <view class="result-section" wx:if="{{hasScanned && scanResult}}">
+    <view class="result-card">
+      <view class="result-header">
+        <view class="result-status {{scanResult.isValid ? 'valid' : 'invalid'}}">
+          <image src="/assets/images/{{scanResult.isValid ? 'check' : 'warning'}}-icon.png" mode="aspectFit" class="status-icon"></image>
+          <text class="status-text">{{scanResult.isValid ? '核验通过' : '核验未通过'}}</text>
+        </view>
+      </view>
+
+      <view class="result-body">
+        <view class="result-item">
+          <text class="item-label">车牌号</text>
+          <text class="item-value">{{scanResult.license}}</text>
+        </view>
+        <view class="result-item">
+          <text class="item-label">车辆名称</text>
+          <text class="item-value">{{scanResult.name}}</text>
+        </view>
+        <view class="result-item">
+          <text class="item-label">运营单位</text>
+          <text class="item-value">{{scanResult.company}}</text>
+        </view>
+        <view class="result-item">
+          <text class="item-label">运营状态</text>
+          <text class="item-value" style="color: {{scanResult.status === 'online' ? '#38a169' : (scanResult.status === 'warning' ? '#e53e3e' : '#718096')}};">
+            {{scanResult.status === 'online' ? '在线' : (scanResult.status === 'warning' ? '异常' : '离线')}}
+          </text>
+        </view>
+        <view class="result-item">
+          <text class="item-label">合规状态</text>
+          <text class="item-value" style="color: {{scanResult.isValid ? '#38a169' : '#e53e3e'}};">
+            {{scanResult.isValid ? '合规' : '不合规'}}
+          </text>
+        </view>
+        <view class="result-item">
+          <text class="item-label">驾驶模式</text>
+          <text class="item-value">{{scanResult.driver}}</text>
+        </view>
+      </view>
+
+      <view class="result-footer">
+        <button class="action-btn secondary-btn" bindtap="onScanAgain">
+          <text class="btn-text">继续扫描</text>
+        </button>
+        <button class="action-btn primary-btn" bindtap="onViewDetail">
+          <text class="btn-text">查看详情</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <view class="tips-section">
+    <view class="tips-card">
+      <text class="tips-title">使用说明</text>
+      <text class="tips-content">1. 点击扫描按钮启动相机</text>
+      <text class="tips-content">2. 将车辆二维码放入扫描框</text>
+      <text class="tips-content">3. 系统自动识别并显示核验结果</text>
+      <text class="tips-content">4. 根据结果进行相应执法操作</text>
+    </view>
+  </view>
+</view>

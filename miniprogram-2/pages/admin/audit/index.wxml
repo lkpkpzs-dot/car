@@ -1,0 +1,65 @@
+<view class="audit-container">
+  <view class="tab-header">
+    <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="{{0}}">
+      <text>待审核</text>
+      <view class="tab-badge" wx:if="{{pendingCount > 0}}">{{pendingCount > 99 ? '99+' : pendingCount}}</view>
+    </view>
+    <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="{{1}}">已处理</view>
+  </view>
+
+  <view class="filter-bar">
+    <view
+      wx:for="{{filterOptions}}"
+      wx:key="value"
+      class="filter-chip {{filterType === item.value ? 'active' : ''}}"
+      data-type="{{item.value}}"
+      bindtap="onFilterChange"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="search-bar">
+    <input
+      class="search-input"
+      placeholder="搜索企业名、VIN 或任务编号"
+      value="{{keyword}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+    />
+    <text class="search-clear" wx:if="{{keyword}}" bindtap="onSearchClear">清除</text>
+  </view>
+
+  <scroll-view class="list-section" scroll-y>
+    <view class="empty-state" wx:if="{{list.length === 0}}">
+      <text class="empty-icon">📋</text>
+      <text>暂无{{currentTab === 0 ? '待审核' : '已处理'}}任务</text>
+    </view>
+
+    <view class="audit-card" wx:for="{{list}}" wx:key="id" bindtap="goToDetail" data-item="{{item}}">
+      <view class="card-header">
+        <view class="title-group">
+          <text class="business-type-tag {{item.businessType === 1 ? 'type-license' : 'type-enterprise'}}">
+            {{item.businessType === 1 ? '上牌' : '资质'}}
+          </text>
+          <text class="task-title">{{item.title}}</text>
+        </view>
+        <text class="status-tag {{currentTab === 0 ? 'pending' : 'processed'}}">{{item.statusDesc}}</text>
+      </view>
+
+      <view class="card-body">
+        <view class="info-row">
+          <text class="label">任务编号</text>
+          <text class="value">{{item.id}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">申请时间</text>
+          <text class="value">{{item.createTime}}</text>
+        </view>
+      </view>
+
+      <view class="card-footer">
+        <text class="detail-hint">{{currentTab === 0 ? '去处理' : '查看记录'}}</text>
+        <text class="arrow">→</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

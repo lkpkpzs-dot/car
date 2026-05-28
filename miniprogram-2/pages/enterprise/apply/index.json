@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "image-uploader": "/components/image-uploader/image-uploader"
+  },
+  "navigationBarTitleText": "发起上牌申请",
+  "navigationBarBackgroundColor": "#1a365d",
+  "navigationBarTextStyle": "white"
+}

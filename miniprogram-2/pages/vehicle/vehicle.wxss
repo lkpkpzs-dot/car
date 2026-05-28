@@ -1,0 +1,174 @@
+page {
+  background: #f0f4f8;
+}
+
+.vehicle-detail-container {
+  padding: 20rpx;
+}
+
+.header-card {
+  background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.vehicle-header {
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.vehicle-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-right: 20rpx;
+}
+
+.vehicle-icon image {
+  width: 100%;
+  height: 100%;
+}
+
+.vehicle-basic {
+  flex: 1;
+}
+
+.vehicle-name {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.vehicle-license {
+  display: block;
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.vehicle-status {
+  margin-left: 20rpx;
+}
+
+.status-badge {
+  padding: 10rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+}
+
+.status-text {
+  color: white;
+  font-weight: bold;
+}
+
+.info-section {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  margin-bottom: 20rpx;
+}
+
+.title-text {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1a365d;
+  padding-left: 20rpx;
+  border-left: 6rpx solid #3182ce;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.data-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.data-card {
+  background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+  border-radius: 12rpx;
+  padding: 30rpx;
+  text-align: center;
+}
+
+.data-speed {
+  background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+}
+
+.data-battery {
+  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+}
+
+.data-value {
+  display: block;
+  font-size: 42rpx;
+  font-weight: bold;
+  color: #1a365d;
+  margin-bottom: 10rpx;
+}
+
+.data-label {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.action-section {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 30rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 90rpx;
+  border-radius: 45rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.action-primary {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  color: white;
+}
+
+.action-secondary {
+  background: white;
+  color: #3182ce;
+  border: 2rpx solid #3182ce;
+}
+
+.btn-text {
+  color: inherit;
+  font-weight: bold;
+}

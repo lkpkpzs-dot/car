@@ -1,0 +1,17 @@
+<view class="timeline">
+  <view class="timeline-item" wx:for="{{items}}" wx:key="index">
+    <view class="timeline-line" wx:if="{{index < items.length - 1}}"></view>
+    <view class="timeline-dot" style="background-color: {{item.actionColor}};"></view>
+    <view class="timeline-content">
+      <view class="timeline-header">
+        <text class="node-name">{{item.nodeName}}</text>
+        <text class="node-time">{{item.createTime}}</text>
+      </view>
+      <text class="action-label" style="color: {{item.actionColor}};">{{item.actionLabel}}</text>
+      <text class="node-comment" wx:if="{{item.comment}}">{{item.comment}}</text>
+    </view>
+  </view>
+  <view class="timeline-empty" wx:if="{{items.length === 0}}">
+    <text>暂无审批记录</text>
+  </view>
+</view>

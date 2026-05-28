@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="empty card" wx:if="{{list.length === 0}}">
+    <text class="empty-text">暂无上牌申请记录</text>
+    <navigator class="empty-link" url="/pages/enterprise/apply/index">去发起申请</navigator>
+  </view>
+
+  <view
+    class="list-item card"
+    wx:for="{{list}}"
+    wx:key="id"
+    data-id="{{item.id}}"
+    bindtap="goDetail"
+  >
+    <view class="item-header">
+      <text class="item-vin">{{item.vin}}</text>
+      <status-tag label="{{item.statusLabel}}" color="{{item.statusColor}}" bgColor="{{item.statusBg}}" />
+    </view>
+    <view class="item-body">
+      <text class="item-meta">申请类型：{{item.applyTypeLabel}}</text>
+      <text class="item-meta">申请时间：{{item.createTime}}</text>
+    </view>
+    <text class="item-arrow">查看详情 →</text>
+  </view>
+</view>

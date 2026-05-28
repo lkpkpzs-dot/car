@@ -1,0 +1,81 @@
+<view class="admin-container">
+  <view class="header-section">
+    <view class="header-bar">
+      <view class="role-badge">
+        <text class="badge-text">{{roleName}}</text>
+      </view>
+      <view class="logout-btn" bindtap="onLogout">
+        <text class="logout-text">退出</text>
+      </view>
+    </view>
+    <text class="greeting">欢迎回来，管理员</text>
+  </view>
+
+  <view class="stats-section">
+    <view class="stats-grid">
+      <view class="stat-card stat-pending">
+        <text class="stat-value">{{stats.pendingCount}}</text>
+        <text class="stat-label">待审核</text>
+      </view>
+      <view class="stat-card stat-approved">
+        <text class="stat-value">{{stats.approvedCount}}</text>
+        <text class="stat-label">已通过</text>
+      </view>
+      <view class="stat-card stat-rejected">
+        <text class="stat-value">{{stats.rejectedCount}}</text>
+        <text class="stat-label">已驳回</text>
+      </view>
+      <view class="stat-card stat-today">
+        <text class="stat-value">{{stats.todayProcess}}</text>
+        <text class="stat-label">今日办理</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="actions-section">
+    <view class="section-header">
+      <text class="section-title">快捷操作</text>
+    </view>
+    <view class="actions-grid">
+      <view 
+        wx:for="{{quickActions}}" 
+        wx:key="id" 
+        class="action-card"
+        data-action-id="{{item.id}}"
+        bindtap="onQuickAction"
+      >
+        <view class="action-icon">
+          <image src="/assets/images/{{item.icon}}-icon.png" mode="aspectFit"></image>
+        </view>
+        <text class="action-name">{{item.name}}</text>
+        <text class="action-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="recent-section">
+    <view class="section-header">
+      <text class="section-title">待办审批</text>
+      <text class="view-all" bindtap="onViewAllAudit">查看全部</text>
+    </view>
+    <view class="recent-list">
+      <view 
+        wx:for="{{recentApproval}}" 
+        wx:key="id" 
+        class="recent-item"
+        data-item="{{item}}"
+        bindtap="onViewDetail"
+      >
+        <view class="item-info">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-company">{{item.company}}</text>
+        </view>
+        <view class="item-status" style="background: {{item.status === 'pending' ? '#fef3c7' : (item.status === 'approved' ? '#dcfce7' : '#fee2e2')}};">
+          <text style="color: {{item.status === 'pending' ? '#d97706' : (item.status === 'approved' ? '#16a34a' : '#dc2626')}};">
+            {{item.status === 'pending' ? '待审核' : (item.status === 'approved' ? '已通过' : '已驳回')}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="header">
+    <text class="header-title">企业工作台</text>
+    <text class="header-sub">智慧出行政务服务平台</text>
+  </view>
+
+  <view class="status-card card">
+    <view class="status-row">
+      <view>
+        <text class="company-name">{{companyName}}</text>
+        <text class="company-tip">企业资质状态</text>
+      </view>
+      <status-tag label="{{statusLabel}}" color="{{statusColor}}" bgColor="{{statusBg}}" />
+    </view>
+  </view>
+
+  <view class="stats-card card">
+    <view class="stat-item">
+      <text class="stat-num">{{stats.vehicleCount}}</text>
+      <text class="stat-label">我的车辆</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-num">{{stats.applyCount}}</text>
+      <text class="stat-label">我的申请</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-num stat-warn">{{stats.reviewingCount}}</text>
+      <text class="stat-label">审核中</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">快捷办理</text>
+    <view class="action-grid">
+      <view
+        class="action-item card"
+        wx:for="{{quickActions}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="onQuickAction"
+      >
+        <view class="action-icon-wrap">
+          <image src="/assets/images/{{item.icon}}-icon.png" mode="aspectFit" />
+        </view>
+        <text class="action-name">{{item.name}}</text>
+        <text class="action-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,130 @@
+@import "./enterprise.wxss";
+
+.header {
+  background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+  padding: 48rpx 32rpx 80rpx;
+  color: #fff;
+}
+
+.header-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.header-sub {
+  display: block;
+  font-size: 24rpx;
+  opacity: 0.85;
+  margin-top: 8rpx;
+}
+
+.status-card {
+  margin: -48rpx 24rpx 0;
+  position: relative;
+  z-index: 2;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.company-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.company-tip {
+  display: block;
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 8rpx;
+}
+
+.stats-card {
+  margin: 24rpx;
+  display: flex;
+  align-items: center;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-num {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a365d;
+}
+
+.stat-num.stat-warn {
+  color: #d97706;
+}
+
+.stat-label {
+  display: block;
+  font-size: 22rpx;
+  color: #64748b;
+  margin-top: 8rpx;
+}
+
+.stat-divider {
+  width: 1rpx;
+  height: 60rpx;
+  background: #e2e8f0;
+}
+
+.section {
+  padding: 0 24rpx 40rpx;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.action-item {
+  padding: 28rpx 20rpx;
+  text-align: center;
+}
+
+.action-item:active {
+  opacity: 0.9;
+}
+
+.action-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  margin: 0 auto 16rpx;
+  background: #ebf8ff;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon-wrap image {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.action-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.action-desc {
+  display: block;
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 8rpx;
+}

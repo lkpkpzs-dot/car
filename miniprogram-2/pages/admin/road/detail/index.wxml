@@ -1,0 +1,115 @@
+<view class="detail-page">
+  <!-- 基本信息 -->
+  <view class="section card">
+    <view class="section-header">
+      <text class="section-title">申请基础信息</text>
+    </view>
+    <view class="info-list">
+      <view class="info-item">
+        <text class="label">申请企业</text>
+        <text class="value highlight">{{info.enterpriseName || info.enterprise_name}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">申请类型</text>
+        <text class="value">{{typeMap[info.type]}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">车辆品牌</text>
+        <text class="value">{{info.vehicleBrand || info.vehicle_brand}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">车辆型号</text>
+        <text class="value">{{info.vehicleModel || info.vehicle_model}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">VIN码</text>
+        <text class="value">{{info.vin}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">测试区域</text>
+        <text class="value">{{info.testArea || info.test_area}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">有效日期</text>
+        <text class="value">{{info.startDate || info.start_date}} 至 {{info.endDate || info.end_date}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 项目详情 -->
+  <view class="section card">
+    <view class="section-header">
+      <text class="section-title">项目详情</text>
+    </view>
+    <view class="text-block">
+      <text class="block-label">测试项目内容：</text>
+      <view class="block-content">{{testProject || '未填写'}}</view>
+    </view>
+    <view class="text-block">
+      <text class="block-label">安全保障计划：</text>
+      <view class="block-content">{{safetyPlan || '未填写'}}</view>
+    </view>
+  </view>
+
+  <!-- 证明材料 -->
+  <view class="section card">
+    <view class="section-header">
+      <text class="section-title">证明材料</text>
+    </view>
+    <view class="material-group" wx:for="{{materials}}" wx:key="label">
+      <text class="material-label">{{item.label}}</text>
+      <view class="image-grid">
+        <image 
+          wx:for="{{item.urls}}" 
+          wx:for-item="url" 
+          wx:key="*this" 
+          src="{{url}}" 
+          mode="aspectFit" 
+          bindtap="previewImage" 
+          data-current="{{url}}" 
+          data-urls="{{item.urls}}"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="footer-action" wx:if="{{info.status === 1}}">
+    <button class="btn-reject" bindtap="onReject">驳回申请</button>
+    <button class="btn-approve" bindtap="onApprove">审核通过</button>
+  </view>
+
+  <!-- 审核弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="hideModal"></view>
+  <view class="audit-modal" wx:if="{{showModal}}">
+    <view class="modal-header">
+      <text>{{modalType === 'pass' ? '审核通过' : '审核驳回'}}</text>
+    </view>
+    <view class="modal-body">
+      <block wx:if="{{modalType === 'pass'}}">
+        <text class="modal-tip">确认该申请材料齐全并符合道路测试要求？</text>
+        <textarea 
+          class="modal-input" 
+          placeholder="请输入审核备注（可选）" 
+          value="{{auditComment}}" 
+          data-field="auditComment" 
+          bindinput="onInput"
+        />
+      </block>
+      <block wx:else>
+        <text class="modal-tip required">请输入驳回原因：</text>
+        <textarea 
+          class="modal-input" 
+          placeholder="例如：材料不清晰、VIN码有误等" 
+          value="{{rejectReason}}" 
+          data-field="rejectReason" 
+          bindinput="onInput"
+        />
+      </block>
+    </view>
+    <view class="modal-footer">
+      <button class="modal-btn-cancel" bindtap="hideModal">取消</button>
+      <button class="modal-btn-confirm {{modalType === 'pass' ? 'confirm-pass' : 'confirm-reject'}}" bindtap="submitAudit">确定</button>
+    </view>
+  </view>
+</view>

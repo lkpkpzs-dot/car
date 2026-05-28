@@ -1,0 +1,167 @@
+<view class="page">
+  <!-- 驳回原因展示 -->
+  <view class="reject-box" wx:if="{{status === 3 && rejectReason}}">
+    <text class="reject-title">驳回原因：</text>
+    <text class="reject-text">{{rejectReason}}</text>
+  </view>
+
+  <view class="form-card card">
+    <text class="section-title">基础信息</text>
+    
+    <view class="form-item">
+      <text class="form-label required">申请类型</text>
+      <picker bindchange="onTypeChange" value="{{typeIndex}}" range="{{typeOptions}}" range-key="label" disabled="{{readonly}}">
+        <view class="form-picker {{readonly ? 'readonly' : ''}}">
+          {{typeOptions[typeIndex].label || '请选择类型'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">车辆品牌</text>
+      <input class="form-input {{readonly ? 'readonly' : ''}}" disabled="{{readonly}}" placeholder="请输入车辆品牌" value="{{vehicleBrand}}" data-field="vehicleBrand" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">车辆型号</text>
+      <input class="form-input {{readonly ? 'readonly' : ''}}" disabled="{{readonly}}" placeholder="请输入车辆型号" value="{{vehicleModel}}" data-field="vehicleModel" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">车辆识别代号(VIN)</text>
+      <input class="form-input {{readonly ? 'readonly' : ''}}" disabled="{{readonly}}" placeholder="请输入17位VIN码" value="{{vin}}" data-field="vin" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">测试区域</text>
+      <input class="form-input {{readonly ? 'readonly' : ''}}" disabled="{{readonly}}" placeholder="请输入申请测试的区域" value="{{testArea}}" data-field="testArea" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">开始日期</text>
+      <picker mode="date" bindchange="onDateChange" data-field="startDate" value="{{startDate}}" disabled="{{readonly}}">
+        <view class="form-picker {{readonly ? 'readonly' : ''}}">{{startDate || '请选择开始日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">结束日期</text>
+      <picker mode="date" bindchange="onDateChange" data-field="endDate" value="{{endDate}}" disabled="{{readonly}}">
+        <view class="form-picker {{readonly ? 'readonly' : ''}}">{{endDate || '请选择结束日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="form-card card">
+    <text class="section-title">项目详情</text>
+    <view class="form-item">
+      <text class="form-label required">测试项目</text>
+      <textarea class="form-textarea {{readonly ? 'readonly' : ''}}" disabled="{{readonly}}" placeholder="请详细描述测试项目内容" value="{{testProjects}}" data-field="testProjects" bindinput="onInput"></textarea>
+    </view>
+    <view class="form-item">
+      <text class="form-label required">安全保障计划</text>
+      <textarea class="form-textarea {{readonly ? 'readonly' : ''}}" disabled="{{readonly}}" placeholder="请输入安全保障计划说明" value="{{supportPlan}}" data-field="supportPlan" bindinput="onInput"></textarea>
+    </view>
+  </view>
+
+  <view class="form-card card">
+    <text class="section-title">证明材料</text>
+    
+    <view class="upload-section">
+      <text class="upload-label required">车辆合格证 (docVehicleCert)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docVehicleCert}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docVehicleCert}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docVehicleCert" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docVehicleCert">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label required">所有人身份证（正反面）</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docOwnerId}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docOwnerId}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docOwnerId" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docOwnerId">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label required">安全检验报告 (docSafetyInspection)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docSafetyInspection}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docSafetyInspection}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docSafetyInspection" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docSafetyInspection">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label required">交强险证明 (docInsurance)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docInsurance}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docInsurance}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docInsurance" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docInsurance">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label">委托书 (docOwnerProxy)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docOwnerProxy}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docOwnerProxy}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docOwnerProxy" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docOwnerProxy">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label">代理人身份证 (正反面)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docAgentId}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docAgentId}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docAgentId" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docAgentId">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label required">安全声明 (docSafetyDeclaration)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docSafetyDeclaration}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docSafetyDeclaration}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docSafetyDeclaration" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docSafetyDeclaration">+</view>
+      </view>
+    </view>
+
+    <view class="upload-section">
+      <text class="upload-label required">申请书 (docApplicationDoc)</text>
+      <view class="image-list">
+        <view class="image-item" wx:for="{{docApplicationDoc}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-urls="{{docApplicationDoc}}" data-current="{{item}}" />
+          <view class="remove-btn" wx:if="{{!readonly}}" bindtap="removeImage" data-field="docApplicationDoc" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" wx:if="{{!readonly}}" bindtap="chooseImage" data-field="docApplicationDoc">+</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer-btn" wx:if="{{!readonly}}">
+    <button class="submit-btn" bindtap="onSubmit">{{status === 3 ? '重新提交' : '提交申请'}}</button>
+  </view>
+
+  <!-- 已通过状态下的操作展示 -->
+  <view class="footer-btn" wx:if="{{status === 2}}">
+    <button class="submit-btn success-btn" bindtap="onPreviewPermit">查看测试许可</button>
+  </view>
+</view>

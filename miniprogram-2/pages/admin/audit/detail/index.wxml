@@ -1,0 +1,83 @@
+<view class="detail-container">
+  <view class="section-card">
+    <view class="section-title">业务详情</view>
+    <view class="info-group">
+      <view class="info-item">
+        <text class="label">业务标题</text>
+        <text class="value highlight">{{title}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">业务类型</text>
+        <text class="value">{{businessType === 1 ? '上牌申请' : '企业资质申请'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">申请单号</text>
+        <text class="value">{{applyId}}</text>
+      </view>
+      <view class="info-item" wx:if="{{statusDesc}}">
+        <text class="label">当前状态</text>
+        <text class="value">{{statusDesc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-title">审核历程</view>
+    <view class="empty-history" wx:if="{{history.length === 0}}">
+      <text>暂无审批记录</text>
+    </view>
+    <view class="timeline" wx:else>
+      <view class="timeline-item" wx:for="{{history}}" wx:key="recordId">
+        <view class="timeline-line"></view>
+        <view class="timeline-dot {{index === 0 ? 'active' : ''}}" style="background-color: {{item.actionColor}};"></view>
+        <view class="timeline-content">
+          <view class="timeline-header">
+            <text class="node-name">{{item.nodeName}}</text>
+            <text class="time">{{item.createTime}}</text>
+          </view>
+          <view class="reviewer-info">
+            <text>处理人 ID: {{item.reviewerId}}</text>
+            <text class="action-tag" style="color: {{item.actionColor}};">{{item.actionLabel}}</text>
+          </view>
+          <view class="comment-box" wx:if="{{item.comment}}">
+            <text class="comment-label">审核意见：</text>
+            <text class="comment-text">{{item.comment}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer-actions" wx:if="{{!isProcessed && businessType === 2}}">
+    <button class="btn reject-btn" bindtap="onReject">驳回申请</button>
+    <button class="btn approve-btn" bindtap="onApprove">通过审核</button>
+  </view>
+
+  <view class="read-only-tip" wx:if="{{isProcessed}}">
+    <text>该任务已处理，仅可查看审批记录</text>
+  </view>
+
+  <view class="read-only-tip" wx:elif="{{businessType !== 2}}">
+    <text>上牌申请审核接口待对接，当前仅可查看记录</text>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="hideModal">
+    <view class="modal-content" catchtap="stopBubble">
+      <view class="modal-header">
+        <text>{{auditAction === 2 ? '确认通过' : '驳回申请'}}</text>
+      </view>
+      <view class="modal-body">
+        <textarea
+          class="reason-textarea"
+          placeholder="{{auditAction === 2 ? '请输入审核通过意见（可选）' : '请输入驳回原因（必填）'}}"
+          bindinput="onReasonInput"
+          value="{{reason}}"
+        ></textarea>
+      </view>
+      <view class="modal-footer">
+        <button class="m-btn cancel" bindtap="hideModal">取消</button>
+        <button class="m-btn {{auditAction === 2 ? 'confirm-pass' : 'confirm-reject'}}" bindtap="submitAudit">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

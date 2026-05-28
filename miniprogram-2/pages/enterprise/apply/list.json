@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "status-tag": "/components/status-tag/status-tag"
+  },
+  "navigationBarTitleText": "我的申请",
+  "navigationBarBackgroundColor": "#1a365d",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true
+}

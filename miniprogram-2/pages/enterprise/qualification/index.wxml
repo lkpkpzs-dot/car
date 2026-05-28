@@ -1,0 +1,35 @@
+<view class="page">
+  <view class="form-card card">
+    <text class="section-title">企业资质{{qualificationStatus === 0 ? '审核中' : (qualificationStatus === 1 ? '信息' : '申请')}}</text>
+    <text class="form-tip" wx:if="{{!readonly}}">提交后将由交警部门审核，审核通过后可发起上牌申请</text>
+
+    <view class="form-item">
+      <text class="form-label required">企业名称</text>
+      <input class="form-input" disabled="{{readonly}}" placeholder="工商注册全称" value="{{enterpriseName}}" data-field="enterpriseName" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">统一社会信用代码</text>
+      <input class="form-input" disabled="{{readonly}}" placeholder="18位信用代码" value="{{creditCode}}" data-field="creditCode" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">法定代表人</text>
+      <input class="form-input" disabled="{{readonly}}" placeholder="法人姓名" value="{{legalPerson}}" data-field="legalPerson" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">联系电话</text>
+      <input class="form-input" disabled="{{readonly}}" type="number" placeholder="经办人手机号" value="{{contactPhone}}" data-field="contactPhone" bindinput="onInput" />
+    </view>
+  </view>
+
+  <view class="form-card card">
+    <text class="section-title">营业执照</text>
+    <image-uploader label="营业执照副本" value="{{licenseImg}}" bind:change="onLicenseChange" wx:if="{{!readonly}}" />
+    <image wx:elif="{{licenseImg}}" class="license-preview" src="{{licenseImg}}" mode="aspectFit" bindtap="previewLicense" />
+    <text class="empty-license" wx:else>暂无营业执照图片</text>
+  </view>
+
+  <view class="footer-btn">
+    <button wx:if="{{!readonly}}" class="submit-btn" bindtap="onSubmit">{{btnText}}</button>
+    <button wx:else class="submit-btn back-btn" bindtap="onSubmit">返回</button>
+  </view>
+</view>

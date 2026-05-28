@@ -1,0 +1,20 @@
+<view class="splash-container">
+  <view class="logo-section {{showLogo ? 'fade-in' : ''}}">
+    <image src="/assets/images/logo.png" mode="aspectFit" class="logo"></image>
+    <text class="app-title">智车通</text>
+    <text class="app-subtitle">无人车政务管理平台</text>
+  </view>
+  
+  <view class="loading-section {{showLoading ? 'fade-in' : ''}}">
+    <view class="loading-dots">
+      <view class="dot"></view>
+      <view class="dot"></view>
+      <view class="dot"></view>
+    </view>
+    <text class="loading-text">正在开启智能通行服务...</text>
+  </view>
+
+  <view class="footer-section">
+    <text class="footer-text">智联无人车 · 通行一站式</text>
+  </view>
+</view>

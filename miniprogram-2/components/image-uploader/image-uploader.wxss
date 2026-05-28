@@ -1,0 +1,58 @@
+.uploader-item {
+  margin-bottom: 24rpx;
+}
+
+.uploader-label {
+  display: block;
+  font-size: 26rpx;
+  color: #4a5568;
+  margin-bottom: 12rpx;
+}
+
+.uploader-box {
+  height: 200rpx;
+  background: #f8fafc;
+  border: 2rpx dashed #cbd5e0;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploader-plus {
+  font-size: 48rpx;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+.uploader-hint {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 8rpx;
+}
+
+.uploader-preview {
+  position: relative;
+}
+
+.preview-img {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 12rpx;
+}
+
+.action-btn {
+  font-size: 24rpx;
+  color: #2563eb;
+}
+
+.action-btn.danger {
+  color: #dc2626;
+}

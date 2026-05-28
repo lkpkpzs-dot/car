@@ -1,0 +1,66 @@
+<scroll-view scroll-y class="monitor-container">
+  <view class="header-section">
+    <text class="page-title">全域监管大屏</text>
+    <text class="page-subtitle">实时监控 · 智能预警</text>
+  </view>
+
+  <view class="stats-section">
+    <view class="stats-grid">
+      <view class="stat-card stat-total">
+        <text class="stat-value">{{stats.total}}</text>
+        <text class="stat-label">总车辆数</text>
+      </view>
+      <view class="stat-card stat-online">
+        <text class="stat-value">{{stats.online}}</text>
+        <text class="stat-label">在线车辆</text>
+      </view>
+      <view class="stat-card stat-warning">
+        <text class="stat-value">{{stats.warning}}</text>
+        <text class="stat-label">异常车辆</text>
+      </view>
+      <view class="stat-card stat-add">
+        <text class="stat-value">{{stats.todayAdd}}</text>
+        <text class="stat-label">今日新增</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="map-section">
+    <view class="section-title">
+      <text class="title-text">车辆实时分布</text>
+    </view>
+    <view class="map-container">
+      <map
+        id="vehicleMap"
+        latitude="{{latitude}}"
+        longitude="{{longitude}}"
+        scale="{{scale}}"
+        markers="{{markers}}"
+        bindmarkertap="onMarkerTap"
+        show-location
+        class="map"
+      ></map>
+    </view>
+  </view>
+
+  <view class="charts-section">
+    <view class="charts-grid">
+      <view class="chart-card">
+        <simple-chart
+          canvasId="chartRunning"
+          chartType="line"
+          chartData="{{runningTrend}}"
+          title="运行趋势"
+        ></simple-chart>
+      </view>
+      <view class="chart-card">
+        <simple-chart
+          canvasId="chartWarning"
+          chartType="bar"
+          chartData="{{warningTrend}}"
+          title="报警趋势"
+        ></simple-chart>
+      </view>
+    </view>
+  </view>
+</scroll-view>

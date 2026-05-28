@@ -1,0 +1,169 @@
+<view class="archive-page">
+  <view class="top-panel">
+    <view class="title-row">
+      <view>
+        <text class="page-title">车辆电子档案</text>
+        <text class="page-subtitle">按 VIN 建档，关联申请、查验、号牌与运行状态</text>
+      </view>
+      <button class="refresh-btn" bindtap="onRefresh">刷新</button>
+    </view>
+
+    <view class="search-box">
+      <image class="search-icon" src="/assets/images/query-icon.png" mode="aspectFit" />
+      <input class="search-input" placeholder="搜索 VIN / 车牌号 / 品牌 / 企业ID" value="{{keyword}}" bindinput="onKeywordInput" />
+      <view class="clear-btn" wx:if="{{keyword}}" bindtap="onClearKeyword">×</view>
+    </view>
+
+    <view class="stats-grid">
+      <view class="stat-card">
+        <text class="stat-value">{{stats.total}}</text>
+        <text class="stat-label">档案总数</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value normal">{{stats.normal}}</text>
+        <text class="stat-label">正常营运</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value warning">{{stats.warning}}</text>
+        <text class="stat-label">异常整改</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value revoked">{{stats.revoked}}</text>
+        <text class="stat-label">已吊销</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="plate-tabs" scroll-x>
+    <view
+      wx:for="{{plateTabs}}"
+      wx:key="value"
+      class="plate-tab {{activePlateType === item.value ? 'active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onPlateTabChange"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <view class="status-filter">
+    <view
+      wx:for="{{statusFilters}}"
+      wx:key="value"
+      class="filter-chip {{activeStatus === item.value ? 'active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onStatusFilterChange"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="content-layout">
+    <view class="archive-list">
+      <view class="empty-state" wx:if="{{displayArchives.length === 0 && !loading}}">
+        <image src="/assets/images/empty.png" mode="aspectFit" />
+        <text>暂无匹配档案</text>
+      </view>
+
+      <view
+        wx:for="{{displayArchives}}"
+        wx:key="vin"
+        class="archive-card {{selectedArchive && selectedArchive.vin === item.vin ? 'selected' : ''}}"
+        data-vin="{{item.vin}}"
+        bindtap="onSelectArchive"
+      >
+        <view class="card-head">
+          <view>
+            <text class="vehicle-title">{{item.title}}</text>
+            <text class="vin-text">{{item.vin}}</text>
+          </view>
+          <view class="status-badge {{item.statusClass}}">{{item.statusLabel}}</view>
+        </view>
+        <view class="card-meta">
+          <view class="meta-item">
+            <text class="meta-label">号牌</text>
+            <text class="meta-value">{{item.plateNumberText}}</text>
+          </view>
+          <view class="meta-item">
+            <text class="meta-label">类型</text>
+            <text class="meta-value">{{item.plateTypeLabel}}</text>
+          </view>
+          <view class="meta-item">
+            <text class="meta-label">里程</text>
+            <text class="meta-value">{{item.totalMileageText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="detail-panel" wx:if="{{selectedArchive}}">
+      <view class="detail-header">
+        <view>
+          <text class="detail-title">{{selectedArchive.title}}</text>
+          <text class="detail-vin">{{selectedArchive.vin}}</text>
+        </view>
+        <view class="copy-btn" bindtap="onCopyVin">复制VIN</view>
+      </view>
+
+      <view class="detail-section">
+        <view class="section-title">档案关联</view>
+        <view class="info-grid">
+          <view class="info-item">
+            <text class="info-label">道路申请ID</text>
+            <text class="info-value">{{selectedArchive.applicationId || '-'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">查验记录ID</text>
+            <text class="info-value">{{selectedArchive.vehicleInfoId || '-'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">所属企业ID</text>
+            <text class="info-value">{{selectedArchive.enterpriseId || '-'}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">档案状态</text>
+            <text class="info-value strong">{{selectedArchive.statusLabel}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="detail-section">
+        <view class="section-title">号牌与运行</view>
+        <view class="metric-row">
+          <view class="metric-card">
+            <text class="metric-value">{{selectedArchive.plateNumberText}}</text>
+            <text class="metric-label">{{selectedArchive.plateTypeLabel}}</text>
+          </view>
+          <view class="metric-card">
+            <text class="metric-value">{{selectedArchive.totalMileageText}}</text>
+            <text class="metric-label">累计合规测试里程</text>
+          </view>
+          <view class="metric-card alert">
+            <text class="metric-value">{{selectedArchive.violationText}}</text>
+            <text class="metric-label">违章/事故记录</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="detail-section">
+        <view class="section-title">查验参数</view>
+        <view class="param-list" wx:if="{{selectedArchive.techParamList.length}}">
+          <view class="param-item" wx:for="{{selectedArchive.techParamList}}" wx:key="key">
+            <text class="param-key">{{item.key}}</text>
+            <text class="param-value">{{item.value}}</text>
+          </view>
+        </view>
+        <view class="empty-inline" wx:else>暂无查验参数</view>
+      </view>
+
+      <view class="detail-section">
+        <view class="section-title">标准照片</view>
+        <view class="photo-grid" wx:if="{{selectedArchive.photoList.length}}">
+          <image wx:for="{{selectedArchive.photoList}}" wx:key="*this" src="{{item}}" mode="aspectFill" />
+        </view>
+        <view class="empty-inline" wx:else>暂无标准照片</view>
+      </view>
+
+      <view class="time-row">
+        <text>创建：{{selectedArchive.createTimeText}}</text>
+        <text>更新：{{selectedArchive.updateTimeText}}</text>
+      </view>
+    </view>
+  </view>
+</view>

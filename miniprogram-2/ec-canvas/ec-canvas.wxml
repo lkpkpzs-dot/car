@@ -1,0 +1,11 @@
+<view class="container">
+  <canvas
+    class="canvas"
+    type="2d"
+    id="{{ canvasId }}"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    binderror="canvasIdError"
+  ></canvas>
+</view>

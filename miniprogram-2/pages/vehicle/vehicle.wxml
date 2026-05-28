@@ -1,0 +1,83 @@
+<view class="vehicle-detail-container" wx:if="{{vehicle}}">
+  <view class="header-card">
+    <view class="vehicle-header">
+      <view class="vehicle-icon">
+        <image src="/assets/images/car-total.png" mode="aspectFit"></image>
+      </view>
+      <view class="vehicle-basic">
+        <text class="vehicle-name">{{vehicle.name}}</text>
+        <text class="vehicle-license">{{vehicle.license}}</text>
+      </view>
+      <view class="vehicle-status">
+        <view class="status-badge" style="background: {{statusColor}};">
+          <text class="status-text">{{statusText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="info-section">
+    <view class="section-title">
+      <text class="title-text">基本信息</text>
+    </view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">所属公司</text>
+        <text class="info-value">{{vehicle.company}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">运营状态</text>
+        <text class="info-value" style="color: {{statusColor}};">{{statusText}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">合规状态</text>
+        <text class="info-value" style="color: {{isValidColor}};">{{isValidText}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">驾驶模式</text>
+        <text class="info-value">{{vehicle.driver}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="info-section">
+    <view class="section-title">
+      <text class="title-text">实时数据</text>
+    </view>
+    <view class="data-cards">
+      <view class="data-card data-speed">
+        <text class="data-value">{{vehicle.speed}}</text>
+        <text class="data-label">当前速度</text>
+      </view>
+      <view class="data-card data-battery">
+        <text class="data-value">{{vehicle.battery}}</text>
+        <text class="data-label">电池电量</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="info-section">
+    <view class="section-title">
+      <text class="title-text">运营信息</text>
+    </view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">运营路线</text>
+        <text class="info-value">{{vehicle.route}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">最后更新</text>
+        <text class="info-value">{{vehicle.lastUpdate}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="action-section">
+    <button class="action-btn action-primary" bindtap="onTrackVehicle">
+      <text class="btn-text">轨迹追踪</text>
+    </button>
+    <button class="action-btn action-secondary" bindtap="onContactCompany">
+      <text class="btn-text">联系运营商</text>
+    </button>
+  </view>
+</view>

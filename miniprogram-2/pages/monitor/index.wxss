@@ -1,0 +1,122 @@
+page {
+  background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+}
+
+.monitor-container {
+  min-height: 100vh;
+  padding-bottom: 20rpx;
+}
+
+.header-section {
+  padding: 40rpx 30rpx;
+  text-align: center;
+  color: white;
+}
+
+.page-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.page-subtitle {
+  display: block;
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.stats-section {
+  padding: 0 30rpx;
+  margin-top: -20rpx;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.stat-total {
+  border-top: 6rpx solid #3182ce;
+}
+
+.stat-online {
+  border-top: 6rpx solid #38a169;
+}
+
+.stat-warning {
+  border-top: 6rpx solid #e53e3e;
+}
+
+.stat-add {
+  border-top: 6rpx solid #ed8936;
+}
+
+.stat-value {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #1a365d;
+}
+
+.stat-label {
+  display: block;
+  font-size: 22rpx;
+  color: #666;
+  margin-top: 6rpx;
+}
+
+.map-section {
+  padding: 30rpx;
+}
+
+.section-title {
+  margin-bottom: 20rpx;
+}
+
+.title-text {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: white;
+  padding-left: 20rpx;
+  border-left: 6rpx solid #3182ce;
+}
+
+.map-container {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.map {
+  width: 100%;
+  height: 400rpx;
+}
+
+.charts-section {
+  padding: 0 30rpx;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  height: 320rpx;
+  backdrop-filter: blur(10px);
+}

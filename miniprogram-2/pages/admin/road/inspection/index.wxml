@@ -1,0 +1,220 @@
+<view class="inspection-page">
+  <!-- 申请信息 -->
+  <view class="section card" wx:if="{{application}}">
+    <view class="section-header">
+      <text class="section-title">道路申请信息</text>
+    </view>
+    <view class="info-list">
+      <view class="info-item">
+        <text class="label">申请企业</text>
+        <text class="value">{{application.enterpriseName || '未知'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">申请类型</text>
+        <text class="value">{{application.typeLabel}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">车辆品牌</text>
+        <text class="value">{{application.vehicleBrand}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">车辆型号</text>
+        <text class="value">{{application.vehicleModel}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">VIN码</text>
+        <text class="value">{{application.vin}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 车辆参数 -->
+  <view class="section card">
+    <view class="section-header">
+      <text class="section-title">车辆参数</text>
+    </view>
+    <view class="form-list">
+      <view class="form-item">
+        <text class="form-label">车长(mm)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入车长" 
+          value="{{inspectionData.length}}"
+          data-field="length"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">车宽(mm)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入车宽" 
+          value="{{inspectionData.width}}"
+          data-field="width"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">车高(mm)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入车高" 
+          value="{{inspectionData.height}}"
+          data-field="height"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">总质量(kg)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入总质量" 
+          value="{{inspectionData.totalMass}}"
+          data-field="totalMass"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">整备质量(kg)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入整备质量" 
+          value="{{inspectionData.curbWeight}}"
+          data-field="curbWeight"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">额定载质量(kg)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入额定载质量" 
+          value="{{inspectionData.ratedLoad}}"
+          data-field="ratedLoad"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">轴数</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入轴数" 
+          value="{{inspectionData.axleCount}}"
+          data-field="axleCount"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">轮胎规格</text>
+        <input 
+          class="form-input" 
+          type="text" 
+          placeholder="请输入轮胎规格" 
+          value="{{inspectionData.tireSpec}}"
+          data-field="tireSpec"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">电机功率(kW)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入电机功率" 
+          value="{{inspectionData.motorPower}}"
+          data-field="motorPower"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">电机编号</text>
+        <input 
+          class="form-input" 
+          type="text" 
+          placeholder="请输入电机编号" 
+          value="{{inspectionData.motorNo}}"
+          data-field="motorNo"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">最高车速(km/h)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入最高车速" 
+          value="{{inspectionData.maxSpeed}}"
+          data-field="maxSpeed"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">电池类型</text>
+        <input 
+          class="form-input" 
+          type="text" 
+          placeholder="请输入电池类型" 
+          value="{{inspectionData.batteryType}}"
+          data-field="batteryType"
+          bindinput="onInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">电池容量(kWh)</text>
+        <input 
+          class="form-input" 
+          type="number" 
+          placeholder="请输入电池容量" 
+          value="{{inspectionData.batteryCapacity}}"
+          data-field="batteryCapacity"
+          bindinput="onInput"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 查验材料 -->
+  <view class="section card">
+    <view class="section-header">
+      <text class="section-title">查验材料</text>
+    </view>
+    <view class="upload-list">
+      <image-uploader 
+        label="车前45°照片" 
+        value="{{inspectionData.photoFront_45}}"
+        data-key="photoFront_45"
+        bind:change="onUploadChange"
+      />
+      <image-uploader 
+        label="车后45°照片" 
+        value="{{inspectionData.photoRear_45}}"
+        data-key="photoRear_45"
+        bind:change="onUploadChange"
+      />
+      <image-uploader 
+        label="VIN码照片" 
+        value="{{inspectionData.photoVin}}"
+        data-key="photoVin"
+        bind:change="onUploadChange"
+      />
+      <image-uploader 
+        label="无人车车辆证书" 
+        value="{{inspectionData.docVehicleCertUnmanned}}"
+        data-key="docVehicleCertUnmanned"
+        bind:change="onUploadChange"
+      />
+    </view>
+  </view>
+
+  <!-- 底部提交 -->
+  <view class="footer-action">
+    <button class="btn-submit" bindtap="onSubmit">提交查验</button>
+  </view>
+</view>

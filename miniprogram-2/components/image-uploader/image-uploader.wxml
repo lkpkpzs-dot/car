@@ -1,0 +1,14 @@
+<view class="uploader-item">
+  <text class="uploader-label">{{label}}</text>
+  <view class="uploader-box" wx:if="{{!value}}" bindtap="onChoose">
+    <text class="uploader-plus">+</text>
+    <text class="uploader-hint">点击上传</text>
+  </view>
+  <view class="uploader-preview" wx:else>
+    <image class="preview-img" src="{{value}}" mode="aspectFill" bindtap="onPreview" />
+    <view class="preview-actions">
+      <text class="action-btn" bindtap="onChoose">重选</text>
+      <text class="action-btn danger" bindtap="onRemove">删除</text>
+    </view>
+  </view>
+</view>

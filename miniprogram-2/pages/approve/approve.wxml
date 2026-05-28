@@ -1,0 +1,144 @@
+<view class="audit-container">
+  <view class="header-section">
+    <text class="page-title">民警审核任务</text>
+    <text class="page-subtitle">审核企业和号牌申请</text>
+  </view>
+
+  <view class="tab-section">
+    <view class="tab-bar">
+      <view 
+        class="tab-item {{activeTab === 'pending' ? 'active' : ''}}" 
+        data-tab="pending" 
+        bindtap="onTabChange"
+      >
+        <text class="tab-text">待审核</text>
+        <view class="tab-badge" wx:if="{{pendingList.length > 0}}">{{pendingList.length}}</view>
+      </view>
+      <view 
+        class="tab-item {{activeTab === 'processed' ? 'active' : ''}}" 
+        data-tab="processed" 
+        bindtap="onTabChange"
+      >
+        <text class="tab-text">已处理</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="list-section" bindscrolltolower="onLoadMore">
+    <view class="task-list">
+      <block wx:if="{{activeTab === 'pending'}}">
+        <view 
+          wx:for="{{pendingList}}" 
+          wx:key="id" 
+          class="task-card pending"
+          data-item="{{item}}"
+          bindtap="onViewDetail"
+        >
+          <view class="task-header">
+            <view class="task-type">
+              <text class="type-text">{{businessTypeMap[item.businessType]}}</text>
+            </view>
+            <view class="task-status" style="background: {{item.status === 0 ? '#fef3c7' : '#dbeafe'}};">
+              <text style="color: {{item.status === 0 ? '#d97706' : '#2563eb'}};">{{item.statusDesc}}</text>
+            </view>
+          </view>
+          <text class="task-title">{{item.title}}</text>
+          <view class="task-footer">
+            <text class="task-time">{{item.createTime}}</text>
+            <text class="task-arrow">→</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view 
+          wx:for="{{processedList}}" 
+          wx:key="id" 
+          class="task-card processed"
+          data-item="{{item}}"
+          bindtap="onViewDetail"
+        >
+          <view class="task-header">
+            <view class="task-type">
+              <text class="type-text">{{businessTypeMap[item.businessType]}}</text>
+            </view>
+            <view class="task-status" style="background: {{item.status === 1 ? '#dcfce7' : '#fee2e2'}};">
+              <text style="color: {{item.status === 1 ? '#16a34a' : '#dc2626'}};">{{item.statusDesc}}</text>
+            </view>
+          </view>
+          <text class="task-title">{{item.title}}</text>
+          <view class="task-footer">
+            <text class="task-time">{{item.createTime}}</text>
+            <text class="task-arrow">→</text>
+          </view>
+        </view>
+      </block>
+
+      <view class="empty-state" wx:if="{{(activeTab === 'pending' && pendingList.length === 0) || (activeTab === 'processed' && processedList.length === 0)}}">
+        <text class="empty-text">暂无{{activeTab === 'pending' ? '待审核' : '已处理'}}任务</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="detail-modal" wx:if="{{showDetail}}" bindtap="onCloseDetail">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">审核详情</text>
+        <view class="close-btn" bindtap="onCloseDetail">
+          <text class="close-text">×</text>
+        </view>
+      </view>
+
+      <view class="modal-body" wx:if="{{currentTask}}">
+        <view class="detail-section">
+          <text class="detail-title">基本信息</text>
+          <view class="detail-info">
+            <view class="info-row">
+              <text class="info-label">业务类型</text>
+              <text class="info-value">{{businessTypeMap[currentTask.businessType]}}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">申请标题</text>
+              <text class="info-value">{{currentTask.title}}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">当前状态</text>
+              <text class="info-value" style="color: {{currentTask.status === 1 ? '#16a34a' : '#d97706'}};">{{currentTask.statusDesc}}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">申请时间</text>
+              <text class="info-value">{{currentTask.createTime}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="detail-section">
+          <text class="detail-title">审批历史</text>
+          <view class="history-list">
+            <view wx:for="{{approvalHistory}}" wx:key="recordId" class="history-item">
+              <view class="history-line"></view>
+              <view class="history-dot" style="background: {{item.actionType === 2 ? '#16a34a' : (item.actionType === 3 ? '#dc2626' : '#3b82f6')}};"></view>
+              <view class="history-content">
+                <view class="history-header">
+                  <text class="history-node">{{item.nodeName}}</text>
+                  <text class="history-action" style="color: {{item.actionType === 2 ? '#16a34a' : (item.actionType === 3 ? '#dc2626' : '#3b82f6')}};">{{actionTypeMap[item.actionType]}}</text>
+                </view>
+                <text class="history-comment">{{item.comment}}</text>
+                <text class="history-time">{{item.createTime}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer" wx:if="{{activeTab === 'pending'}}">
+        <button class="modal-btn reject-btn" bindtap="onReject">
+          <text class="btn-text">驳回</text>
+        </button>
+        <button class="modal-btn approve-btn" bindtap="onApprove">
+          <text class="btn-text">通过</text>
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

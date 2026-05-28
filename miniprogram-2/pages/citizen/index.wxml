@@ -1,0 +1,95 @@
+<view class="citizen-container">
+  <view class="header-section">
+    <view class="header-bar">
+      <view class="role-badge">
+        <text class="badge-text">{{roleName}}</text>
+      </view>
+      <view class="logout-btn" bindtap="onLogout">
+        <text class="logout-text">退出</text>
+      </view>
+    </view>
+    <text class="greeting">欢迎您，市民朋友</text>
+    <text class="greeting-desc">您的意见对我们很重要</text>
+  </view>
+
+  <view class="stats-section">
+    <!-- 资质状态展示 -->
+    <view class="qualification-card" wx:if="{{qualificationStatus !== -1}}">
+      <view class="qual-row">
+        <text class="qual-label">资质申请状态</text>
+        <status-tag label="{{statusLabel}}" color="{{statusColor}}" bgColor="{{statusBg}}" />
+      </view>
+    </view>
+
+    <view class="stats-card">
+      <view class="stats-header">
+        <text class="stats-title">市民参与数据</text>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{stats.suggestions}}</text>
+          <text class="stat-label">意见建议</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{stats.reports}}</text>
+          <text class="stat-label">违规举报</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{stats.processed}}</text>
+          <text class="stat-label">已处理</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{stats.pending}}</text>
+          <text class="stat-label">处理中</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="actions-section">
+    <view class="section-header">
+      <text class="section-title">我要参与</text>
+    </view>
+    <view class="actions-grid">
+      <view 
+        wx:for="{{quickActions}}" 
+        wx:key="id" 
+        class="action-card"
+        data-action-id="{{item.id}}"
+        bindtap="onQuickAction"
+      >
+        <view class="action-icon">
+          <image src="/assets/images/{{item.icon}}-icon.png" mode="aspectFit"></image>
+        </view>
+        <text class="action-name">{{item.name}}</text>
+        <text class="action-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tips-section">
+    <view class="section-header">
+      <text class="section-title">使用指南</text>
+    </view>
+    <view class="tips-list">
+      <view 
+        wx:for="{{tips}}" 
+        wx:key="id" 
+        class="tip-item"
+      >
+        <view class="tip-icon">
+          <text class="icon-text">{{id}}</text>
+        </view>
+        <view class="tip-content">
+          <text class="tip-title">{{item.title}}</text>
+          <text class="tip-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer-section">
+    <text class="footer-text">感谢您的参与和监督！</text>
+    <text class="footer-sub">您的每一条建议都很宝贵</text>
+  </view>
+</view>

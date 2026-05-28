@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "车辆查验",
+  "usingComponents": {
+    "image-uploader": "/components/image-uploader/image-uploader"
+  }
+}
