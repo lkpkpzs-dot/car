@@ -140,6 +140,7 @@ function login() {
           wx.request({
             url: 'http://localhost:8080/auth/login',
             method: 'POST',
+            timeout: 10000,
             data: { code: res.code },
             success: (loginRes) => {
               console.log('[Auth] Login response:', loginRes.data);

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "安全员监管",
+  "usingComponents": {
+    "status-tag": "/components/status-tag/status-tag"
+  },
+  "enablePullDownRefresh": true
+}

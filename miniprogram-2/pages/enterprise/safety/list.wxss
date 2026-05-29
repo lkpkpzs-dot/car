@@ -1,0 +1,73 @@
+@import "../enterprise.wxss";
+
+.top-action {
+  padding: 24rpx 24rpx 0;
+}
+
+.primary-btn {
+  height: 84rpx;
+  line-height: 84rpx;
+  background: #1a365d;
+  color: #fff;
+  border-radius: 42rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.empty {
+  margin: 24rpx;
+  text-align: center;
+  padding: 64rpx 24rpx;
+}
+
+.empty-text,
+.empty-link {
+  display: block;
+  font-size: 28rpx;
+}
+
+.empty-text {
+  color: #94a3b8;
+}
+
+.empty-link {
+  color: #3182ce;
+  margin-top: 20rpx;
+}
+
+.list-item {
+  margin: 24rpx;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 18rpx;
+}
+
+.item-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.item-meta {
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.item-arrow {
+  display: block;
+  text-align: right;
+  color: #3182ce;
+  font-size: 24rpx;
+  margin-top: 18rpx;
+}

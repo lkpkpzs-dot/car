@@ -15,6 +15,7 @@ Page({
     quickActions: [
       { id: 'audit', name: '资质审核', icon: 'apply', desc: '企业资质与号牌申请' },
       { id: 'roadAudit', name: '道路审核', icon: 'monitor', desc: '道路测试与示范应用' },
+      { id: 'safety', name: '安全员监管', icon: 'check', desc: '资质审核与事故处分' },
       { id: 'scan', name: '执勤核验', icon: 'scan', desc: '扫码核验车辆' },
       { id: 'archive', name: '档案管理', icon: 'archive', desc: '车辆档案查询' },
       { id: 'logs', name: '系统日志', icon: 'records', desc: '操作日志记录' }
@@ -66,6 +67,7 @@ Page({
     const actionRoutes = {
       audit: '/pages/admin/audit/index',
       roadAudit: '/pages/admin/road/list/index',
+      safety: '/pages/admin/safety/list',
       archive: '/pages/admin/archive/index',
       scan: '/pages/scan/scan',
       logs: '/pages/logs/logs'

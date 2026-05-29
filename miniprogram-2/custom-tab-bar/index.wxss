@@ -3,22 +3,23 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100rpx;
+  height: 120rpx;
   background: white;
   display: flex;
-  padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8rpx);
+  box-shadow: 0 -4rpx 24rpx rgba(15, 23, 42, 0.08);
+  border-top: 1rpx solid rgba(148, 163, 184, 0.1);
   z-index: 999;
+  backdrop-filter: blur(20rpx);
 }
 
 .tab-bar-border {
-  background-color: rgba(0, 0, 0, 0.1);
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.15), transparent);
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
-  height: 1rpx;
-  transform: scaleY(0.5);
+  height: 2rpx;
 }
 
 .tab-bar-item {
@@ -28,14 +29,54 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  padding-top: 16rpx;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.tab-bar-item image {
-  width: 44rpx;
-  height: 44rpx;
-  margin-bottom: 4rpx;
+.tab-bar-item:active {
+  transform: scale(0.95);
 }
 
-.tab-bar-item view {
-  font-size: 20rpx;
+.tab-bar-item .tab-bar-icon {
+  width: 56rpx;
+  height: 56rpx;
+  margin-bottom: 8rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-bar-item.active .tab-bar-icon {
+  transform: scale(1.1);
+}
+
+.tab-bar-item .tab-bar-text {
+  font-size: 22rpx;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 选中状态的背景高亮 */
+.tab-bar-item.active::before {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  opacity: 0.1;
+  transition: all 0.3s;
+}
+
+/* 不同端的选中背景色 */
+.tab-bar-item.admin.active::before {
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+}
+
+.tab-bar-item.enterprise.active::before {
+  background: linear-gradient(135deg, #10B981, #059669);
+}
+
+.tab-bar-item.citizen.active::before {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
 }

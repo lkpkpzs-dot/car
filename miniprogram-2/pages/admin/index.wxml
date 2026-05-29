@@ -4,6 +4,10 @@
       <view class="role-badge">
         <text class="badge-text">{{roleName}}</text>
       </view>
+      <!-- SVG头像示例 -->
+      <view class="header-avatar">
+        <image class="svg-avatar" src="/assets/images/user-icon.svg" mode="aspectFit" />
+      </view>
       <view class="logout-btn" bindtap="onLogout">
         <text class="logout-text">退出</text>
       </view>

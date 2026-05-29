@@ -1,4 +1,18 @@
 <view class="page">
+  <view class="header-section">
+    <view class="header-content">
+      <text class="page-title">道路许可申请</text>
+      <text class="page-subtitle">查看和管理所有申请记录</text>
+    </view>
+  </view>
+
+  <view class="tabs-container">
+    <view class="tab-item {{currentTab === index ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" data-index="{{index}}" bindtap="onTabChange">
+      <text class="tab-text">{{item}}</text>
+      <view class="tab-indicator" wx:if="{{currentTab === index}}"></view>
+    </view>
+  </view>
+
   <view class="list-container">
     <view class="empty-state" wx:if="{{list.length === 0}}">
       <image src="/assets/images/empty.png" mode="aspectFit" />
@@ -19,8 +33,8 @@
           <text class="value">{{item.vehicleBrand}} {{item.vehicleModel}}</text>
         </view>
         <view class="info-row">
-          <text class="label">测试区域：</text>
-          <text class="value">{{item.testArea}}</text>
+          <text class="label">VIN码：</text>
+          <text class="value">{{item.vin}}</text>
         </view>
         <view class="info-row">
           <text class="label">申请日期：</text>

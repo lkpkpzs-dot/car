@@ -87,7 +87,6 @@ Page({
       const res = await request.get('/audit/list', this.buildListParams());
       const rawList = request.parseListData(res);
 
-      wx.hideLoading();
       this.setData({ rawList }, () => {
         this.applyFilters();
       });
@@ -98,7 +97,6 @@ Page({
         this.refreshPendingCount();
       }
     } catch (err) {
-      wx.hideLoading();
       console.error('Fetch audit list failed:', err);
       wx.showToast({
         title: '加载失败',
@@ -111,6 +109,8 @@ Page({
       }, () => {
         this.applyFilters();
       });
+    } finally {
+      wx.hideLoading();
     }
   },
 

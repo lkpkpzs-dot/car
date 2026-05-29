@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="form-card">
+    <view class="section-title">事故信息</view>
+    <view class="form-item">
+      <text class="form-label required">事故日期</text>
+      <picker mode="date" value="{{form.accidentDate}}" bindchange="onDateChange">
+        <view class="form-picker">{{form.accidentDate || '请选择事故日期'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label required">责任等级</text>
+      <picker mode="selector" range="{{liabilityOptions}}" range-key="label" value="{{liabilityIndex}}" bindchange="onLiabilityChange">
+        <view class="form-picker">{{liabilityIndex >= 0 ? liabilityOptions[liabilityIndex].label : '请选择责任等级'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label required">伤亡情况</text>
+      <picker mode="selector" range="{{casualtyOptions}}" range-key="label" value="{{casualtyIndex}}" bindchange="onCasualtyChange">
+        <view class="form-picker">{{casualtyIndex >= 0 ? casualtyOptions[casualtyIndex].label : '请选择伤亡情况'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label required">事故说明</text>
+      <textarea class="form-textarea" value="{{form.reason}}" bindinput="onReasonInput" placeholder="请输入事故说明"></textarea>
+    </view>
+  </view>
+
+  <view class="footer-btn">
+    <button class="submit-btn" bindtap="onSubmit">提交处理</button>
+  </view>
+</view>

@@ -145,8 +145,6 @@ Page({
         reason: reason.trim()
       });
 
-      wx.hideLoading();
-
       if (res.code !== undefined && res.code !== 200) {
         wx.showToast({ title: res.msg || '提交失败', icon: 'none' });
         return;
@@ -159,9 +157,10 @@ Page({
         wx.navigateBack();
       }, 1500);
     } catch (err) {
-      wx.hideLoading();
       console.error('Submit enterprise audit failed:', err);
       wx.showToast({ title: '提交失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
     }
   }
 });

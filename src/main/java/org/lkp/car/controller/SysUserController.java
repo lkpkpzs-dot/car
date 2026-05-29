@@ -3,11 +3,14 @@ package org.lkp.car.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.dto.UserProfileUpdateRequest;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.SysUserService;
+import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -64,5 +67,33 @@ public class SysUserController {
     @ApiOperation("删除用户")
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(sysUserService.removeById(id));
+    }
+
+    /**
+     * 更新用户个人资料（安全接口）
+     */
+    @PostMapping("/updateProfile")
+    @ApiOperation("更新用户个人资料")
+    public Result<Boolean> updateProfile(@RequestBody UserProfileUpdateRequest request, HttpServletRequest httpRequest) {
+        SysUser currentUser = AuthContext.currentUser(httpRequest);
+        if (currentUser == null) {
+            return Result.error("请先登录");
+        }
+
+        // 从数据库获取当前用户最新信息
+        SysUser user = sysUserService.getById(currentUser.getUserId());
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        // 只更新允许的字段
+        if (request.getRealName() != null) {
+            user.setRealName(request.getRealName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+
+        return Result.success(sysUserService.updateById(user));
     }
 }

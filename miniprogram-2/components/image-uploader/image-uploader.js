@@ -18,12 +18,12 @@ Component({
           wx.showLoading({ title: '上传中...' });
           try {
             const url = await request.uploadFile(path);
-            wx.hideLoading();
             this.triggerEvent('change', { value: url });
           } catch (err) {
-            wx.hideLoading();
             console.error('Upload failed:', err);
             wx.showToast({ title: '上传失败', icon: 'none' });
+          } finally {
+            wx.hideLoading();
           }
         }
       });

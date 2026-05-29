@@ -1,0 +1,29 @@
+<view class="page">
+  <view class="top-action">
+    <button class="primary-btn" bindtap="goForm">新增安全员</button>
+  </view>
+
+  <view class="empty card" wx:if="{{list.length === 0}}">
+    <text class="empty-text">暂无安全员记录</text>
+    <text class="empty-link" bindtap="goForm">去新增安全员</text>
+  </view>
+
+  <view
+    class="list-item card"
+    wx:for="{{list}}"
+    wx:key="officerId"
+    data-id="{{item.officerId}}"
+    bindtap="goDetail"
+  >
+    <view class="item-header">
+      <text class="item-title">{{item.officerName}}</text>
+      <status-tag label="{{item.statusLabel}}" color="{{item.statusColor}}" bgColor="{{item.statusBg}}" />
+    </view>
+    <view class="item-body">
+      <text class="item-meta">驾驶证类型：{{item.licenseType || '-'}}</text>
+      <text class="item-meta">年龄：{{item.age || '-'}}</text>
+      <text class="item-meta">更新时间：{{item.updateTime || item.createTime || '-'}}</text>
+    </view>
+    <text class="item-arrow">查看详情 →</text>
+  </view>
+</view>

@@ -108,7 +108,6 @@ Page({
           isDeleted: 0
         }
       });
-      wx.hideLoading();
 
       if (res.code !== undefined && res.code !== 200) {
         wx.showToast({ title: res.msg || '提交失败', icon: 'none' });
@@ -126,9 +125,10 @@ Page({
         success: () => wx.navigateBack()
       });
     } catch (err) {
-      wx.hideLoading();
       console.error('Enterprise qualification apply failed:', err);
       wx.showToast({ title: '提交失败，请稍后重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
     }
   }
 });

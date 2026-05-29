@@ -1,16 +1,38 @@
 <view class="profile-container">
   <view class="user-card">
     <view class="avatar-section">
-      <image class="avatar" src="/assets/images/logo.png" mode="aspectFill" />
+      <view class="avatar-wrapper">
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+        </button>
+        <view class="avatar-guide" wx:if="{{showAvatarGuide}}">
+          <text class="guide-bubble">点击选择微信头像</text>
+          <view class="guide-arrow"></view>
+        </view>
+      </view>
       <view class="user-info">
-        <text class="username">{{userInfo.enterpriseName || userInfo.real_name || '企业用户'}}</text>
+        <text class="username">{{userInfo.enterpriseName || userInfo.real_name || '用户'}}</text>
         <view class="role-tag" style="background-color: {{roleColor}}">{{roleName}}</view>
       </view>
     </view>
   </view>
+  
+  <!-- SVG图标菜单示例 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="onGoToSettings">
+      <image class="menu-icon" src="/assets/images/settings-icon.svg" mode="aspectFit" />
+      <text class="menu-text">账户设置</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item">
+      <image class="menu-icon" src="/assets/images/about-icon.svg" mode="aspectFit" />
+      <text class="menu-text">关于我们</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
 
-  <!-- 企业信息展示：仅在已认证时显示 -->
-  <view class="card-block" wx:if="{{isEnterprise}}">
+  <!-- 企业信息展示：仅在已认证时显示，民警端不显示 -->
+  <view class="card-block" wx:if="{{isEnterprise && role !== 'admin'}}">
     <text class="block-title">企业信息</text>
     <view class="info-item">
       <text class="info-label">企业名称</text>
@@ -28,13 +50,9 @@
       <text class="info-label">联系电话</text>
       <text class="info-value">{{userInfo.contactPhone || '—'}}</text>
     </view>
-    <view class="info-item" wx:if="{{userInfo.licenseImg}}">
-      <text class="info-label">营业执照</text>
-      <image class="license-thumb" src="{{userInfo.licenseImg}}" mode="aspectFill" bindtap="previewLicense" />
-    </view>
   </view>
 
-  <!-- 资质状态与操作：对普通用户/企业用户始终显示 -->
+  <!-- 资质状态与操作：对普通用户/企业用户始终显示，民警端不显示 -->
   <view class="card-block" wx:if="{{role !== 'admin'}}">
     <view class="qual-header">
       <text class="block-title">企业资质</text>
@@ -44,16 +62,14 @@
   </view>
 
   <!-- 用户基础信息 -->
-  <view class="card-block" wx:if="{{!isEnterprise}}">
+  <view class="card-block" wx:if="{{!isEnterprise || role === 'admin'}}">
     <view class="info-item">
       <text class="info-label">姓名</text>
-      <text class="info-value">{{userInfo.real_name || '—'}}</text>
+      <text class="info-value">{{userInfo.realName || userInfo.real_name || '—'}}</text>
     </view>
     <view class="info-item">
       <text class="info-label">电话</text>
       <text class="info-value">{{userInfo.phone || '—'}}</text>
     </view>
   </view>
-
-  <button class="logout-btn" bindtap="onLogout">退出登录</button>
 </view>

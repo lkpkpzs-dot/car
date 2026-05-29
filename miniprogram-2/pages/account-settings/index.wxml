@@ -1,0 +1,40 @@
+<view class="settings-container">
+  <view class="header-section">
+    <text class="page-title">账户设置</text>
+    <text class="page-subtitle">完善您的个人信息</text>
+  </view>
+
+  <view class="form-card">
+    <view class="form-item">
+      <text class="form-label">真实姓名</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入真实姓名" 
+        value="{{realName}}" 
+        bindinput="onRealNameInput"
+        placeholder-class="input-placeholder"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">联系电话</text>
+      <input 
+        class="form-input" 
+        type="number"
+        placeholder="请输入联系电话" 
+        value="{{phone}}" 
+        bindinput="onPhoneInput"
+        placeholder-class="input-placeholder"
+      />
+    </view>
+  </view>
+
+  <button 
+    class="save-btn" 
+    bindtap="onSave" 
+    loading="{{loading}}"
+    disabled="{{loading}}"
+  >
+    {{loading ? '保存中...' : '保存'}}
+  </button>
+</view>

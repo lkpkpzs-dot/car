@@ -1,5 +1,6 @@
 const auth = require('../../utils/auth');
 const enterpriseUtil = require('../../utils/enterprise.js');
+const request = require('../../utils/request.js');
 
 Page({
   data: {
@@ -13,11 +14,33 @@ Page({
     statusColor: '#64748b',
     statusBg: '#f1f5f9',
     qualBtnText: '申请企业资质',
-    qualBtnMode: 'apply'
+    qualBtnMode: 'apply',
+    avatarUrl: '/assets/images/user-icon.png', // 默认头像
+    showAvatarGuide: false // 显示头像引导
   },
 
   onLoad() {
     this.loadUserInfo();
+    // 检查是否需要显示头像引导（首次打开时显示）
+    const hasChosenAvatar = wx.getStorageSync('hasChosenAvatar');
+    if (!hasChosenAvatar) {
+      this.setData({ showAvatarGuide: true });
+    }
+  },
+
+  onChooseAvatar(e) {
+    const { avatarUrl } = e.detail;
+    this.setData({
+      avatarUrl: avatarUrl,
+      showAvatarGuide: false
+    });
+    // 保存用户已选择过头像的状态
+    wx.setStorageSync('hasChosenAvatar', true);
+    wx.showToast({
+      title: '头像设置成功',
+      icon: 'success',
+      duration: 1500
+    });
   },
 
   onShow() {
@@ -61,8 +84,11 @@ Page({
     let roleName = auth.getRoleName(role);
     let roleColor = auth.getRoleColor(role);
 
-    // 如果是已认证的企业，角色显示改为“企业用户”
-    if (isEnterpriseCertified) {
+    // 根据角色显示不同的名称和颜色
+    if (role === 'admin') {
+      roleName = '管理员用户';
+      roleColor = '#3b82f6'; // 蓝色
+    } else if (isEnterpriseCertified) {
       roleName = '企业用户';
       roleColor = '#2f855a'; // 企业绿
     }
@@ -81,6 +107,33 @@ Page({
       qualBtnMode,
       showQualBtn
     });
+
+    // 如果是已认证企业且不是民警端，获取企业详细信息
+    if (isEnterpriseCertified && userInfo.authEnterpriseId && role !== 'admin') {
+      this.loadEnterpriseInfo(userInfo.authEnterpriseId);
+    }
+  },
+
+  async loadEnterpriseInfo(enterpriseId) {
+    try {
+      const res = await request.get(`/enterpriseInfo/${enterpriseId}`);
+      if (res.code === 200 && res.data) {
+        const enterpriseInfo = res.data;
+        // 更新用户信息中的企业数据
+        const userInfo = {
+          ...this.data.userInfo,
+          enterpriseName: enterpriseInfo.enterpriseName,
+          creditCode: enterpriseInfo.creditCode,
+          legalPerson: enterpriseInfo.legalPerson,
+          contactPhone: enterpriseInfo.contactPhone
+        };
+        this.setData({ userInfo });
+        // 保存到本地缓存
+        wx.setStorageSync('userInfo', userInfo);
+      }
+    } catch (error) {
+      console.error('获取企业信息失败:', error);
+    }
   },
 
   onQualificationAction() {
@@ -91,23 +144,9 @@ Page({
     wx.navigateTo({ url });
   },
 
-  previewLicense() {
-    const { licenseImg } = this.data.userInfo;
-    if (licenseImg) wx.previewImage({ urls: [licenseImg] });
-  },
 
-  onLogout() {
-    wx.showModal({
-      title: '提示',
-      content: '确定要退出登录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          auth.clearRole();
-          wx.removeStorageSync('token');
-          wx.removeStorageSync('userInfo');
-          wx.reLaunch({ url: '/pages/index/index' });
-        }
-      }
-    });
+
+  onGoToSettings() {
+    wx.navigateTo({ url: '/pages/account-settings/index' });
   }
 });

@@ -1,0 +1,70 @@
+<view class="detail-container" wx:if="{{detail}}">
+  <view class="section-card">
+    <view class="detail-header">
+      <view class="section-title">安全员信息</view>
+      <status-tag label="{{detail.statusLabel}}" color="{{detail.statusColor}}" bgColor="{{detail.statusBg}}" />
+    </view>
+    <view class="info-item"><text class="label">姓名</text><text class="value highlight">{{detail.officerName}}</text></view>
+    <view class="info-item"><text class="label">企业ID</text><text class="value">{{detail.enterpriseId || '-'}}</text></view>
+    <view class="info-item"><text class="label">身份证号</text><text class="value">{{detail.idCardNo}}</text></view>
+    <view class="info-item"><text class="label">手机号</text><text class="value">{{detail.phone || '-'}}</text></view>
+    <view class="info-item"><text class="label">年龄</text><text class="value">{{detail.age || '-'}}</text></view>
+    <view class="info-item"><text class="label">驾驶证类型</text><text class="value">{{detail.licenseType || '-'}}</text></view>
+    <view class="info-item"><text class="label">驾驶证号</text><text class="value">{{detail.driverLicenseNo || '-'}}</text></view>
+    <view class="info-item"><text class="label">初次领证日期</text><text class="value">{{detail.firstLicenseDate || '-'}}</text></view>
+    <view class="info-item"><text class="label">审核意见</text><text class="value">{{detail.auditCommentText}}</text></view>
+    <view class="info-item"><text class="label">暂停起止日期</text><text class="value">{{detail.suspendRangeText}}</text></view>
+    <view class="info-item"><text class="label">处分原因</text><text class="value">{{detail.penaltyReasonText}}</text></view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-title">资质条件</view>
+    <view class="condition-row"><text>最近连续三个记分周期无记满12分记录</text><text>{{detail.noFullScoreRecord === 1 ? '是' : '否'}}</text></view>
+    <view class="condition-row"><text>无致人死亡或重伤交通责任事故记录</text><text>{{detail.noMajorAccidentRecord === 1 ? '是' : '否'}}</text></view>
+    <view class="condition-row"><text>无酒后或醉酒驾驶记录</text><text>{{detail.noDuiRecord === 1 ? '是' : '否'}}</text></view>
+    <view class="condition-row"><text>无犯罪记录</text><text>{{detail.noCrimeRecord === 1 ? '是' : '否'}}</text></view>
+    <view class="condition-row"><text>身心健康</text><text>{{detail.healthy === 1 ? '是' : '否'}}</text></view>
+    <view class="condition-row"><text>无酗酒、吸毒记录</text><text>{{detail.noAlcoholDrugRecord === 1 ? '是' : '否'}}</text></view>
+  </view>
+
+  <view class="section-card" wx:if="{{detail.materialList.length > 0}}">
+    <view class="section-title">材料预览</view>
+    <view class="material-grid">
+      <view class="material-item" wx:for="{{detail.materialList}}" wx:key="key">
+        <text class="material-label">{{item.label}}</text>
+        <image class="material-img" src="{{item.url}}" mode="aspectFill" data-url="{{item.url}}" bindtap="previewImage" />
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-title">处分记录</view>
+    <view class="empty-line" wx:if="{{penalties.length === 0}}">暂无处分记录</view>
+    <view class="penalty-item" wx:for="{{penalties}}" wx:key="penaltyId">
+      <view class="penalty-title">{{item.accidentDate || item.createTime}}</view>
+      <view class="penalty-line">责任等级：{{item.liabilityLabel || '-'}}</view>
+      <view class="penalty-line">伤亡情况：{{item.casualtyLabel || '-'}}</view>
+      <view class="penalty-line">处分原因：{{item.reason || item.penaltyReason || '-'}}</view>
+    </view>
+  </view>
+
+  <view class="footer-actions">
+    <button class="btn penalty-btn" wx:if="{{detail.status === 1}}" bindtap="goPenalty">录入事故处分</button>
+    <button class="btn penalty-btn disabled" wx:else disabled>录入事故处分</button>
+    <button class="btn reject-btn" wx:if="{{detail.status === 0}}" bindtap="onReject">驳回</button>
+    <button class="btn approve-btn" wx:if="{{detail.status === 0}}" bindtap="onApprove">审核通过</button>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showRejectModal}}" bindtap="hideRejectModal">
+    <view class="modal-content" catchtap="stopBubble">
+      <view class="modal-header">驳回申请</view>
+      <view class="modal-body">
+        <textarea class="reason-textarea" value="{{rejectReason}}" bindinput="onRejectReasonInput" placeholder="请输入驳回原因（必填）"></textarea>
+      </view>
+      <view class="modal-footer">
+        <button class="m-btn cancel" bindtap="hideRejectModal">取消</button>
+        <button class="m-btn confirm-reject" bindtap="confirmReject">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

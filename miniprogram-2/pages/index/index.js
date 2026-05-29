@@ -43,6 +43,7 @@ Page({
       auth.navigateByRole(data.roleType);
     } catch (err) {
       console.error('Silent login failed:', err);
+      this.setData({ showLoading: false });
       
       // 如果是后端服务没开，提供重试选项
       wx.showModal({

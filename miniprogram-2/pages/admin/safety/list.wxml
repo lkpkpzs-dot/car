@@ -1,0 +1,56 @@
+<view class="safety-container">
+  <scroll-view class="tab-scroll" scroll-x>
+    <view class="tab-row">
+      <view
+        wx:for="{{statusTabs}}"
+        wx:key="label"
+        class="tab-chip {{currentStatus === item.value ? 'active' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="onTabChange"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="search-bar">
+    <input
+      class="search-input"
+      type="number"
+      value="{{enterpriseId}}"
+      placeholder="按企业ID筛选"
+      bindinput="onEnterpriseInput"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <text class="search-action" wx:if="{{enterpriseId}}" bindtap="onClearEnterprise">清除</text>
+    <text class="search-action" bindtap="onSearch">查询</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{list.length === 0}}">
+    <text>暂无安全员记录</text>
+  </view>
+
+  <view
+    class="officer-card"
+    wx:for="{{list}}"
+    wx:key="officerId"
+    data-id="{{item.officerId}}"
+    bindtap="goDetail"
+  >
+    <view class="card-header">
+      <view class="title-group">
+        <text class="officer-name">{{item.officerName}}</text>
+        <text class="enterprise-id">企业ID：{{item.enterpriseId || '-'}}</text>
+      </view>
+      <status-tag label="{{item.statusLabel}}" color="{{item.statusColor}}" bgColor="{{item.statusBg}}" />
+    </view>
+    <view class="card-body">
+      <view class="info-row"><text class="label">驾驶证类型</text><text class="value">{{item.licenseType || '-'}}</text></view>
+      <view class="info-row"><text class="label">年龄</text><text class="value">{{item.age || '-'}}</text></view>
+      <view class="info-row"><text class="label">更新时间</text><text class="value">{{item.updateTime || item.createTime || '-'}}</text></view>
+    </view>
+    <view class="card-footer">
+      <text>查看详情</text>
+      <text>→</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "安全员资质申请",
+  "usingComponents": {
+    "image-uploader": "/components/image-uploader/image-uploader"
+  }
+}

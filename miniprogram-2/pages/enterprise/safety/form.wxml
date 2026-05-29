@@ -1,0 +1,61 @@
+<view class="page">
+  <view class="form-card card">
+    <text class="section-title">基础信息</text>
+    <view class="form-item">
+      <text class="form-label required">姓名</text>
+      <input class="form-input" value="{{form.officerName}}" data-key="officerName" bindinput="onInput" placeholder="请输入姓名" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">身份证号</text>
+      <input class="form-input" value="{{form.idCardNo}}" data-key="idCardNo" bindinput="onInput" placeholder="请输入身份证号" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">手机号</text>
+      <input class="form-input" value="{{form.phone}}" data-key="phone" bindinput="onInput" type="number" placeholder="请输入手机号" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">年龄</text>
+      <input class="form-input" value="{{form.age}}" data-key="age" bindinput="onInput" type="number" placeholder="21-50" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">驾驶证类型</text>
+      <picker mode="selector" range="{{licenseTypes}}" value="{{licenseTypeIndex}}" bindchange="onLicenseTypeChange">
+        <view class="form-picker">{{form.licenseType || '请选择驾驶证类型'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label">驾驶证号</text>
+      <input class="form-input" value="{{form.driverLicenseNo}}" data-key="driverLicenseNo" bindinput="onInput" placeholder="请输入驾驶证号" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">初次领证日期</text>
+      <picker mode="date" value="{{form.firstLicenseDate}}" bindchange="onDateChange">
+        <view class="form-picker">{{form.firstLicenseDate || '请选择日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="form-card card">
+    <text class="section-title">资质条件</text>
+    <view class="switch-row" wx:for="{{conditionFields}}" wx:key="key">
+      <text class="switch-label">{{item.label}}</text>
+      <switch checked="{{form[item.key] === 1}}" data-key="{{item.key}}" bindchange="onConditionChange" color="#1a365d" />
+    </view>
+  </view>
+
+  <view class="form-card card">
+    <text class="section-title">证明材料</text>
+    <image-uploader
+      wx:for="{{materialFields}}"
+      wx:key="key"
+      label="{{item.label}}"
+      value="{{form[item.key]}}"
+      data-key="{{item.key}}"
+      bind:change="onUploadChange"
+    />
+  </view>
+
+  <view class="footer-btn">
+    <button class="submit-btn" bindtap="onSubmit">{{isResubmit ? '重新提交' : '提交申请'}}</button>
+  </view>
+</view>

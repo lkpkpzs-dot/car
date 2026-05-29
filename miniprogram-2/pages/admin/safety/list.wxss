@@ -1,0 +1,126 @@
+.safety-container {
+  min-height: 100vh;
+  background: #f7fafc;
+  padding-bottom: 30rpx;
+}
+
+.tab-scroll {
+  background: #1a365d;
+  white-space: nowrap;
+}
+
+.tab-row {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 30rpx;
+}
+
+.tab-chip {
+  flex-shrink: 0;
+  padding: 12rpx 28rpx;
+  border-radius: 32rpx;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 26rpx;
+}
+
+.tab-chip.active {
+  color: #1a365d;
+  background: #fff;
+  font-weight: 700;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 30rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 24rpx;
+  background: #fff;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+}
+
+.search-action {
+  color: #3182ce;
+  font-size: 26rpx;
+  flex-shrink: 0;
+}
+
+.empty-state {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 28rpx;
+  padding-top: 180rpx;
+}
+
+.officer-card {
+  margin: 0 30rpx 24rpx;
+  padding: 30rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #edf2f7;
+}
+
+.title-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.officer-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a365d;
+}
+
+.enterprise-id {
+  display: block;
+  margin-top: 8rpx;
+  color: #94a3b8;
+  font-size: 24rpx;
+}
+
+.card-body {
+  padding: 18rpx 0;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24rpx;
+  font-size: 26rpx;
+  line-height: 1.8;
+}
+
+.label {
+  color: #718096;
+}
+
+.value {
+  color: #4a5568;
+  text-align: right;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8rpx;
+  color: #3182ce;
+  font-size: 25rpx;
+}

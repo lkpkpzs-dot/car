@@ -55,13 +55,14 @@ Page({
     try {
       const res = await request.get('/carArchive/list');
       const list = request.parseListData(res);
-      wx.hideLoading();
       this.applyArchiveData(list.length ? list : this.getMockArchives());
     } catch (err) {
-      wx.hideLoading();
       console.error('Fetch car archive list failed:', err);
       this.applyArchiveData(this.getMockArchives());
       wx.showToast({ title: '已展示本地样例数据', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+      this.setData({ loading: false });
     }
   },
 

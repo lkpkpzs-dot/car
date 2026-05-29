@@ -15,9 +15,9 @@ Page({
       reviewingCount: 0
     },
     quickActions: [
-      { id: 'licenseApply', name: '发起上牌申请', icon: 'apply', desc: '在线提交号牌申请' },
       { id: 'roadApply', name: '道路许可申请', icon: 'monitor', desc: '道路测试/示范应用/应用试点' },
-      { id: 'applyList', name: '我的申请列表', icon: 'records', desc: '查看上牌申请进度' }
+      { id: 'safety', name: '安全员监管', icon: 'check', desc: '资质申请与人员管理' },
+      { id: 'myVehicles', name: '我的车辆', icon: 'vehicle', desc: '查看已通过查验的车辆' }
     ]
   },
 
@@ -46,71 +46,63 @@ Page({
       statusBg: meta.bg
     });
 
-    await this.loadStats();
+    await this.loadDashboardData();
   },
 
-  async loadStats() {
+  async loadDashboardData() {
     try {
-      const res = await request.get('/licenseApplication/myList');
-      const list = request.parseListData(res);
-      const reviewingCount = list.filter(item =>
-        item.status === enterpriseUtil.LICENSE_STATUS.REVIEWING
-        || item.status === enterpriseUtil.LICENSE_STATUS.INSPECTING
-      ).length;
-      this.setData({
-        stats: {
-          vehicleCount: list.filter(item => item.status === enterpriseUtil.LICENSE_STATUS.ISSUED).length,
-          applyCount: list.length,
-          reviewingCount
-        }
-      });
+      wx.showLoading({ title: '加载中...' });
+      const res = await request.get('/enterprise/dashboard');
+      
+      if (res.code === 200 && res.data) {
+        const { count } = res.data;
+        this.setData({
+          stats: {
+            vehicleCount: count.vehicle || 0,
+            applyCount: count.totalApplication || 0,
+            reviewingCount: count.pending || 0
+          }
+        });
+      }
     } catch (err) {
-      const mockList = enterpriseUtil.getMockLicenseList();
-      this.setData({
-        stats: {
-          vehicleCount: 1,
-          applyCount: mockList.length,
-          reviewingCount: mockList.filter(i => i.status === 1).length
-        }
-      });
+      console.error('[Enterprise Dashboard] Load failed:', err);
+    } finally {
+      wx.hideLoading();
     }
   },
 
   onQuickAction(e) {
     const { id } = e.currentTarget.dataset;
-    const { userInfo } = this.data;
-
-    if (id === 'licenseApply') {
-      const check = enterpriseUtil.checkLicenseApplyPermission(userInfo);
-      if (!check.allowed) {
-        wx.showModal({
-          title: '无法申请',
-          content: check.message,
-          confirmText: '去认证',
-          success: (res) => {
-            if (res.confirm) {
-              wx.navigateTo({ url: '/pages/enterprise/qualification/index' });
-            }
-          }
-        });
-        return;
-      }
-      wx.navigateTo({ url: '/pages/enterprise/apply/index' });
-      return;
-    }
-
-    if (id === 'applyList') {
-      wx.navigateTo({ url: '/pages/enterprise/apply/list' });
-      return;
-    }
 
     if (id === 'roadApply') {
       wx.navigateTo({ url: '/pages/road/list/index' });
       return;
     }
 
+    if (id === 'safety') {
+      wx.navigateTo({ url: '/pages/enterprise/safety/list' });
+      return;
+    }
+
+    if (id === 'myVehicles') {
+      wx.navigateTo({ url: '/pages/enterprise/vehicles/index' });
+      return;
+    }
+
     if (id === 'qualification') {
       this.goQualification();
+    }
+  },
+
+  onStatClick(e) {
+    const { type } = e.currentTarget.dataset;
+    
+    if (type === 'myVehicles') {
+      wx.navigateTo({ url: '/pages/enterprise/vehicles/index' });
+    } else if (type === 'myApplications') {
+      wx.navigateTo({ url: '/pages/road/list/index' });
+    } else if (type === 'pending') {
+      wx.navigateTo({ url: '/pages/road/list/index?tab=1' });
     }
   },
 

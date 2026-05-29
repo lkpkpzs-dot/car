@@ -1,8 +1,9 @@
 Component({
   data: {
     selected: 0,
-    color: "#7A7E83",
-    selectedColor: "#1a365d",
+    color: "#64748B",
+    selectedColor: "#3B82F6",
+    bgColor: "#FFFFFF",
     list: []
   },
   attached() {
@@ -15,31 +16,51 @@ Component({
       const userInfo = enterpriseUtil.normalizeUserInfo(wx.getStorageSync('userInfo'));
       
       let homePath = '/pages/citizen/index';
+      let color = "#64748B";
+      let selectedColor = "#3B82F6";
+      let tabConfig = {};
+      
+      // 三端共用同一套TabBar图标
+      tabConfig = {
+        home: {
+          icon: "/assets/images/tab-home.png",
+          selectedIcon: "/assets/images/tab-home-active.png"
+        },
+        profile: {
+          icon: "/assets/images/tab-my.png",
+          selectedIcon: "/assets/images/tab-my-active.png"
+        }
+      };
       
       // 1. 民警端
       if (role === 'admin') {
         homePath = '/pages/admin/index';
+        selectedColor = "#3B82F6";
       } 
       // 2. 企业端 (必须认证通过)
       else if (userInfo.authEnterpriseId && userInfo.qualificationStatus === 1) {
         homePath = '/pages/enterprise/index';
+        selectedColor = "#10B981";
       }
       // 3. 普通市民端 (默认)
       else {
         homePath = '/pages/citizen/index';
+        selectedColor = "#F59E0B";
       }
       
       this.setData({
+        color,
+        selectedColor,
         list: [{
           pagePath: homePath,
           text: "首页",
-          iconPath: "/assets/images/home.png",
-          selectedIconPath: "/assets/images/home-active.png"
+          iconPath: tabConfig.home.icon,
+          selectedIconPath: tabConfig.home.selectedIcon
         }, {
           pagePath: "/pages/profile/index",
           text: "我的",
-          iconPath: "/assets/images/about-icon.png",
-          selectedIconPath: "/assets/images/about-icon.png"
+          iconPath: tabConfig.profile.icon,
+          selectedIconPath: tabConfig.profile.selectedIcon
         }]
       });
     },

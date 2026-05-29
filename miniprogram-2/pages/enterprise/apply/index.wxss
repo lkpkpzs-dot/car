@@ -1,5 +1,0 @@
-@import "../enterprise.wxss";
-
-.page {
-  padding-bottom: 160rpx;
-}
