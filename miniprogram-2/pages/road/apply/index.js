@@ -1,5 +1,6 @@
 const request = require('../../../utils/request.js');
 const enterpriseUtil = require('../../../utils/enterprise.js');
+const validator = require('../../../utils/validator.js');
 
 Page({
   data: {
@@ -89,7 +90,20 @@ Page({
   onInput(e) {
     if (this.data.readonly) return;
     const { field } = e.currentTarget.dataset;
-    this.setData({ [field]: e.detail.value });
+    let value = e.detail.value;
+
+    if (field === 'vin') {
+      value = value.toUpperCase();
+      if (value.length > 17) value = value.slice(0, 17);
+    }
+    if (field === 'vehicleBrand' || field === 'vehicleModel' || field === 'testArea') {
+      if (validator.hasSpecialChars(value)) {
+        wx.showToast({ title: '不能输入特殊符号', icon: 'none', duration: 1000 });
+        return;
+      }
+    }
+
+    this.setData({ [field]: value });
   },
 
   onTypeChange(e) {
@@ -152,10 +166,83 @@ Page({
 
   validate() {
     const d = this.data;
-    if (!d.vehicleBrand || !d.vehicleModel || !d.vin || !d.testArea || !d.startDate || !d.endDate || !d.testProjects || !d.supportPlan) {
-      wx.showToast({ title: '请填写完整信息', icon: 'none' });
+    
+    if (!d.vehicleBrand) {
+      wx.showToast({ title: '请填写车辆品牌', icon: 'none' });
       return false;
     }
+    if (d.vehicleBrand.length < 1 || d.vehicleBrand.length > 50) {
+      wx.showToast({ title: '车辆品牌长度需在1-50字之间', icon: 'none' });
+      return false;
+    }
+    if (validator.hasSpecialChars(d.vehicleBrand)) {
+      wx.showToast({ title: '车辆品牌不能包含特殊符号', icon: 'none' });
+      return false;
+    }
+
+    if (!d.vehicleModel) {
+      wx.showToast({ title: '请填写车辆型号', icon: 'none' });
+      return false;
+    }
+    if (d.vehicleModel.length < 1 || d.vehicleModel.length > 50) {
+      wx.showToast({ title: '车辆型号长度需在1-50字之间', icon: 'none' });
+      return false;
+    }
+    if (validator.hasSpecialChars(d.vehicleModel)) {
+      wx.showToast({ title: '车辆型号不能包含特殊符号', icon: 'none' });
+      return false;
+    }
+
+    if (!d.vin) {
+      wx.showToast({ title: '请填写VIN码', icon: 'none' });
+      return false;
+    }
+    if (!validator.isVin(d.vin)) {
+      wx.showToast({ title: 'VIN码应为17位字母数字', icon: 'none' });
+      return false;
+    }
+
+    if (!d.testArea) {
+      wx.showToast({ title: '请填写测试区域', icon: 'none' });
+      return false;
+    }
+    if (d.testArea.length < 2 || d.testArea.length > 200) {
+      wx.showToast({ title: '测试区域长度需在2-200字之间', icon: 'none' });
+      return false;
+    }
+    if (validator.hasSpecialChars(d.testArea)) {
+      wx.showToast({ title: '测试区域不能包含特殊符号', icon: 'none' });
+      return false;
+    }
+
+    if (!d.startDate || !d.endDate) {
+      wx.showToast({ title: '请选择日期', icon: 'none' });
+      return false;
+    }
+
+    if (new Date(d.startDate) > new Date(d.endDate)) {
+      wx.showToast({ title: '结束日期不能早于开始日期', icon: 'none' });
+      return false;
+    }
+
+    if (!d.testProjects) {
+      wx.showToast({ title: '请填写测试项目', icon: 'none' });
+      return false;
+    }
+    if (d.testProjects.length < 10 || d.testProjects.length > 1000) {
+      wx.showToast({ title: '测试项目长度需在10-1000字之间', icon: 'none' });
+      return false;
+    }
+
+    if (!d.supportPlan) {
+      wx.showToast({ title: '请填写安全保障计划', icon: 'none' });
+      return false;
+    }
+    if (d.supportPlan.length < 10 || d.supportPlan.length > 1000) {
+      wx.showToast({ title: '安全保障计划长度需在10-1000字之间', icon: 'none' });
+      return false;
+    }
+
     if (d.docVehicleCert.length === 0 || d.docOwnerId.length === 0 || d.docSafetyInspection.length === 0 || d.docInsurance.length === 0 || d.docSafetyDeclaration.length === 0 || d.docApplicationDoc.length === 0) {
       wx.showToast({ title: '请上传必要证明材料', icon: 'none' });
       return false;

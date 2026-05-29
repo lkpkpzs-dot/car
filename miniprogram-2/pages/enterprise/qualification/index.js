@@ -1,5 +1,6 @@
 const request = require('../../../utils/request.js');
 const enterpriseUtil = require('../../../utils/enterprise.js');
+const validator = require('../../../utils/validator.js');
 
 Page({
   data: {
@@ -42,7 +43,18 @@ Page({
   onInput(e) {
     if (this.data.readonly) return;
     const field = e.currentTarget.dataset.field;
-    this.setData({ [field]: e.detail.value });
+    let value = e.detail.value;
+
+    if (field === 'creditCode') {
+      value = value.toUpperCase();
+      if (value.length > 18) value = value.slice(0, 18);
+    }
+    if (field === 'contactPhone') {
+      value = validator.filterPositiveInteger(value);
+      if (value.length > 11) value = value.slice(0, 11);
+    }
+
+    this.setData({ [field]: value });
   },
 
   onLicenseChange(e) {
@@ -57,10 +69,47 @@ Page({
 
   validate() {
     const { enterpriseName, creditCode, legalPerson, contactPhone, licenseImg } = this.data;
-    if (!enterpriseName || !creditCode || !legalPerson || !contactPhone) {
-      wx.showToast({ title: '请填写完整信息', icon: 'none' });
+    
+    if (!enterpriseName) {
+      wx.showToast({ title: '请填写企业名称', icon: 'none' });
       return false;
     }
+    if (enterpriseName.length < 2 || enterpriseName.length > 100) {
+      wx.showToast({ title: '企业名称长度需在2-100字之间', icon: 'none' });
+      return false;
+    }
+    if (validator.hasSpecialChars(enterpriseName)) {
+      wx.showToast({ title: '企业名称不能包含特殊符号', icon: 'none' });
+      return false;
+    }
+
+    if (!creditCode) {
+      wx.showToast({ title: '请填写统一社会信用代码', icon: 'none' });
+      return false;
+    }
+    if (!validator.isCreditCode(creditCode)) {
+      wx.showToast({ title: '统一社会信用代码应为18位', icon: 'none' });
+      return false;
+    }
+
+    if (!legalPerson) {
+      wx.showToast({ title: '请填写法定代表人', icon: 'none' });
+      return false;
+    }
+    if (legalPerson.length < 2 || legalPerson.length > 20) {
+      wx.showToast({ title: '法定代表人姓名长度需在2-20字之间', icon: 'none' });
+      return false;
+    }
+
+    if (!contactPhone) {
+      wx.showToast({ title: '请填写联系电话', icon: 'none' });
+      return false;
+    }
+    if (!validator.isPhone(contactPhone)) {
+      wx.showToast({ title: '请填写正确的手机号', icon: 'none' });
+      return false;
+    }
+
     if (!licenseImg) {
       wx.showToast({ title: '请上传营业执照', icon: 'none' });
       return false;

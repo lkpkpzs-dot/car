@@ -215,6 +215,6 @@
 
   <!-- 底部提交 -->
   <view class="footer-action">
-    <button class="btn-submit" bindtap="onSubmit">提交查验</button>
+    <button class="btn-submit" bindtap="onSubmit" disabled="{{submitting}}" loading="{{submitting}}">{{submitting ? '提交中...' : '提交查验'}}</button>
   </view>
 </view>
