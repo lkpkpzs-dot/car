@@ -27,6 +27,8 @@ public class FileUploadController {
 
     @Value("${file.upload-path}")
     private String uploadPath;
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     /**
      * 图片上传接口
@@ -62,8 +64,9 @@ public class FileUploadController {
             int serverPort = request.getServerPort();
             String contextPath = request.getContextPath();
             
-            String fileUrl = scheme + "://" + serverName + ":" + serverPort + contextPath + "/uploads/" + newFilename;
-            
+//            String fileUrl = scheme + "://" + serverName + ":" + serverPort + contextPath + "/uploads/" + newFilename;
+
+            String fileUrl = baseUrl + "/uploads/" + newFilename;
             return Result.success(fileUrl);
         } catch (IOException e) {
             log.error("文件上传失败", e);

@@ -68,4 +68,22 @@ public class CitizenReport implements Serializable {
     @ApiModelProperty("创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
+
+    /**
+     * 审核民警ID
+     */
+    @ApiModelProperty("审核民警ID")
+    private Long reviewerId;
+
+    /**
+     * 审核时间
+     */
+    @ApiModelProperty("审核时间")
+    private Date reviewTime;
+
+    /**
+     * 审核备注
+     */
+    @ApiModelProperty("审核备注")
+    private String reviewRemark;
 }

@@ -32,10 +32,22 @@ public class SysMessage implements Serializable {
     private Long receiverId;
 
     /**
-     * 消息类型: 1-审批通过, 2-驳回, 3-整改通知
+     * 消息类型: 1-审批通过, 2-驳回, 3-整改通知, 4-举报处理通知
      */
-    @ApiModelProperty("消息类型: 1-审批通过, 2-驳回, 3-整改通知")
+    @ApiModelProperty("消息类型: 1-审批通过, 2-驳回, 3-整改通知, 4-举报处理通知")
     private Integer msgType;
+
+    /**
+     * 业务类型: 1-举报
+     */
+    @ApiModelProperty("业务类型: 1-举报")
+    private Integer businessType;
+
+    /**
+     * 业务ID
+     */
+    @ApiModelProperty("业务ID")
+    private Long businessId;
 
     /**
      * 消息标题

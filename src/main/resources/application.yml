@@ -1,0 +1,51 @@
+# 应用服务 WEB 访问端口
+server:
+  port: 8080
+
+# 数据库连接配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/car_admin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+
+  # Jackson 配置 (解决日期解析错误)
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  # 文件上传大小限制
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: is_deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Knife4j 配置
+knife4j:
+  enable: true
+
+# 微信小程序配置
+wx:
+  miniapp:
+    appid: wxadb2b28d2975997f
+    secret: f355d65be0c1b449d2bf24beb094a4e5
+
+# 文件上传配置
+file:
+  upload-path: uploads/
+  access-path: /uploads/**
+app:
+  base-url: https://unemanative-sharda-unprodigiously.ngrok-free.dev

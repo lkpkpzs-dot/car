@@ -4,10 +4,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
 import org.lkp.car.entity.CitizenReport;
+import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.CitizenReportService;
+import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -44,7 +47,11 @@ public class CitizenReportController {
      */
     @PostMapping("/save")
     @ApiOperation("提交举报")
-    public Result<Boolean> save(@RequestBody CitizenReport citizenReport) {
+    public Result<Boolean> save(@RequestBody CitizenReport citizenReport, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (currentUser != null) {
+            citizenReport.setUserId(currentUser.getUserId());
+        }
         return Result.success(citizenReportService.save(citizenReport));
     }
 
@@ -53,7 +60,14 @@ public class CitizenReportController {
      */
     @PutMapping("/update")
     @ApiOperation("更新举报处理状态")
-    public Result<Boolean> update(@RequestBody CitizenReport citizenReport) {
+    public Result<Boolean> update(@RequestBody CitizenReport citizenReport, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        // 如果是更新处理状态，自动设置审核人
+        if (citizenReport.getProcessStatus() != null && (citizenReport.getProcessStatus() == 1 || citizenReport.getProcessStatus() == 2)) {
+            if (AuthContext.isPolice(currentUser)) {
+                citizenReport.setReviewerId(currentUser.getUserId());
+            }
+        }
         return Result.success(citizenReportService.updateById(citizenReport));
     }
 

@@ -11,6 +11,7 @@ import org.lkp.car.service.EnterpriseDashboardService;
 import org.lkp.car.service.RoadPermissionApplicationService;
 import org.lkp.car.service.VehicleInfoService;
 import org.lkp.car.service.VehiclePlateService;
+import org.lkp.car.vo.AdminDashboardVO;
 import org.lkp.car.vo.DashboardApplicationVO;
 import org.lkp.car.vo.DashboardCountVO;
 import org.lkp.car.vo.DashboardVehicleVO;
@@ -19,7 +20,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -149,6 +152,43 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
         count.setPending(pendingList.size());
         count.setVehicle(vehicleList.size());
         result.setCount(count);
+
+        return result;
+    }
+
+    @Override
+    public AdminDashboardVO getAdminDashboardData() {
+        AdminDashboardVO result = new AdminDashboardVO();
+
+        // 统计待审核数量（status = 1）
+        long pendingCount = roadPermissionApplicationService.count(
+                new LambdaQueryWrapper<RoadPermissionApplication>()
+                        .eq(RoadPermissionApplication::getStatus, 1)
+        );
+        result.setPendingCount((int) pendingCount);
+
+        // 统计已通过数量（status = 2）
+        long approvedCount = roadPermissionApplicationService.count(
+                new LambdaQueryWrapper<RoadPermissionApplication>()
+                        .eq(RoadPermissionApplication::getStatus, 2)
+        );
+        result.setApprovedCount((int) approvedCount);
+
+        // 统计已驳回数量（status = 3）
+        long rejectedCount = roadPermissionApplicationService.count(
+                new LambdaQueryWrapper<RoadPermissionApplication>()
+                        .eq(RoadPermissionApplication::getStatus, 3)
+        );
+        result.setRejectedCount((int) rejectedCount);
+
+        // 统计今日办理数量
+        String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        long todayProcess = roadPermissionApplicationService.count(
+                new LambdaQueryWrapper<RoadPermissionApplication>()
+                        .apply("DATE(audit_time) = {0}", today)
+                        .isNotNull(RoadPermissionApplication::getAuditTime)
+        );
+        result.setTodayProcess((int) todayProcess);
 
         return result;
     }
