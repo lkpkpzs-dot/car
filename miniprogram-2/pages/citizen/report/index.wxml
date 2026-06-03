@@ -1,0 +1,76 @@
+<view class="report-container">
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">举报信息</text>
+    </view>
+
+    <!-- 举报类型 -->
+    <view class="form-item">
+      <text class="form-label required">举报类型</text>
+      <view class="type-grid">
+        <view 
+          wx:for="{{reportTypes}}" 
+          wx:key="id" 
+          class="type-item {{selectedType === item.id ? 'selected' : ''}}"
+          data-type="{{item.id}}"
+          bindtap="onSelectType"
+        >
+          <text class="type-icon">{{item.icon}}</text>
+          <text class="type-text">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 车辆信息 -->
+    <view class="form-item">
+      <text class="form-label">车辆号牌</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入车辆号牌（选填）" 
+        value="{{formData.targetPlate}}"
+        data-field="targetPlate"
+        bindinput="onInput"
+      />
+    </view>
+
+    <!-- 发生地点 -->
+    <view class="form-item">
+      <text class="form-label required">发生地点</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入详细地址" 
+        value="{{formData.locationExt}}"
+        data-field="locationExt"
+        bindinput="onInput"
+      />
+    </view>
+  </view>
+
+  <!-- 证据上传 -->
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">证据材料</text>
+      <text class="section-desc">最多上传 9 张图片</text>
+    </view>
+
+    <view class="upload-grid">
+      <view class="image-item" wx:for="{{formData.images}}" wx:key="index">
+        <image class="image-preview" src="{{item}}" mode="aspectFill" bindtap="onPreviewImage" data-index="{{index}}" />
+        <view class="image-delete" bindtap="onDeleteImage" data-index="{{index}}">
+          <text class="delete-icon">×</text>
+        </view>
+      </view>
+      <view class="upload-btn" wx:if="{{formData.images.length < 9}}" bindtap="onChooseImage">
+        <text class="upload-icon">+</text>
+        <text class="upload-text">上传图片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="footer-section">
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}" loading="{{submitting}}">
+      {{submitting ? '提交中...' : '提交举报'}}
+    </button>
+  </view>
+</view>

@@ -2,6 +2,7 @@ package org.lkp.car.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.lkp.car.entity.SysMessage;
+import org.lkp.car.vo.SysMessageDetailVO;
 
 import java.util.List;
 
@@ -24,4 +25,9 @@ public interface SysMessageService extends IService<SysMessage> {
      * 标记消息为已读
      */
     boolean markAsRead(Long msgId);
+
+    /**
+     * 获取系统消息详情（包含关联的举报信息）
+     */
+    SysMessageDetailVO getMessageDetail(Long msgId);
 }

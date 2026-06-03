@@ -1,0 +1,81 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">
+    <view class="loading-spinner"></view>
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{detail}}" class="content">
+    <view class="message-panel">
+      <view class="message-top">
+        <view class="message-icon">
+          <text>{{detail.businessType === 1 ? '举' : '信'}}</text>
+        </view>
+        <view class="message-meta">
+          <text class="message-title">{{detail.title}}</text>
+          <text class="message-time">{{detail.createTime}}</text>
+        </view>
+      </view>
+      <text class="message-body">{{detail.content}}</text>
+    </view>
+
+    <view wx:if="{{detail.businessType === 1}}" class="section">
+      <view class="section-header">
+        <text class="section-title">举报处理信息</text>
+        <view class="status-badge status-{{detail.processStatus}}">
+          <text>{{processStatusMap[detail.processStatus] || '未知状态'}}</text>
+        </view>
+      </view>
+
+      <view class="info-list">
+        <view class="info-item" wx:if="{{detail.targetPlate}}">
+          <text class="info-label">被举报车牌号</text>
+          <text class="info-value plate">{{detail.targetPlate}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.reportCreateTime}}">
+          <text class="info-label">举报时间</text>
+          <text class="info-value">{{detail.reportCreateTime}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">处理状态</text>
+          <text class="info-value">{{processStatusMap[detail.processStatus] || '未知状态'}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.reviewerName || detail.reviewerId}}">
+          <text class="info-label">审核民警</text>
+          <text class="info-value">{{detail.reviewerName || detail.reviewerId}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.reviewTime}}">
+          <text class="info-label">审核时间</text>
+          <text class="info-value">{{detail.reviewTime}}</text>
+        </view>
+        <view class="info-item remark" wx:if="{{detail.reviewRemark}}">
+          <text class="info-label">审核备注</text>
+          <text class="info-value">{{detail.reviewRemark}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{detail.businessType === 1 && images.length > 0}}" class="section">
+      <view class="section-header">
+        <text class="section-title">证据图片</text>
+        <text class="section-count">{{images.length}}张</text>
+      </view>
+
+      <view class="image-grid">
+        <view
+          wx:for="{{images}}"
+          wx:key="index"
+          class="image-card"
+          data-index="{{index}}"
+          bindtap="onPreviewImage"
+        >
+          <image class="evidence-image" src="{{item}}" mode="aspectFill" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="state">
+    <text class="empty-icon">!</text>
+    <text class="state-text">消息不存在或已被删除</text>
+  </view>
+</view>

@@ -4,8 +4,14 @@
       <view class="role-badge">
         <text class="badge-text">{{roleName}}</text>
       </view>
-      <view class="logout-btn" bindtap="onLogout">
-        <text class="logout-text">退出</text>
+      <view class="header-right">
+        <view class="message-btn" bindtap="onGoToMessages">
+          <text class="message-icon">🔔</text>
+          <view wx:if="{{unreadCount > 0}}" class="message-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
+        </view>
+        <view class="logout-btn" bindtap="onLogout">
+          <text class="logout-text">退出</text>
+        </view>
       </view>
     </view>
     <text class="greeting">欢迎您，市民朋友</text>
@@ -27,20 +33,20 @@
       </view>
       <view class="stats-grid">
         <view class="stat-item">
-          <text class="stat-value">{{stats.suggestions}}</text>
-          <text class="stat-label">意见建议</text>
+          <text class="stat-value">{{stats.totalReport}}</text>
+          <text class="stat-label">举报总数</text>
         </view>
         <view class="stat-item">
-          <text class="stat-value">{{stats.reports}}</text>
-          <text class="stat-label">违规举报</text>
+          <text class="stat-value">{{stats.pendingCount}}</text>
+          <text class="stat-label">待核实</text>
         </view>
         <view class="stat-item">
-          <text class="stat-value">{{stats.processed}}</text>
+          <text class="stat-value">{{stats.approvedCount}}</text>
           <text class="stat-label">已处理</text>
         </view>
         <view class="stat-item">
-          <text class="stat-value">{{stats.pending}}</text>
-          <text class="stat-label">处理中</text>
+          <text class="stat-value">{{stats.rejectedCount}}</text>
+          <text class="stat-label">无效举报</text>
         </view>
       </view>
     </view>

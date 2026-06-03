@@ -12,9 +12,6 @@ const ROLE_MAP = {
 };
 
 function mapRoleType(roleType) {
-  // 打印接收到的原始 roleType，方便在控制台排查
-  console.log('[Auth] Mapping roleType:', roleType);
-  
   // 如果后端返回的是数字，进行转换；如果是字符串，直接返回或按需映射
   // 增加对数值和字符串数值的兼容
   const roleValue = parseInt(roleType);
@@ -138,7 +135,7 @@ function login() {
       success: (res) => {
         if (res.code) {
           wx.request({
-            url: 'http://localhost:8080/auth/login',
+            url: 'https://rdd285a4.natappfree.cc/auth/login',
             method: 'POST',
             timeout: 10000,
             data: { code: res.code },

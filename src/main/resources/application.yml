@@ -1,7 +1,7 @@
 # 应用服务 WEB 访问端口
 server:
   port: 8080
-
+  address: 0.0.0.0
 # 数据库连接配置
 spring:
   datasource:
@@ -48,4 +48,4 @@ file:
   upload-path: uploads/
   access-path: /uploads/**
 app:
-  base-url: https://unemanative-sharda-unprodigiously.ngrok-free.dev
+  base-url: https://rdd285a4.natappfree.cc

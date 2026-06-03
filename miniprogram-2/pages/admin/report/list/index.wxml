@@ -1,0 +1,71 @@
+<view class="report-list-container">
+  <view class="header">
+    <text class="title">群众举报</text>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-container">
+    <view 
+      class="tab-item {{currentTab === 0 ? 'active' : ''}}"
+      data-index="0"
+      bindtap="onTabChange"
+    >
+      <text>未审核</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 1 ? 'active' : ''}}"
+      data-index="1"
+      bindtap="onTabChange"
+    >
+      <text>已审核</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{list.length === 0}}" class="empty-state">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">{{currentTab === 0 ? '暂无待处理举报' : '暂无已审核举报'}}</text>
+  </view>
+
+  <view wx:else class="list-content">
+    <view 
+      wx:for="{{list}}" 
+      wx:key="reportId" 
+      class="report-item"
+      data-report-id="{{item.reportId}}"
+      bindtap="onViewDetail"
+    >
+      <view class="item-header">
+        <view class="type-badge">
+          <text class="type-text">{{item.reportTypeName}}</text>
+        </view>
+        <view class="status-badge status-{{item.processStatus}}">
+          <text>{{processStatusMap[item.processStatus]}}</text>
+        </view>
+      </view>
+      
+      <view class="item-info">
+        <view class="info-row" wx:if="{{item.targetPlate}}">
+          <text class="info-label">车牌号码</text>
+          <text class="info-value">{{item.targetPlate}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">举报地点</text>
+          <text class="info-value">{{item.locationExt}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">举报时间</text>
+          <text class="info-value">{{item.createTime}}</text>
+        </view>
+      </view>
+
+      <view class="item-arrow">
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+</view>

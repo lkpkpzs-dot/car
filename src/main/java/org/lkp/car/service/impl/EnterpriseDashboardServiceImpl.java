@@ -3,15 +3,18 @@ package org.lkp.car.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.lkp.car.common.enums.VehicleStatusEnum;
 import org.lkp.car.entity.CarArchive;
+import org.lkp.car.entity.CitizenReport;
 import org.lkp.car.entity.RoadPermissionApplication;
 import org.lkp.car.entity.VehicleInfo;
 import org.lkp.car.entity.VehiclePlate;
 import org.lkp.car.service.CarArchiveService;
+import org.lkp.car.service.CitizenReportService;
 import org.lkp.car.service.EnterpriseDashboardService;
 import org.lkp.car.service.RoadPermissionApplicationService;
 import org.lkp.car.service.VehicleInfoService;
 import org.lkp.car.service.VehiclePlateService;
 import org.lkp.car.vo.AdminDashboardVO;
+import org.lkp.car.vo.CitizenDashboardVO;
 import org.lkp.car.vo.DashboardApplicationVO;
 import org.lkp.car.vo.DashboardCountVO;
 import org.lkp.car.vo.DashboardVehicleVO;
@@ -41,6 +44,9 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
 
     @Autowired
     private CarArchiveService carArchiveService;
+
+    @Autowired
+    private CitizenReportService citizenReportService;
 
     @Override
     public EnterpriseDashboardVO getDashboardData(Long enterpriseId) {
@@ -189,6 +195,44 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
                         .isNotNull(RoadPermissionApplication::getAuditTime)
         );
         result.setTodayProcess((int) todayProcess);
+
+        return result;
+    }
+
+    @Override
+    public CitizenDashboardVO getCitizenDashboardData(Long userId) {
+        CitizenDashboardVO result = new CitizenDashboardVO();
+
+        // 统计我的举报总数
+        long totalReport = citizenReportService.count(
+                new LambdaQueryWrapper<CitizenReport>()
+                        .eq(CitizenReport::getUserId, userId)
+        );
+        result.setTotalReport((int) totalReport);
+
+        // 统计待核实数量（status = 0）
+        long pendingCount = citizenReportService.count(
+                new LambdaQueryWrapper<CitizenReport>()
+                        .eq(CitizenReport::getUserId, userId)
+                        .eq(CitizenReport::getProcessStatus, 0)
+        );
+        result.setPendingCount((int) pendingCount);
+
+        // 统计已处理数量（status = 1）
+        long approvedCount = citizenReportService.count(
+                new LambdaQueryWrapper<CitizenReport>()
+                        .eq(CitizenReport::getUserId, userId)
+                        .eq(CitizenReport::getProcessStatus, 1)
+        );
+        result.setApprovedCount((int) approvedCount);
+
+        // 统计无效举报数量（status = 2）
+        long rejectedCount = citizenReportService.count(
+                new LambdaQueryWrapper<CitizenReport>()
+                        .eq(CitizenReport::getUserId, userId)
+                        .eq(CitizenReport::getProcessStatus, 2)
+        );
+        result.setRejectedCount((int) rejectedCount);
 
         return result;
     }

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://10.10.4.192:8080';
+const API_BASE_URL = 'https://rdd285a4.natappfree.cc';
 const auth = require('./auth');
 
 // 刷新 token 相关状态
@@ -49,20 +49,16 @@ function requestWithoutToken(options) {
 // 重新登录
 async function refreshToken() {
   if (isRefreshingToken) {
-    // 如果正在刷新，加入队列等待
     return new Promise((resolve, reject) => {
       refreshTokenQueue.push({ resolve, reject });
     });
   }
 
   isRefreshingToken = true;
-  console.log('[Auth] 开始重新登录...');
 
   try {
-    // 清除旧的 token
     wx.removeStorageSync('token');
 
-    // 调用 wx.login 获取 code
     const loginRes = await new Promise((resolve, reject) => {
       wx.login({
         success: resolve,
@@ -74,7 +70,6 @@ async function refreshToken() {
       throw new Error('wx.login 获取 code 失败');
     }
 
-    // 调用后端登录接口
     const res = await requestWithoutToken({
       url: '/auth/login',
       method: 'POST',
@@ -84,21 +79,16 @@ async function refreshToken() {
     if (res.code === 200 && res.data && res.data.token) {
       wx.setStorageSync('token', res.data.token);
       
-      // 保存用户信息
       if (res.data.user) {
         wx.setStorageSync('userInfo', res.data.user);
       }
       
-      // 保存角色
       if (res.data.roleType !== undefined || res.data.role_type !== undefined) {
         const roleType = res.data.roleType !== undefined ? res.data.roleType : res.data.role_type;
         const role = auth.mapRoleType(roleType);
         auth.setRole(role);
       }
       
-      console.log('[Auth] 重新登录成功');
-      
-      // 执行队列中的所有请求
       refreshTokenQueue.forEach(({ resolve }) => resolve());
       refreshTokenQueue = [];
       return;
@@ -106,8 +96,6 @@ async function refreshToken() {
       throw new Error(res.msg || '登录失败');
     }
   } catch (error) {
-    console.error('[Auth] 重新登录失败:', error);
-    // 拒绝队列中的所有请求
     refreshTokenQueue.forEach(({ reject }) => reject(error));
     refreshTokenQueue = [];
     throw error;
@@ -118,14 +106,25 @@ async function refreshToken() {
 
 const request = (options) => {
   return new Promise((resolve, reject) => {
-    const queryData = options.method === 'GET' || !options.method
-      ? normalizeQueryData(options.data)
-      : (options.data || {});
+    let url = options.url.startsWith('http') ? options.url : API_BASE_URL + options.url;
+    let data = options.data || {};
+    
+    if ((options.method === 'GET' || !options.method) && data) {
+      const queryData = normalizeQueryData(data);
+      const queryString = Object.keys(queryData)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryData[key])}`)
+        .join('&');
+      
+      if (queryString) {
+        url += (url.includes('?') ? '&' : '?') + queryString;
+      }
+      data = {};
+    }
 
     const defaultOptions = {
-      url: options.url.startsWith('http') ? options.url : API_BASE_URL + options.url,
+      url,
       method: options.method || 'GET',
-      data: queryData,
+      data,
       timeout: options.timeout || 10000,
       header: {
         'Content-Type': 'application/json',
@@ -133,12 +132,10 @@ const request = (options) => {
         ...options.header
       },
       success: async (res) => {
-        // 自动检查响应中的角色标识（仅对象型 data，跳过列表数组）
         if (res.data && res.data.data && !Array.isArray(res.data.data)) {
           const data = res.data.data;
           const user = data.user;
           
-          // 尝试从多个可能的位置获取角色标识
           let roleType = data.roleType !== undefined ? data.roleType : data.role_type;
           if (roleType === undefined && user) {
             roleType = user.roleType !== undefined ? user.roleType : user.role_type;
@@ -149,7 +146,6 @@ const request = (options) => {
             const serverRole = auth.mapRoleType(roleType);
             
             if (serverRole !== currentRole) {
-              console.log(`检测到角色变更: ${currentRole} -> ${serverRole}`);
               auth.setRole(serverRole);
               auth.navigateByRole(serverRole);
             }
@@ -160,11 +156,7 @@ const request = (options) => {
           resolve(res.data);
         } else if (res.statusCode === 401) {
           try {
-            console.log('[Auth] 收到 401，重新登录...');
             await refreshToken();
-            // 重新登录成功后，重试当前请求
-            console.log('[Auth] 重新登录成功，重试请求...');
-            // 用新的 token 重新发起请求
             const retryOptions = {
               ...options,
               header: {
@@ -175,7 +167,6 @@ const request = (options) => {
             const retryRes = await request(retryOptions);
             resolve(retryRes);
           } catch (error) {
-            console.error('[Auth] 重新登录失败，拒绝请求:', error);
             reject(error);
           }
         } else {
@@ -219,18 +210,13 @@ const uploadFile = (filePath) => {
           'Authorization': wx.getStorageSync('token') ? `Bearer ${wx.getStorageSync('token')}` : '',
         },
         success: async (res) => {
-          // 检查 401 状态码
           if (res.statusCode === 401) {
             try {
-              console.log('[Auth] 上传收到 401，重新登录...');
               await refreshToken();
-              // 重新登录成功后，重试上传
-              console.log('[Auth] 重新登录成功，重试上传...');
               const retryRes = await uploadFile(filePath);
               resolve(retryRes);
               return;
             } catch (error) {
-              console.error('[Auth] 重新登录失败，拒绝上传:', error);
               reject(error);
               return;
             }
@@ -239,7 +225,12 @@ const uploadFile = (filePath) => {
           try {
             const data = JSON.parse(res.data);
             if (data.code === 200) {
-              resolve(data.data); // 返回 URL 字符串
+              let url = data.data;
+              url = url.replace(
+                'http://10.10.4.185:8080',
+                API_BASE_URL
+              );
+              resolve(url);
             } else {
               reject(new Error(data.msg || '上传失败'));
             }

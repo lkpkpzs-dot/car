@@ -19,13 +19,12 @@ Page({
     const mode = options.mode || 'edit';
     const userInfo = enterpriseUtil.normalizeUserInfo(wx.getStorageSync('userInfo'));
     const status = userInfo.qualificationStatus;
+    const hasEnterpriseId = !!userInfo.authEnterpriseId;
 
-    // 审核中(0) 或 已通过(1) 时，页面设为只读
+    // 如果没有 authEnterpriseId，即使 qualificationStatus 是1也允许编辑
     const isPending = status === enterpriseUtil.QUALIFICATION_STATUS.PENDING;
-    const isApproved = status === enterpriseUtil.QUALIFICATION_STATUS.APPROVED;
+    const isApproved = status === enterpriseUtil.QUALIFICATION_STATUS.APPROVED && hasEnterpriseId;
     const readonly = mode === 'view' || isPending || isApproved;
-
-    console.log('[Qualification] Status:', status, 'Readonly:', readonly);
 
     this.setData({
       mode,
@@ -36,7 +35,7 @@ Page({
       contactPhone: userInfo.contactPhone || '',
       licenseImg: userInfo.licenseImg || '',
       qualificationStatus: status,
-      btnText: status === enterpriseUtil.QUALIFICATION_STATUS.REJECTED ? '重新申请' : '提交申请'
+      btnText: status === enterpriseUtil.QUALIFICATION_STATUS.REJECTED || !hasEnterpriseId ? '重新申请' : '提交申请'
     });
   },
 

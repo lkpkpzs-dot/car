@@ -2,7 +2,9 @@ package org.lkp.car.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.lkp.car.common.Result;
+import org.lkp.car.dto.CitizenReportReviewRequest;
 import org.lkp.car.entity.CitizenReport;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.CitizenReportService;
@@ -25,25 +27,73 @@ public class CitizenReportController {
     private CitizenReportService citizenReportService;
 
     /**
-     * 获取举报列表
+     * 举报列表（民警端）
      */
     @GetMapping("/list")
-    @ApiOperation("获取举报列表")
-    public Result<List<CitizenReport>> list() {
-        return Result.success(citizenReportService.list());
+    @ApiOperation("举报列表（民警端）")
+    public Result<List<CitizenReport>> list(
+            @ApiParam(value = "处理状态: 0-待核实 1-已处理 2-无效举报")
+            @RequestParam(required = false) Integer processStatus,
+            HttpServletRequest request) {
+        // 验证权限
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无权限访问");
+        }
+        List<CitizenReport> list = citizenReportService.getReportList(processStatus);
+        return Result.success(list);
     }
 
     /**
-     * 根据ID获取举报详情
+     * 举报详情
      */
-    @GetMapping("/{id}")
-    @ApiOperation("根据ID获取举报详情")
-    public Result<CitizenReport> getById(@PathVariable Long id) {
-        return Result.success(citizenReportService.getById(id));
+    @GetMapping("/detail")
+    @ApiOperation("举报详情")
+    public Result<CitizenReport> detail(
+            @ApiParam(value = "举报ID", required = true)
+            @RequestParam Long reportId,
+            HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (currentUser == null) {
+            return Result.error(401, "请先登录");
+        }
+        CitizenReport report = citizenReportService.getReportDetail(reportId);
+        if (report == null) {
+            return Result.error("举报记录不存在");
+        }
+        return Result.success(report);
     }
 
     /**
-     * 提交举报
+     * 举报审核
+     */
+    @PutMapping("/review")
+    @ApiOperation("举报审核")
+    public Result<Boolean> review(
+            @RequestBody CitizenReportReviewRequest request,
+            HttpServletRequest httpRequest) {
+        // 验证权限
+        SysUser currentUser = AuthContext.currentUser(httpRequest);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无权限审核");
+        }
+        
+        // 验证参数
+        if (request.getProcessStatus() == null || 
+            (request.getProcessStatus() != 1 && request.getProcessStatus() != 2)) {
+            return Result.error("处理状态必须为1或2");
+        }
+        
+        try {
+            boolean result = citizenReportService.reviewReport(request, currentUser);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 提交举报（保留原有接口）
      */
     @PostMapping("/save")
     @ApiOperation("提交举报")
@@ -53,30 +103,5 @@ public class CitizenReportController {
             citizenReport.setUserId(currentUser.getUserId());
         }
         return Result.success(citizenReportService.save(citizenReport));
-    }
-
-    /**
-     * 更新举报处理状态
-     */
-    @PutMapping("/update")
-    @ApiOperation("更新举报处理状态")
-    public Result<Boolean> update(@RequestBody CitizenReport citizenReport, HttpServletRequest request) {
-        SysUser currentUser = AuthContext.currentUser(request);
-        // 如果是更新处理状态，自动设置审核人
-        if (citizenReport.getProcessStatus() != null && (citizenReport.getProcessStatus() == 1 || citizenReport.getProcessStatus() == 2)) {
-            if (AuthContext.isPolice(currentUser)) {
-                citizenReport.setReviewerId(currentUser.getUserId());
-            }
-        }
-        return Result.success(citizenReportService.updateById(citizenReport));
-    }
-
-    /**
-     * 删除举报记录
-     */
-    @DeleteMapping("/{id}")
-    @ApiOperation("删除举报记录")
-    public Result<Boolean> delete(@PathVariable Long id) {
-        return Result.success(citizenReportService.removeById(id));
     }
 }

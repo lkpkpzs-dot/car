@@ -1,0 +1,101 @@
+<view class="detail-container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 详情内容 -->
+  <view wx:elif="{{detail}}" class="detail-content">
+    <!-- 基本信息 -->
+    <view class="info-section">
+      <view class="section-header">
+        <text class="section-title">举报信息</text>
+        <view class="status-badge status-{{detail.processStatus}}">
+          <text>{{processStatusMap[detail.processStatus]}}</text>
+        </view>
+      </view>
+
+      <view class="info-list">
+        <view class="info-item">
+          <text class="info-label">举报编号</text>
+          <text class="info-value">{{detail.reportId}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">举报类型</text>
+          <text class="info-value">{{reportTypeMap[detail.reportType]}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.targetPlate}}">
+          <text class="info-label">车牌号码</text>
+          <text class="info-value">{{detail.targetPlate}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">举报地点</text>
+          <text class="info-value">{{detail.locationExt}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">举报时间</text>
+          <text class="info-value">{{detail.createTime}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 证据图片 -->
+    <view class="evidence-section" wx:if="{{images.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">证据材料</text>
+        <text class="section-count">{{images.length}}张</text>
+      </view>
+
+      <view class="image-grid">
+        <view 
+          wx:for="{{images}}" 
+          wx:key="index" 
+          class="image-item"
+          data-index="{{index}}"
+          bindtap="onPreviewImage"
+        >
+          <image class="image-preview" src="{{item}}" mode="aspectFill" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 审核信息（仅在已审核时显示） -->
+    <view class="review-section" wx:if="{{detail.processStatus !== 0}}">
+      <view class="section-header">
+        <text class="section-title">审核信息</text>
+      </view>
+
+      <view class="info-list">
+        <view class="info-item" wx:if="{{detail.reviewerId}}">
+          <text class="info-label">审核人</text>
+          <text class="info-value">{{detail.reviewerId}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.reviewTime}}">
+          <text class="info-label">审核时间</text>
+          <text class="info-value">{{detail.reviewTime}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.reviewRemark}}">
+          <text class="info-label">审核备注</text>
+          <text class="info-value">{{detail.reviewRemark}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty-state">
+    <text class="empty-icon">📄</text>
+    <text class="empty-text">举报信息不存在</text>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view wx:if="{{detail && detail.processStatus === 0}}" class="footer-actions">
+    <button class="action-btn btn-reject" bindtap="onReject" disabled="{{submitting}}" loading="{{submitting}}">
+      判定无效
+    </button>
+    <button class="action-btn btn-approve" bindtap="onApprove" disabled="{{submitting}}" loading="{{submitting}}">
+      处理通过
+    </button>
+  </view>
+</view>

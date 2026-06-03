@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "违规举报",
+  "usingComponents": {
+    "image-uploader": "/components/image-uploader/image-uploader"
+  }
+}

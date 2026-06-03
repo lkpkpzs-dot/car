@@ -36,6 +36,47 @@ page {
   z-index: 1;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.message-btn {
+  position: relative;
+  padding: 12rpx;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  backdrop-filter: blur(10rpx);
+}
+
+.message-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.message-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 32rpx;
+  height: 32rpx;
+  background: #ef4444;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6rpx;
+  border: 3rpx solid #ea580c;
+}
+
+.message-badge text {
+  font-size: 20rpx;
+  color: white;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .role-badge {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10rpx);

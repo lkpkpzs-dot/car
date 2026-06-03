@@ -15,8 +15,8 @@ Page({
     quickActions: [
       { id: 'audit', name: '资质审核', icon: 'apply', desc: '企业资质与号牌申请' },
       { id: 'roadAudit', name: '道路审核', icon: 'monitor', desc: '道路测试与示范应用' },
+      { id: 'report', name: '举报审核', icon: 'check', desc: '群众举报审核处理' },
       { id: 'safety', name: '安全员监管', icon: 'check', desc: '资质审核与事故处分' },
-      { id: 'scan', name: '执勤核验', icon: 'scan', desc: '扫码核验车辆' },
       { id: 'archive', name: '档案管理', icon: 'archive', desc: '车辆档案查询' },
       { id: 'logs', name: '系统日志', icon: 'records', desc: '操作日志记录' }
     ],
@@ -39,16 +39,26 @@ Page({
 
   async loadData() {
     try {
+      // 加载统计数据
+      const dashboardRes = await request.get('/enterprise/admin/dashboard');
+      if (dashboardRes.code === 200 && dashboardRes.data) {
+        this.setData({
+          stats: {
+            pendingCount: dashboardRes.data.pendingCount,
+            approvedCount: dashboardRes.data.approvedCount,
+            rejectedCount: dashboardRes.data.rejectedCount,
+            todayProcess: dashboardRes.data.todayProcess
+          }
+        });
+      }
+      
+      // 加载待审核列表
       const res = await request.get('/audit/list', {
         isProcessed: false,
         businessType: auditUtil.BUSINESS_TYPE.ENTERPRISE
       });
       const list = request.parseListData(res);
       this.setData({
-        stats: {
-          ...this.data.stats,
-          pendingCount: list.length
-        },
         recentApproval: list.slice(0, 3).map(item => ({
           id: item.id,
           name: item.title,
@@ -58,7 +68,7 @@ Page({
         }))
       });
     } catch (err) {
-      console.error('Load admin pending list failed:', err);
+      console.error('Load admin data failed:', err);
     }
   },
 
@@ -67,9 +77,9 @@ Page({
     const actionRoutes = {
       audit: '/pages/admin/audit/index',
       roadAudit: '/pages/admin/road/list/index',
+      report: '/pages/admin/report/list/index',
       safety: '/pages/admin/safety/list',
       archive: '/pages/admin/archive/index',
-      scan: '/pages/scan/scan',
       logs: '/pages/logs/logs'
     };
 

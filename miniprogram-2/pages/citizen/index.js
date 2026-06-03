@@ -1,5 +1,6 @@
 const app = getApp();
 const enterpriseUtil = require('../../utils/enterprise.js');
+const request = require('../../utils/request.js');
 
 Page({
   data: {
@@ -10,27 +11,28 @@ Page({
     statusLabel: '未申请',
     statusColor: '#64748b',
     statusBg: '#f1f5f9',
+    unreadCount: 0,
     stats: {
-      suggestions: 156,
-      reports: 42,
-      processed: 185,
-      pending: 13
+      totalReport: 0,
+      pendingCount: 0,
+      approvedCount: 0,
+      rejectedCount: 0
     },
     quickActions: [
-      { id: 'suggest', name: '意见建议', icon: 'suggest', desc: '提交优化建议' },
       { id: 'report', name: '违规举报', icon: 'report', desc: '举报违规行为' },
       { id: 'apply', name: '申请企业资质', icon: 'archive', desc: '提交企业认证申请' },
       { id: 'about', name: '关于我们', icon: 'about', desc: '了解详情' }
     ],
     tips: [
       { id: 1, title: '如何举报违规行为', desc: '点击"违规举报"，选择举报类型，上传证据图片' },
-      { id: 2, title: '意见建议提交', desc: '欢迎对无人车通行、路线规划等提出宝贵建议' },
-      { id: 3, title: '处理进度查询', desc: '提交后可在"查询进度"中查看处理状态' }
+      { id: 2, title: '处理进度查询', desc: '提交后可在"查询进度"中查看处理状态' }
     ]
   },
 
   onLoad() {
     this.loadUserInfo();
+    this.loadUnreadCount();
+    this.loadStats();
   },
 
   onShow() {
@@ -41,6 +43,35 @@ Page({
       this.getTabBar().updateTabList();
     }
     this.loadUserInfo();
+    this.loadUnreadCount();
+    this.loadStats();
+  },
+
+  async loadUnreadCount() {
+    try {
+      const res = await request.get('/sysMessage/unreadCount');
+      if (res.code === 200 && res.data !== undefined) {
+        this.setData({ unreadCount: res.data });
+      }
+    } catch (error) {
+    }
+  },
+
+  async loadStats() {
+    try {
+      const res = await request.get('/enterprise/citizen/dashboard');
+      if (res.code === 200 && res.data) {
+        this.setData({
+          stats: {
+            totalReport: res.data.totalReport || 0,
+            pendingCount: res.data.pendingCount || 0,
+            approvedCount: res.data.approvedCount || 0,
+            rejectedCount: res.data.rejectedCount || 0
+          }
+        });
+      }
+    } catch (error) {
+    }
   },
 
   loadUserInfo() {
@@ -79,31 +110,9 @@ Page({
       } else {
         wx.navigateTo({ url: '/pages/enterprise/qualification/index' });
       }
-    } else if (actionId === 'suggest') {
-      wx.showModal({
-        title: '意见建议',
-        content: '请输入您的建议：',
-        editable: true,
-        placeholderText: '请输入您对无人车通行、路线规划等方面的建议...',
-        success: (res) => {
-          if (res.confirm && res.content && res.content.trim()) {
-            wx.showToast({
-              title: '建议已提交',
-              icon: 'success'
-            });
-          }
-        }
-      });
     } else if (actionId === 'report') {
-      wx.showActionSheet({
-        itemList: ['违规占道', '乱停乱放', '违规行驶', '违规运营', '其他'],
-        success: (res) => {
-          const types = ['违规占道', '乱停乱放', '违规行驶', '违规运营', '其他'];
-          wx.showToast({
-            title: `已举报：${types[res.tapIndex]}`,
-            icon: 'success'
-          });
-        }
+      wx.navigateTo({
+        url: '/pages/citizen/report/index'
       });
     } else if (actionId === 'query') {
       wx.showToast({
@@ -117,6 +126,12 @@ Page({
         showCancel: false
       });
     }
+  },
+
+  onGoToMessages() {
+    wx.navigateTo({
+      url: '/pages/citizen/messages/index'
+    });
   },
 
   onLogout() {

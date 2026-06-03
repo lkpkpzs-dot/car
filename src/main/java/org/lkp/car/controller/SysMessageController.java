@@ -7,6 +7,7 @@ import org.lkp.car.entity.SysMessage;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.SysMessageService;
 import org.lkp.car.utils.AuthContext;
+import org.lkp.car.vo.SysMessageDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +69,23 @@ public class SysMessageController {
     @ApiOperation("根据ID获取消息详情")
     public Result<SysMessage> getById(@PathVariable Long id) {
         return Result.success(sysMessageService.getById(id));
+    }
+
+    /**
+     * 获取系统消息详情（包含关联的举报信息）
+     */
+    @GetMapping("/detail/{id}")
+    @ApiOperation("获取系统消息详情（包含关联的举报信息）")
+    public Result<SysMessageDetailVO> getDetail(@PathVariable Long id, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (currentUser == null) {
+            return Result.error("请先登录");
+        }
+        SysMessageDetailVO detail = sysMessageService.getMessageDetail(id);
+        if (detail == null) {
+            return Result.error("消息不存在");
+        }
+        return Result.success(detail);
     }
 
     /**

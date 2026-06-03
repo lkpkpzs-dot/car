@@ -53,6 +53,7 @@ App({
         method: 'POST',
         data: { code: loginRes.code }
       });
+      console.log("lkp",res.data)
 
       if (res.code === 200 && res.data && res.data.token) {
         wx.setStorageSync('token', res.data.token);
@@ -84,7 +85,7 @@ App({
   // 不带 token 的请求（用于登录时）
   requestWithoutToken(options) {
     return new Promise((resolve, reject) => {
-      const API_BASE_URL = 'http://10.10.4.192:8080';
+      const API_BASE_URL = 'https://rdd285a4.natappfree.cc';
       wx.request({
         url: options.url.startsWith('http') ? options.url : API_BASE_URL + options.url,
         method: options.method || 'GET',
@@ -137,6 +138,6 @@ App({
   globalData: {
     userInfo: null,
     role: null,
-    baseUrl: 'http://localhost:8080'
+    baseUrl: 'https://rdd285a4.natappfree.cc'
   }
 });

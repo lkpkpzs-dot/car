@@ -7,6 +7,7 @@ import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.EnterpriseDashboardService;
 import org.lkp.car.utils.AuthContext;
 import org.lkp.car.vo.AdminDashboardVO;
+import org.lkp.car.vo.CitizenDashboardVO;
 import org.lkp.car.vo.EnterpriseDashboardVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +43,17 @@ public class EnterpriseDashboardController {
             return Result.error(403, "无权限访问管理端数据");
         }
         AdminDashboardVO dashboard = enterpriseDashboardService.getAdminDashboardData();
+        return Result.success(dashboard);
+    }
+
+    @GetMapping("/citizen/dashboard")
+    @ApiOperation("获取市民端首页统计数据")
+    public Result<CitizenDashboardVO> getCitizenDashboard(HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (currentUser == null) {
+            return Result.error(401, "请先登录");
+        }
+        CitizenDashboardVO dashboard = enterpriseDashboardService.getCitizenDashboardData(currentUser.getUserId());
         return Result.success(dashboard);
     }
 }
