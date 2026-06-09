@@ -108,11 +108,12 @@ public class CitizenReportController {
         if (currentUser == null) {
             return Result.error(401, "请先登录");
         }
-        CitizenReport report = citizenReportService.getReportDetail(reportId);
-        if (report == null) {
-            return Result.error("举报记录不存在");
+        try {
+            CitizenReport report = citizenReportService.getReportDetailWithPermission(reportId, currentUser);
+            return Result.success(report);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
         }
-        return Result.success(report);
     }
 
     /**
@@ -136,7 +137,7 @@ public class CitizenReportController {
         
         try {
             boolean result = citizenReportService.enterpriseHandleReport(
-                    request, currentUser.getUserId());
+                    request, currentUser.getUserId(), currentUser.getAuthEnterpriseId());
             return Result.success(result);
         } catch (Exception e) {
             return Result.error(e.getMessage());

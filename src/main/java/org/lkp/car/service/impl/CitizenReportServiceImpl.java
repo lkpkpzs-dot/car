@@ -12,6 +12,7 @@ import org.lkp.car.mapper.CitizenReportMapper;
 import org.lkp.car.service.CarArchiveService;
 import org.lkp.car.service.CitizenReportService;
 import org.lkp.car.service.SysMessageService;
+import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -116,7 +117,7 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean enterpriseHandleReport(CitizenReportEnterpriseHandleRequest request, Long enterpriseHandlerId) {
+    public boolean enterpriseHandleReport(CitizenReportEnterpriseHandleRequest request, Long enterpriseHandlerId, Long enterpriseId) {
         CitizenReport report = this.getById(request.getReportId());
         if (report == null) {
             throw new RuntimeException("举报记录不存在");
@@ -126,6 +127,10 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
         }
         if (request.getProcessStatus() != 2 && request.getProcessStatus() != 3) {
             throw new RuntimeException("处理状态必须为2(已处理)或3(无效举报)");
+        }
+        // 验证企业权限：只能处理自己企业的举报
+        if (report.getEnterpriseId() == null || !report.getEnterpriseId().equals(enterpriseId)) {
+            throw new RuntimeException("无权处理此举报");
         }
 
         // 更新处理信息
@@ -280,5 +285,34 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
         }
         wrapper.orderByDesc(CitizenReport::getCreateTime);
         return this.list(wrapper);
+    }
+
+    @Override
+    public CitizenReport getReportDetailWithPermission(Long reportId, SysUser currentUser) {
+        CitizenReport report = this.getById(reportId);
+        if (report == null) {
+            throw new RuntimeException("举报记录不存在");
+        }
+
+        // 民警可以看所有
+        if (AuthContext.isPolice(currentUser)) {
+            return report;
+        }
+
+        // 企业用户只能看自己企业的举报
+        if (AuthContext.hasEnterprise(currentUser)) {
+            if (report.getEnterpriseId() == null || 
+                !report.getEnterpriseId().equals(currentUser.getAuthEnterpriseId())) {
+                throw new RuntimeException("无权查看此举报");
+            }
+            return report;
+        }
+
+        // 市民只能看自己的举报
+        if (report.getUserId() == null || !report.getUserId().equals(currentUser.getUserId())) {
+            throw new RuntimeException("无权查看此举报");
+        }
+
+        return report;
     }
 }

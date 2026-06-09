@@ -38,9 +38,17 @@ public interface CitizenReportService extends IService<CitizenReport> {
     CitizenReport getReportDetail(Long reportId);
 
     /**
+     * 获取举报详情（带权限验证）
+     * @param reportId 举报ID
+     * @param currentUser 当前用户
+     * @return 举报详情
+     */
+    CitizenReport getReportDetailWithPermission(Long reportId, SysUser currentUser);
+
+    /**
      * 企业处理举报
      */
-    boolean enterpriseHandleReport(CitizenReportEnterpriseHandleRequest request, Long enterpriseHandlerId);
+    boolean enterpriseHandleReport(CitizenReportEnterpriseHandleRequest request, Long enterpriseHandlerId, Long enterpriseId);
 
     /**
      * 审核举报
