@@ -96,10 +96,9 @@
         <input 
           class="form-input" 
           type="number" 
-          placeholder="请输入发牌民警ID" 
+          placeholder="自动获取" 
           value="{{formData.issuerId}}"
-          data-field="issuerId"
-          bindinput="onInput"
+          disabled
         />
       </view>
       <view class="form-item">

@@ -95,6 +95,17 @@ Page({
     });
   },
 
+  // 车牌格式校验
+  validatePlateNumber(plate) {
+    if (!plate || !plate.trim()) {
+      return true; // 车牌是选填的，空的没问题
+    }
+    
+    // 中国车牌正则：包含新能源
+    const plateReg = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4,5}[A-HJ-NP-Z0-9挂学警港澳]?$/;
+    return plateReg.test(plate);
+  },
+
   validate() {
     const { selectedType, formData, selectedRiskLevel } = this.data;
     
@@ -114,16 +125,28 @@ Page({
       wx.showToast({ title: '请上传至少一张图片', icon: 'none' });
       return false;
     }
+    // 车牌格式校验
+    if (formData.targetPlate && !this.validatePlateNumber(formData.targetPlate)) {
+      wx.showModal({
+        title: '提示',
+        content: '您填写的车牌格式不正确。车牌格式应为：省份简称+字母+5-6位字符（如：京A12345）。是否继续提交？',
+        confirmText: '继续提交',
+        cancelText: '重新填写',
+        success: (res) => {
+          if (res.confirm) {
+            // 用户选择继续，直接提交
+            this.doSubmit();
+          }
+        }
+      });
+      return false;
+    }
     
     return true;
   },
 
-  async onSubmit() {
-    if (this.data.submitting) return;
-    if (!this.validate()) return;
-
+  async doSubmit() {
     this.setData({ submitting: true });
-
     try {
       const userInfo = enterpriseUtil.normalizeUserInfo(wx.getStorageSync('userInfo'));
       
@@ -159,5 +182,13 @@ Page({
     } finally {
       this.setData({ submitting: false });
     }
+  },
+
+  async onSubmit() {
+    if (this.data.submitting) return;
+    if (!this.validate()) return;
+
+    // 正常校验通过，直接提交
+    await this.doSubmit();
   }
 });

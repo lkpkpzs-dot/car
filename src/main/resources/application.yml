@@ -50,5 +50,7 @@ file:
 app:
   base-url: https://q32d54e8.natappfree.cc
 
+citizen-report:
+  enterprise-handle-timeout-hours: 24   # 默认低风险
 
 

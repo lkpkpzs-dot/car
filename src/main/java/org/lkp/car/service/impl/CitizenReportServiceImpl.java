@@ -12,11 +12,13 @@ import org.lkp.car.mapper.CitizenReportMapper;
 import org.lkp.car.service.CarArchiveService;
 import org.lkp.car.service.CitizenReportService;
 import org.lkp.car.service.SysMessageService;
+import org.lkp.car.service.SysUserService;
 import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -32,9 +34,15 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
     @Lazy
     private CarArchiveService carArchiveService;
 
-    // 企业处理超时时间（小时）
-    private static final int ENTERPRISE_HANDLE_TIMEOUT_HOURS = 24;
+    @Autowired
+    private SysUserService sysUserService;
 
+    // 企业处理超时时间（小时）
+//    private static final int ENTERPRISE_HANDLE_TIMEOUT_HOURS = 24;
+
+    // 企业处理超时时间（小时），从配置文件读取
+    @Value("${citizen-report.enterprise-handle-timeout-hours}")
+    private int enterpriseHandleTimeoutHours;
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long submitReport(CitizenReport report, Long userId) {
@@ -61,7 +69,7 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
             report.setProcessStatus(1);
             // 设置企业处理截止时间
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.HOUR, ENTERPRISE_HANDLE_TIMEOUT_HOURS);
+            calendar.add(Calendar.HOUR, enterpriseHandleTimeoutHours);
             report.setEnterpriseDeadline(calendar.getTime());
         } else {
             // 高风险：待民警核实
@@ -242,16 +250,7 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
     private void sendEnterpriseNotification(CitizenReport report) {
         String title = report.getRiskLevel() == 1 ? "收到新的举报，请处理" : "收到高风险举报，请关注";
         String content = String.format("车牌号 %s 被举报，请及时处理", report.getTargetPlate());
-
-        SysMessage message = new SysMessage();
-        message.setReceiverId(report.getEnterpriseId()); // 这里需要根据实际情况设置企业接收人ID
-        message.setMsgType(4);
-        message.setBusinessType(1);
-        message.setBusinessId(report.getReportId());
-        message.setTitle(title);
-        message.setContent(content);
-        message.setIsRead(0);
-        sysMessageService.save(message);
+        sendNotificationToEnterpriseUsers(report.getEnterpriseId(), title, content, report.getReportId());
     }
 
     /**
@@ -260,20 +259,50 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
     private void sendUpgradeNotification(CitizenReport report) {
         // 通知企业
         String enterpriseContent = String.format("车牌号 %s 的举报已超时未处理，已升级为民警审核", report.getTargetPlate());
-        sendEnterpriseNotificationContent(report.getEnterpriseId(), "举报超时升级通知", enterpriseContent);
+        sendNotificationToEnterpriseUsers(report.getEnterpriseId(), "举报超时升级通知", enterpriseContent, report.getReportId());
 
-        // 这里还可以添加通知民警的逻辑
+        // 通知所有民警
+        String policeContent = String.format("车牌号 %s 的举报已超时未处理，请民警审核", report.getTargetPlate());
+        sendNotificationToAllPolice("举报超时升级通知", policeContent, report.getReportId());
     }
 
-    private void sendEnterpriseNotificationContent(Long enterpriseId, String title, String content) {
-        SysMessage message = new SysMessage();
-        message.setReceiverId(enterpriseId); // 需要根据实际业务调整
-        message.setMsgType(4);
-        message.setBusinessType(1);
-        message.setTitle(title);
-        message.setContent(content);
-        message.setIsRead(0);
-        sysMessageService.save(message);
+    /**
+     * 发送通知给企业所有用户
+     */
+    private void sendNotificationToEnterpriseUsers(Long enterpriseId, String title, String content, Long reportId) {
+        if (enterpriseId == null) {
+            return;
+        }
+        List<SysUser> enterpriseUsers = sysUserService.getEnterpriseUsers(enterpriseId);
+        for (SysUser user : enterpriseUsers) {
+            SysMessage message = new SysMessage();
+            message.setReceiverId(user.getUserId());
+            message.setMsgType(4);
+            message.setBusinessType(1);
+            message.setBusinessId(reportId);
+            message.setTitle(title);
+            message.setContent(content);
+            message.setIsRead(0);
+            sysMessageService.save(message);
+        }
+    }
+
+    /**
+     * 发送通知给所有民警
+     */
+    private void sendNotificationToAllPolice(String title, String content, Long reportId) {
+        List<SysUser> policeUsers = sysUserService.getAllPoliceUsers();
+        for (SysUser user : policeUsers) {
+            SysMessage message = new SysMessage();
+            message.setReceiverId(user.getUserId());
+            message.setMsgType(4);
+            message.setBusinessType(1);
+            message.setBusinessId(reportId);
+            message.setTitle(title);
+            message.setContent(content);
+            message.setIsRead(0);
+            sysMessageService.save(message);
+        }
     }
 
     @Override
