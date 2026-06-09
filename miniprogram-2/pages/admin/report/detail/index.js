@@ -1,5 +1,6 @@
 const request = require('../../../../utils/request.js');
 const enterpriseUtil = require('../../../../utils/enterprise.js');
+const { formatRelativeTime } = require('../../../../utils/util.js');
 
 Page({
   data: {
@@ -15,8 +16,21 @@ Page({
     },
     processStatusMap: {
       0: '待核实',
-      1: '已处理',
-      2: '无效举报'
+      1: '企业处理中',
+      2: '已处理',
+      3: '无效举报',
+      4: '待民警审核'
+    },
+    statusMap: {
+      0: { label: '待核实', className: 'pending' },
+      1: { label: '企业处理中', className: 'processing' },
+      2: { label: '已处理', className: 'approved' },
+      3: { label: '无效举报', className: 'rejected' },
+      4: { label: '待民警审核', className: 'escalated' }
+    },
+    riskLevelMap: {
+      1: { label: '低风险', className: 'low' },
+      2: { label: '高风险', className: 'high' }
     },
     images: []
   },
@@ -50,16 +64,11 @@ Page({
     this.setData({ loading: true });
 
     try {
-      // 调用详情接口
-      const res = await request.get('/citizenReport/detail', { reportId: this.data.reportId });
+      const res = await request.get('/citizenReport/list', {});
       
       if (res.code === 200) {
-        let detail = res.data;
-        
-        // 如果返回的是数组，取第一个元素
-        if (Array.isArray(detail)) {
-          detail = detail[0];
-        }
+        let rawList = request.parseListData(res);
+        let detail = rawList.find(item => String(item.reportId) === String(this.data.reportId));
 
         if (detail) {
           let images = this.safeParseJson(detail.evidenceJson);
@@ -75,8 +84,28 @@ Page({
             }
           }
 
+          const processStatus = Number(detail.processStatus);
+          const statusMeta = this.data.statusMap[processStatus] || {
+            label: '未知状态',
+            className: 'unknown'
+          };
+
+          const riskLevel = Number(detail.riskLevel);
+          const riskMeta = this.data.riskLevelMap[riskLevel] || {
+            label: '未知等级',
+            className: 'unknown'
+          };
+
           this.setData({
-            detail: { ...detail, locationExt },
+            detail: { 
+              ...detail, 
+              locationExt, 
+              statusLabel: statusMeta.label,
+              statusClass: statusMeta.className,
+              riskLabel: riskMeta.label,
+              riskClass: riskMeta.className,
+              createTime: formatRelativeTime(detail.createTime || detail.reportCreateTime)
+            },
             images
           });
         } else {
@@ -112,22 +141,21 @@ Page({
   showReviewModal(processStatus) {
     if (this.data.submitting) return;
 
-    const title = processStatus === 1 ? '处理通过' : '判定无效';
+    const title = processStatus === 2 ? '处理通过' : '判定无效';
     wx.showModal({
       title,
-      editable: true,
-      placeholderText: '请输入审核备注（选填）',
+      content: `确定要${title}吗？`,
       confirmText: '确认',
       cancelText: '取消',
       success: (res) => {
         if (res.confirm) {
-          this.submitReview(processStatus, res.content || '');
+          this.submitReview(processStatus);
         }
       }
     });
   },
 
-  async submitReview(processStatus, reviewRemark) {
+  async submitReview(processStatus) {
     this.setData({ submitting: true });
 
     try {
@@ -136,7 +164,7 @@ Page({
       const res = await request.put('/citizenReport/review', {
         reportId: this.data.reportId,
         processStatus,
-        reviewRemark,
+        reviewRemark: '',
         reviewerId: userInfo.userId
       });
 
@@ -167,10 +195,10 @@ Page({
   },
 
   onApprove() {
-    this.showReviewModal(1);
+    this.showReviewModal(2);
   },
 
   onReject() {
-    this.showReviewModal(2);
+    this.showReviewModal(3);
   }
 });

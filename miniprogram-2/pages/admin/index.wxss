@@ -1,17 +1,17 @@
 page {
-  background: #f8fafc;
+  background: #f4f7fb;
   min-height: 100vh;
 }
 
 .admin-container {
   min-height: 100vh;
-  padding-bottom: 30rpx;
+  padding-bottom: 40rpx;
 }
 
 .header-section {
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
-  padding: 70rpx 32rpx 50rpx;
-  color: white;
+  background: linear-gradient(135deg, #10233f 0%, #1b4a7d 58%, #2f7ec7 100%);
+  padding: 72rpx 32rpx;
+  color: #ffffff;
   position: relative;
   overflow: hidden;
 }
@@ -21,10 +21,20 @@ page {
   position: absolute;
   top: -100rpx;
   right: -100rpx;
-  width: 300rpx;
-  height: 300rpx;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  width: 340rpx;
+  height: 340rpx;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
+}
+
+.header-section::after {
+  content: '';
+  position: absolute;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 0;
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .header-bar {
@@ -37,75 +47,66 @@ page {
   gap: 16rpx;
 }
 
-.header-avatar {
-  flex-shrink: 0;
-}
-
-.svg-avatar {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8rpx;
+.role-badge,
+.logout-btn {
+  border-radius: 999rpx;
+  backdrop-filter: blur(10rpx);
 }
 
 .role-badge {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10rpx);
+  background: rgba(255, 255, 255, 0.16);
   padding: 10rpx 24rpx;
-  border-radius: 50rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.28);
 }
 
 .badge-text {
   font-size: 22rpx;
-  color: white;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .logout-btn {
   padding: 10rpx 24rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.3);
-  border-radius: 50rpx;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .logout-text {
   font-size: 24rpx;
-  color: white;
+  color: #ffffff;
   font-weight: 500;
 }
 
 .greeting {
-  font-size: 36rpx;
-  font-weight: 700;
+  display: block;
+  font-size: 42rpx;
+  font-weight: 800;
+  line-height: 1.25;
   position: relative;
   z-index: 1;
-  letter-spacing: 0.5rpx;
 }
 
 .stats-section {
   padding: 0 32rpx;
-  margin-top: -36rpx;
+  margin-top: -44rpx;
   position: relative;
   z-index: 10;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20rpx;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18rpx;
 }
 
 .stat-card {
-  background: white;
-  border-radius: 24rpx;
-  padding: 28rpx 16rpx;
-  text-align: center;
-  box-shadow: 0 8rpx 32rpx rgba(15, 23, 42, 0.08);
-  border: 1rpx solid rgba(148, 163, 184, 0.1);
-  transition: all 0.3s;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 28rpx 28rpx 26rpx;
+  text-align: left;
+  box-shadow: 0 10rpx 28rpx rgba(20, 55, 95, 0.1);
+  border: 1rpx solid rgba(148, 163, 184, 0.16);
+  transition: all 0.25s;
   position: relative;
   overflow: hidden;
 }
@@ -115,50 +116,50 @@ page {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  height: 6rpx;
+  bottom: 0;
+  width: 8rpx;
 }
 
 .stat-pending::before {
-  background: linear-gradient(90deg, #f59e0b, #d97706);
+  background: #d97706;
 }
 
 .stat-approved::before {
-  background: linear-gradient(90deg, #22c55e, #16a34a);
+  background: #16a34a;
 }
 
 .stat-rejected::before {
-  background: linear-gradient(90deg, #f87171, #dc2626);
+  background: #dc2626;
 }
 
 .stat-today::before {
-  background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  background: #2563eb;
 }
 
 .stat-card:active {
-  transform: translateY(-4rpx);
-  box-shadow: 0 12rpx 40rpx rgba(15, 23, 42, 0.12);
+  transform: scale(0.98);
+  box-shadow: 0 8rpx 22rpx rgba(20, 55, 95, 0.12);
 }
 
 .stat-value {
   display: block;
-  font-size: 40rpx;
+  font-size: 46rpx;
   font-weight: 800;
-  color: #0f172a;
+  color: #132238;
   line-height: 1.1;
-  margin-top: 8rpx;
+  margin-top: 4rpx;
 }
 
 .stat-label {
   display: block;
-  font-size: 20rpx;
-  color: #64748b;
-  margin-top: 8rpx;
-  font-weight: 500;
+  font-size: 24rpx;
+  color: #697586;
+  margin-top: 10rpx;
+  font-weight: 600;
 }
 
 .actions-section {
-  padding: 40rpx 32rpx;
+  padding: 42rpx 32rpx 34rpx;
 }
 
 .section-header {
@@ -171,45 +172,43 @@ page {
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #0f172a;
+  color: #132238;
   position: relative;
+  padding-left: 16rpx;
 }
 
 .section-title::before {
   content: '';
   position: absolute;
-  left: -16rpx;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
   width: 8rpx;
   height: 36rpx;
-  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  background: #2563eb;
   border-radius: 4rpx;
 }
 
 .view-all {
   font-size: 26rpx;
-  color: #3b82f6;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4rpx;
+  color: #2563eb;
+  font-weight: 600;
 }
 
 .actions-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24rpx;
+  gap: 18rpx;
 }
 
 .action-card {
-  background: white;
-  border-radius: 24rpx;
-  padding: 40rpx 32rpx;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 34rpx 24rpx;
   text-align: center;
-  box-shadow: 0 4rpx 20rpx rgba(15, 23, 42, 0.06);
-  border: 1rpx solid rgba(148, 163, 184, 0.1);
-  transition: all 0.3s;
+  box-shadow: 0 6rpx 20rpx rgba(20, 55, 95, 0.07);
+  border: 1rpx solid rgba(148, 163, 184, 0.14);
+  transition: all 0.25s;
   position: relative;
   overflow: hidden;
 }
@@ -218,17 +217,17 @@ page {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03));
+  left: 0;
+  background: rgba(37, 99, 235, 0.04);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s;
 }
 
 .action-card:active {
-  transform: translateY(-4rpx) scale(0.98);
-  box-shadow: 0 12rpx 40rpx rgba(15, 23, 42, 0.1);
+  transform: scale(0.98);
+  box-shadow: 0 8rpx 22rpx rgba(20, 55, 95, 0.1);
 }
 
 .action-card:active::before {
@@ -236,11 +235,11 @@ page {
 }
 
 .action-icon {
-  width: 100rpx;
-  height: 100rpx;
-  margin: 0 auto 20rpx;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-  border-radius: 28rpx;
+  width: 88rpx;
+  height: 88rpx;
+  margin: 0 auto 18rpx;
+  background: #eef5ff;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,16 +248,16 @@ page {
 }
 
 .action-icon image {
-  width: 56rpx;
-  height: 56rpx;
+  width: 52rpx;
+  height: 52rpx;
 }
 
 .action-name {
   display: block;
-  font-size: 30rpx;
+  font-size: 29rpx;
   font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 10rpx;
+  color: #132238;
+  margin-bottom: 8rpx;
   position: relative;
   z-index: 1;
 }
@@ -266,7 +265,7 @@ page {
 .action-desc {
   display: block;
   font-size: 24rpx;
-  color: #64748b;
+  color: #697586;
   line-height: 1.4;
   position: relative;
   z-index: 1;
@@ -277,19 +276,19 @@ page {
 }
 
 .recent-list {
-  background: white;
-  border-radius: 24rpx;
+  background: #ffffff;
+  border-radius: 16rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(15, 23, 42, 0.06);
-  border: 1rpx solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 6rpx 20rpx rgba(20, 55, 95, 0.07);
+  border: 1rpx solid rgba(148, 163, 184, 0.14);
 }
 
 .recent-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 32rpx;
-  border-bottom: 1rpx solid #f1f5f9;
+  padding: 28rpx;
+  border-bottom: 1rpx solid #eef2f7;
   transition: background 0.2s;
 }
 
@@ -303,26 +302,29 @@ page {
 
 .item-info {
   flex: 1;
+  min-width: 0;
+  margin-right: 20rpx;
 }
 
 .item-name {
   display: block;
-  font-size: 30rpx;
+  font-size: 29rpx;
   font-weight: 700;
-  color: #0f172a;
+  color: #132238;
   margin-bottom: 8rpx;
 }
 
 .item-company {
   display: block;
   font-size: 24rpx;
-  color: #64748b;
+  color: #697586;
 }
 
 .item-status {
-  padding: 10rpx 24rpx;
-  border-radius: 50rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .item-status text {

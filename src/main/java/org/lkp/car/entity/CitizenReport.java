@@ -38,10 +38,22 @@ public class CitizenReport implements Serializable {
     private Integer reportType;
 
     /**
+     * 风险等级: 1-低风险, 2-高风险
+     */
+    @ApiModelProperty("风险等级: 1-低风险, 2-高风险")
+    private Integer riskLevel;
+
+    /**
      * 被举报车牌号
      */
     @ApiModelProperty("被举报车牌号")
     private String targetPlate;
+
+    /**
+     * 关联企业ID（根据车牌号自动关联）
+     */
+    @ApiModelProperty("关联企业ID")
+    private Long enterpriseId;
 
     /**
      * 图片/视频OSS路径JSON
@@ -56,10 +68,36 @@ public class CitizenReport implements Serializable {
     private String locationExt;
 
     /**
-     * 处理状态: 0-待核实, 1-已处理, 2-无效举报
+     * 处理状态: 0-待核实, 1-企业处理中, 2-已处理, 3-无效举报, 4-待民警审核（超时升级）
      */
-    @ApiModelProperty("处理状态: 0-待核实, 1-已处理, 2-无效举报")
+    @ApiModelProperty("处理状态: 0-待核实, 1-企业处理中, 2-已处理, 3-无效举报, 4-待民警审核（超时升级）")
     private Integer processStatus;
+
+    /**
+     * 企业处理截止时间
+     */
+    @ApiModelProperty("企业处理截止时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date enterpriseDeadline;
+
+    /**
+     * 企业处理人ID
+     */
+    @ApiModelProperty("企业处理人ID")
+    private Long enterpriseHandlerId;
+
+    /**
+     * 企业处理时间
+     */
+    @ApiModelProperty("企业处理时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date enterpriseHandleTime;
+
+    /**
+     * 企业处理备注
+     */
+    @ApiModelProperty("企业处理备注")
+    private String enterpriseHandleRemark;
 
     /**
      * 创建时间
@@ -79,6 +117,7 @@ public class CitizenReport implements Serializable {
      * 审核时间
      */
     @ApiModelProperty("审核时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date reviewTime;
 
     /**

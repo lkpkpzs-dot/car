@@ -20,8 +20,8 @@ App({
       });
     }
 
-    // 自动登录
-    await this.autoLogin();
+    // 不再在这里自动登录，由 pages/splash/index.js 统一处理登录逻辑
+    // 避免重复调用登录接口
   },
 
   // 自动登录
@@ -58,9 +58,15 @@ App({
       if (res.code === 200 && res.data && res.data.token) {
         wx.setStorageSync('token', res.data.token);
         
-        // 保存用户信息
+        // 保存完整的用户信息
         if (res.data.user) {
-          wx.setStorageSync('userInfo', res.data.user);
+          const enterpriseUtil = require('./utils/enterprise.js');
+          const fullUserInfo = {
+            ...res.data.user,
+            enterpriseName: res.data.enterpriseName,
+            qualificationStatus: res.data.qualificationStatus
+          };
+          wx.setStorageSync('userInfo', enterpriseUtil.normalizeUserInfo(fullUserInfo));
         }
         
         // 保存角色
@@ -85,7 +91,7 @@ App({
   // 不带 token 的请求（用于登录时）
   requestWithoutToken(options) {
     return new Promise((resolve, reject) => {
-      const API_BASE_URL = 'https://rdd285a4.natappfree.cc';
+      const API_BASE_URL = 'https://q32d54e8.natappfree.cc';
       wx.request({
         url: options.url.startsWith('http') ? options.url : API_BASE_URL + options.url,
         method: options.method || 'GET',
@@ -138,6 +144,6 @@ App({
   globalData: {
     userInfo: null,
     role: null,
-    baseUrl: 'https://rdd285a4.natappfree.cc'
+    baseUrl: 'https://q32d54e8.natappfree.cc'
   }
 });

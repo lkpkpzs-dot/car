@@ -43,6 +43,10 @@
           <text class="value">{{item.vin}}</text>
         </view>
         <view class="info-row">
+          <text class="label">安全员</text>
+          <text class="value">{{item.officerName || '未指定'}}</text>
+        </view>
+        <view class="info-row">
           <text class="label">申请时间</text>
           <text class="value">{{item.createTimeShort}}</text>
         </view>

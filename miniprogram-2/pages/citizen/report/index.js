@@ -11,6 +11,11 @@ Page({
       { id: 4, name: '意见建议', icon: '💡' }
     ],
     selectedType: null,
+    riskLevels: [
+      { value: 1, name: '低风险' },
+      { value: 2, name: '高风险' }
+    ],
+    selectedRiskLevel: 1,
     formData: {
       targetPlate: '',
       locationExt: '',
@@ -24,6 +29,11 @@ Page({
   onSelectType(e) {
     const typeId = e.currentTarget.dataset.type;
     this.setData({ selectedType: typeId });
+  },
+
+  onSelectRiskLevel(e) {
+    const level = e.currentTarget.dataset.level;
+    this.setData({ selectedRiskLevel: level });
   },
 
   onInput(e) {
@@ -86,10 +96,14 @@ Page({
   },
 
   validate() {
-    const { selectedType, formData } = this.data;
+    const { selectedType, formData, selectedRiskLevel } = this.data;
     
     if (!selectedType) {
       wx.showToast({ title: '请选择举报类型', icon: 'none' });
+      return false;
+    }
+    if (!selectedRiskLevel) {
+      wx.showToast({ title: '请选择风险等级', icon: 'none' });
       return false;
     }
     if (!formData.locationExt.trim()) {
@@ -113,8 +127,9 @@ Page({
     try {
       const userInfo = enterpriseUtil.normalizeUserInfo(wx.getStorageSync('userInfo'));
       
-      const res = await request.post('/citizenReport/save', {
+      const res = await request.post('/citizenReport/submit', {
         reportType: this.data.selectedType,
+        riskLevel: this.data.selectedRiskLevel,
         targetPlate: this.data.formData.targetPlate,
         locationExt: this.data.formData.locationExt,
         evidenceJson: JSON.stringify(this.data.formData.images),

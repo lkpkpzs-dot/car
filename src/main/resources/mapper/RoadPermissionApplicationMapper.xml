@@ -6,6 +6,7 @@
         <id property="id" column="id"/>
         <result property="enterpriseId" column="enterprise_id"/>
         <result property="applicantId" column="applicant_id"/>
+        <result property="officerId" column="officer_id"/>
         <result property="type" column="type"/>
         <result property="status" column="status"/>
         <result property="plateStatus" column="plate_status"/>

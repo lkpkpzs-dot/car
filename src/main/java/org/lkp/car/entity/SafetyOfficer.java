@@ -128,4 +128,8 @@ public class SafetyOfficer implements Serializable {
     @TableLogic
     @ApiModelProperty("逻辑删除：0-未删除，1-已删除")
     private Integer isDeleted;
+
+    @TableField(exist = false)
+    @ApiModelProperty("已关联车辆总数（正式档案 + 待审核/已通过申请），用于前端展示")
+    private Integer totalVehicleCount;
 }

@@ -98,6 +98,9 @@ public class EnterpriseInfoServiceImpl extends ServiceImpl<EnterpriseInfoMapper,
         if (!StringUtils.hasText(enterprise.getEnterpriseName())) {
             throw new RuntimeException("企业名称不能为空");
         }
+        if (!StringUtils.hasText(enterprise.getCreditCode())) {
+            throw new RuntimeException("统一社会信用代码不能为空");
+        }
 
         SysUser applicant = sysUserService.getById(applyRequest.getApplicantId());
         if (applicant == null) {
@@ -107,11 +110,28 @@ public class EnterpriseInfoServiceImpl extends ServiceImpl<EnterpriseInfoMapper,
         enterprise.setAuditStatus(0);
 
         if (enterprise.getEnterpriseId() == null) {
+            // 新建申请：检查信用代码是否已存在
+            LambdaQueryWrapper<EnterpriseInfo> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(EnterpriseInfo::getCreditCode, enterprise.getCreditCode());
+            EnterpriseInfo existingByCreditCode = this.getOne(wrapper);
+            if (existingByCreditCode != null) {
+                throw new RuntimeException("该统一社会信用代码已提交过申请，请联系管理员或使用其他代码");
+            }
             super.save(enterprise);
         } else {
+            // 重新申请：检查信用代码是否被其他企业占用
             EnterpriseInfo existing = this.getById(enterprise.getEnterpriseId());
             if (existing == null) {
                 throw new RuntimeException("企业信息不存在，无法重新申请");
+            }
+            // 检查信用代码是否被其他企业占用
+            if (!existing.getCreditCode().equals(enterprise.getCreditCode())) {
+                LambdaQueryWrapper<EnterpriseInfo> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(EnterpriseInfo::getCreditCode, enterprise.getCreditCode());
+                EnterpriseInfo existingByCreditCode = this.getOne(wrapper);
+                if (existingByCreditCode != null && !existingByCreditCode.getEnterpriseId().equals(enterprise.getEnterpriseId())) {
+                    throw new RuntimeException("该统一社会信用代码已被其他企业使用");
+                }
             }
             this.updateById(enterprise);
         }

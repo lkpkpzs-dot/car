@@ -1,0 +1,71 @@
+<view class="splash-container">
+  <!-- 背景层 -->
+  <view class="background-layer">
+    <!-- 渐变背景 -->
+    <view class="gradient-bg"></view>
+    
+    <!-- 城市天际线 -->
+    <view class="city-skyline">
+      <view class="building building-1"></view>
+      <view class="building building-2"></view>
+      <view class="building building-3"></view>
+      <view class="building building-4"></view>
+      <view class="building building-5"></view>
+    </view>
+    
+    <!-- 发光道路网络 -->
+    <view class="road-network">
+      <view class="road road-1"></view>
+      <view class="road road-2"></view>
+      <view class="road road-3"></view>
+      <view class="road road-4"></view>
+    </view>
+    
+    <!-- 连接节点 -->
+    <view class="connectivity-nodes">
+      <view class="node node-1"></view>
+      <view class="node node-2"></view>
+      <view class="node node-3"></view>
+      <view class="node node-4"></view>
+      <view class="node node-5"></view>
+    </view>
+    
+    <!-- 光尾动画 -->
+    <view class="light-trails">
+      <view class="trail trail-1"></view>
+      <view class="trail trail-2"></view>
+      <view class="trail trail-3"></view>
+    </view>
+  </view>
+  
+  <!-- 前景层 -->
+  <view class="foreground-layer">
+    <!-- Logo区域 -->
+    <view class="logo-section">
+      <view class="logo-wrapper">
+        <view class="logo-icon">
+          <view class="car-shape">
+            <view class="car-body"></view>
+            <view class="car-wheel wheel-1"></view>
+            <view class="car-wheel wheel-2"></view>
+            <view class="car-glow"></view>
+          </view>
+        </view>
+        <view class="logo-text">
+          <text class="main-text">智驾联盟</text>
+          <text class="sub-text">SMART DRIVING ALLIANCE</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 加载条 -->
+     <view class="loading-section">
+       <view class="loading-bar-container">
+        <view class="loading-bar" style="width: {{loadingProgress + '%'}};">
+           <view class="loading-bar-glow"></view>
+         </view>
+       </view>
+       <text class="loading-text">{{loadingProgress}}%</text>
+     </view>
+  </view>
+</view>

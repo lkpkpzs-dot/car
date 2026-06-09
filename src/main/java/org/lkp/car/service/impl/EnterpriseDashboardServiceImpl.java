@@ -210,27 +210,27 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
         );
         result.setTotalReport((int) totalReport);
 
-        // 统计待核实数量（status = 0）
+        // 统计待核实数量（status = 0, 1, 4 都视为待处理/进行中）
         long pendingCount = citizenReportService.count(
                 new LambdaQueryWrapper<CitizenReport>()
                         .eq(CitizenReport::getUserId, userId)
-                        .eq(CitizenReport::getProcessStatus, 0)
+                        .in(CitizenReport::getProcessStatus, 0, 1, 4)
         );
         result.setPendingCount((int) pendingCount);
 
-        // 统计已处理数量（status = 1）
+        // 统计已处理数量（status = 2）
         long approvedCount = citizenReportService.count(
                 new LambdaQueryWrapper<CitizenReport>()
                         .eq(CitizenReport::getUserId, userId)
-                        .eq(CitizenReport::getProcessStatus, 1)
+                        .eq(CitizenReport::getProcessStatus, 2)
         );
         result.setApprovedCount((int) approvedCount);
 
-        // 统计无效举报数量（status = 2）
+        // 统计无效举报数量（status = 3）
         long rejectedCount = citizenReportService.count(
                 new LambdaQueryWrapper<CitizenReport>()
                         .eq(CitizenReport::getUserId, userId)
-                        .eq(CitizenReport::getProcessStatus, 2)
+                        .eq(CitizenReport::getProcessStatus, 3)
         );
         result.setRejectedCount((int) rejectedCount);
 

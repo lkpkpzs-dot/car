@@ -1,0 +1,112 @@
+<view class="page-container" wx:if="{{reportDetail}}">
+  <!-- 头部信息 -->
+  <view class="detail-header">
+    <view class="header-title">
+      <text class="report-type">{{reportTypeMap[reportDetail.reportType] || '其他'}}</text>
+      <view class="tags">
+        <text class="tag risk-{{reportDetail.riskLevel === 1 ? 'low' : 'high'}}">{{riskLevelMap[reportDetail.riskLevel] || '未知'}}</text>
+        <text class="tag status">{{statusMap[reportDetail.processStatus] || '未知'}}</text>
+      </view>
+    </view>
+    <text class="create-time">{{reportDetail.createTimeText}}</text>
+  </view>
+
+  <!-- 详情内容 -->
+  <scroll-view class="detail-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <view class="info-section">
+      <view class="section-title">基本信息</view>
+      
+      <view class="info-item">
+        <text class="item-label">车辆号牌</text>
+        <text class="item-value">{{reportDetail.targetPlate || '-'}}</text>
+      </view>
+
+      <view class="info-item">
+        <text class="item-label">发生地点</text>
+        <text class="item-value">{{reportDetail.locationText}}</text>
+      </view>
+    </view>
+
+    <!-- 证据图片 -->
+    <view class="image-section" wx:if="{{reportDetail.images && reportDetail.images.length > 0}}">
+      <view class="section-title">证据照片</view>
+      <view class="image-grid">
+        <image 
+          wx:for="{{reportDetail.images}}" 
+          wx:key="*this" 
+          class="evidence-image" 
+          src="{{item}}" 
+          mode="aspectFill"
+          data-index="{{index}}"
+          bindtap="onPreviewImage"
+        />
+      </view>
+    </view>
+
+    <!-- 处理记录 -->
+    <view class="handle-section" wx:if="{{reportDetail.enterpriseHandleRemark}}">
+      <view class="section-title">处理记录</view>
+      <view class="handle-record">
+        <text class="handle-time">{{reportDetail.enterpriseHandleTime}}</text>
+        <text class="handle-remark">{{reportDetail.enterpriseHandleRemark}}</text>
+      </view>
+    </view>
+
+    <!-- 处理表单 -->
+    <view class="form-section" wx:if="{{reportDetail.processStatus === 1}}">
+      <view class="section-title">处理举报</view>
+      
+      <view class="form-item">
+        <text class="form-label required">处理结果</text>
+        <view class="status-options">
+          <view 
+            class="status-option {{selectedStatus === 2 ? 'active' : ''}}"
+            bindtap="onSelectStatus"
+            data-status="2"
+          >
+            <text class="status-icon">{{selectedStatus === 2 ? '✓' : ''}}</text>
+            <text class="status-text">认可举报并已处理</text>
+          </view>
+          <view 
+            class="status-option {{selectedStatus === 3 ? 'active' : ''}}"
+            bindtap="onSelectStatus"
+            data-status="3"
+          >
+            <text class="status-icon">{{selectedStatus === 3 ? '✓' : ''}}</text>
+            <text class="status-text">认为是无效举报</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label required">处理说明</text>
+        <textarea
+          class="form-textarea"
+          placeholder="请说明您对该举报的处理情况..."
+          value="{{remark}}"
+          maxlength="500"
+          bindinput="onRemarkInput"
+          auto-height
+        />
+        <text class="char-count">{{remark.length}}/500</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部提交 -->
+  <view class="footer-section" wx:if="{{reportDetail.processStatus === 1}}">
+    <button 
+      class="submit-btn" 
+      bindtap="onHandleSubmit"
+      disabled="{{submitting || !selectedStatus}}"
+      loading="{{submitting}}"
+    >
+      {{submitting ? '提交中...' : '提交处理'}}
+    </button>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view class="loading-state" wx:if="{{loading && !reportDetail}}">
+  <text class="loading-text">加载中...</text>
+</view>

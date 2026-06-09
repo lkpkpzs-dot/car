@@ -1,4 +1,5 @@
 const request = require('../../../utils/request.js');
+const { createCompatibleDate } = require('../../../utils/util.js');
 
 Page({
   data: {
@@ -25,30 +26,34 @@ Page({
           // 格式化时间
           let time = item.createTime || '';
           if (time) {
-            const date = new Date(time);
-            const now = new Date();
-            const diff = now - date;
+            const date = createCompatibleDate(time);
+            if (isNaN(date.getTime())) {
+              time = '';
+            } else {
+              const now = new Date();
+              const diff = now - date;
             
-            // 今天
-            if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
-              const hours = String(date.getHours()).padStart(2, '0');
-              const minutes = String(date.getMinutes()).padStart(2, '0');
-              time = `${hours}:${minutes}`;
-            }
-            // 昨天
-            else if (diff < 48 * 60 * 60 * 1000) {
-              time = '昨天';
-            }
-            // 本周内
-            else if (diff < 7 * 24 * 60 * 60 * 1000) {
-              const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-              time = weekdays[date.getDay()];
-            }
-            // 更早
-            else {
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              time = `${month}-${day}`;
+              // 今天
+              if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                time = `${hours}:${minutes}`;
+              }
+              // 昨天
+              else if (diff < 48 * 60 * 60 * 1000) {
+                time = '昨天';
+              }
+              // 本周内
+              else if (diff < 7 * 24 * 60 * 60 * 1000) {
+                const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                time = weekdays[date.getDay()];
+              }
+              // 更早
+              else {
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                time = `${month}-${day}`;
+              }
             }
           }
           return { ...item, createTime: time };

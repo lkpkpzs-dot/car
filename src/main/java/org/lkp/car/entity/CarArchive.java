@@ -38,6 +38,9 @@ public class CarArchive implements Serializable {
     @ApiModelProperty("所属企业ID")
     private Long enterpriseId;
 
+    @ApiModelProperty("关联的安全员ID")
+    private Long officerId;
+
     @ApiModelProperty("车辆品牌")
     private String vehicleBrand;
 

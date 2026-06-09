@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.dto.AssignSafetyOfficerRequest;
 import org.lkp.car.dto.GenerateArchiveRequest;
 import org.lkp.car.dto.IssuePlateRequest;
 import org.lkp.car.entity.CarArchive;
@@ -124,5 +125,32 @@ public class CarArchiveController {
         }
         issueRequest.setIssuerId(currentUser.getUserId());
         return Result.success(carArchiveService.issuePlate(issueRequest));
+    }
+
+    /**
+     * 分配安全员
+     */
+    @PostMapping("/assignSafetyOfficer")
+    @ApiOperation("分配安全员")
+    public Result<Boolean> assignSafetyOfficer(@RequestBody AssignSafetyOfficerRequest request, HttpServletRequest httpRequest) {
+        SysUser currentUser = AuthContext.currentUser(httpRequest);
+        // 企业用户或民警都可以分配安全员
+        if (!AuthContext.isPolice(currentUser) && !AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "无分配安全员权限");
+        }
+        return Result.success(carArchiveService.assignSafetyOfficer(request));
+    }
+
+    /**
+     * 获取安全员关联的车辆列表
+     */
+    @GetMapping("/byOfficer/{officerId}")
+    @ApiOperation("获取安全员关联的车辆列表")
+    public Result<List<CarArchive>> getVehiclesByOfficerId(@PathVariable Long officerId, HttpServletRequest httpRequest) {
+        SysUser currentUser = AuthContext.currentUser(httpRequest);
+        if (!AuthContext.isPolice(currentUser) && !AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "无权限查询");
+        }
+        return Result.success(carArchiveService.getVehiclesByOfficerId(officerId));
     }
 }

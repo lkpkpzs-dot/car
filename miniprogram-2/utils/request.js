@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://rdd285a4.natappfree.cc';
+const API_BASE_URL = 'https://q32d54e8.natappfree.cc';
+
 const auth = require('./auth');
 
 // 刷新 token 相关状态
@@ -80,7 +81,13 @@ async function refreshToken() {
       wx.setStorageSync('token', res.data.token);
       
       if (res.data.user) {
-        wx.setStorageSync('userInfo', res.data.user);
+        const enterpriseUtil = require('./enterprise.js');
+        const fullUserInfo = {
+          ...res.data.user,
+          enterpriseName: res.data.enterpriseName,
+          qualificationStatus: res.data.qualificationStatus
+        };
+        wx.setStorageSync('userInfo', enterpriseUtil.normalizeUserInfo(fullUserInfo));
       }
       
       if (res.data.roleType !== undefined || res.data.role_type !== undefined) {
@@ -108,6 +115,8 @@ const request = (options) => {
   return new Promise((resolve, reject) => {
     let url = options.url.startsWith('http') ? options.url : API_BASE_URL + options.url;
     let data = options.data || {};
+    
+    console.log(`[Request] ${options.method || 'GET'} ${options.url}`, { data });
     
     if ((options.method === 'GET' || !options.method) && data) {
       const queryData = normalizeQueryData(data);
@@ -152,6 +161,8 @@ const request = (options) => {
           }
         }
 
+        console.log(`[Response] ${options.url}`, { statusCode: res.statusCode, data: res.data });
+        
         if (res.statusCode === 200) {
           resolve(res.data);
         } else if (res.statusCode === 401) {

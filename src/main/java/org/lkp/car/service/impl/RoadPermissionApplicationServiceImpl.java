@@ -7,10 +7,12 @@ import org.lkp.car.common.enums.VehicleStatusEnum;
 import org.lkp.car.dto.RoadApplyRequest;
 import org.lkp.car.dto.RoadAuditRequest;
 import org.lkp.car.entity.RoadPermissionApplication;
+import org.lkp.car.entity.SafetyOfficer;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.entity.VehicleInfo;
 import org.lkp.car.mapper.RoadPermissionApplicationMapper;
 import org.lkp.car.service.RoadPermissionApplicationService;
+import org.lkp.car.service.SafetyOfficerService;
 import org.lkp.car.service.SysUserService;
 import org.lkp.car.service.VehicleInfoService;
 import org.lkp.car.vo.RoadPermissionApplicationVO;
@@ -36,6 +38,10 @@ public class RoadPermissionApplicationServiceImpl extends ServiceImpl<RoadPermis
     @Lazy
     private VehicleInfoService vehicleInfoService;
 
+    @Autowired
+    @Lazy
+    private SafetyOfficerService safetyOfficerService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long apply(RoadApplyRequest applyRequest) {
@@ -53,6 +59,42 @@ public class RoadPermissionApplicationServiceImpl extends ServiceImpl<RoadPermis
         }
         if (!applicant.getAuthEnterpriseId().equals(applyRequest.getEnterpriseId())) {
             throw new RuntimeException("操作失败：您无权代表该企业发起申请");
+        }
+
+        // 安全员校验
+        if (applyRequest.getOfficerId() != null) {
+            SafetyOfficer officer = safetyOfficerService.getById(applyRequest.getOfficerId());
+            if (officer == null) {
+                throw new RuntimeException("安全员不存在");
+            }
+            // 校验安全员是否属于该企业
+            if (!officer.getEnterpriseId().equals(applyRequest.getEnterpriseId())) {
+                throw new RuntimeException("安全员不属于当前企业");
+            }
+            // 校验安全员状态是否有效
+            if (officer.getStatus() != 1) {
+                throw new RuntimeException("安全员资质无效，请选择有效状态的安全员");
+            }
+            
+            // 核心校验：检查安全员已关联车辆 + 待审核/已通过申请 ≤ 2
+            // 1. 查询该安全员已关联的正式车辆档案数
+            int archiveCount = safetyOfficerService.getOfficerVehicleCount(applyRequest.getOfficerId());
+            
+            // 2. 查询其他已选该安全员且状态为待审核/已通过的申请数（排除当前正在编辑的申请）
+            LambdaQueryWrapper<RoadPermissionApplication> applyWrapper = new LambdaQueryWrapper<>();
+            applyWrapper.eq(RoadPermissionApplication::getOfficerId, applyRequest.getOfficerId())
+                       .in(RoadPermissionApplication::getStatus, 1, 2); // 1=待审核, 2=已通过
+            // 如果是重新提交，排除当前申请本身
+            if (applyRequest.getId() != null) {
+                applyWrapper.ne(RoadPermissionApplication::getId, applyRequest.getId());
+            }
+            int applyCount = (int) this.count(applyWrapper);
+            
+            // 总数不能超过 2，因为加上当前申请就是 3 了
+            if (archiveCount + applyCount >= 3) {
+                throw new RuntimeException("该安全员已关联 " + (archiveCount + applyCount) + 
+                    " 辆车，最多只能关联 3 辆，请选择其他安全员");
+            }
         }
 
         RoadPermissionApplication application;
@@ -100,17 +142,72 @@ public class RoadPermissionApplicationServiceImpl extends ServiceImpl<RoadPermis
     }
 
     @Override
-    public List<RoadPermissionApplication> listMyApplications(Long applicantId) {
-        return this.list(new LambdaQueryWrapper<RoadPermissionApplication>()
+    public List<RoadPermissionApplicationVO> listMyApplications(Long applicantId) {
+        List<RoadPermissionApplication> list = this.list(new LambdaQueryWrapper<RoadPermissionApplication>()
                 .eq(RoadPermissionApplication::getApplicantId, applicantId)
                 .orderByDesc(RoadPermissionApplication::getCreateTime));
+        
+        return list.stream().map(this::convertToVOAndFillInfo).collect(java.util.stream.Collectors.toList());
     }
 
     @Override
-    public List<RoadPermissionApplication> listByEnterprise(Long enterpriseId) {
-        return this.list(new LambdaQueryWrapper<RoadPermissionApplication>()
+    public List<RoadPermissionApplicationVO> listByEnterprise(Long enterpriseId) {
+        List<RoadPermissionApplication> list = this.list(new LambdaQueryWrapper<RoadPermissionApplication>()
                 .eq(RoadPermissionApplication::getEnterpriseId, enterpriseId)
                 .orderByDesc(RoadPermissionApplication::getCreateTime));
+        
+        return list.stream().map(this::convertToVOAndFillInfo).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public RoadPermissionApplicationVO getDetail(Long id) {
+        RoadPermissionApplication application = this.getById(id);
+        if (application == null) {
+            return null;
+        }
+        return convertToVOAndFillInfo(application);
+    }
+
+    /**
+     * 将 Entity 转换为 VO 并填充额外信息
+     */
+    private RoadPermissionApplicationVO convertToVOAndFillInfo(RoadPermissionApplication application) {
+        RoadPermissionApplicationVO vo = RoadPermissionApplicationVO.fromEntity(application);
+        
+        // 填充查验状态
+        LambdaQueryWrapper<VehicleInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(VehicleInfo::getApplicationId, vo.getId());
+        VehicleInfo vehicleInfo = vehicleInfoService.getOne(wrapper);
+        
+        if (vehicleInfo != null) {
+            if (VehicleStatusEnum.PASSED.getCode().equals(vehicleInfo.getStatus())) {
+                vo.setInspectionStatus(2);
+                vo.setInspectionStatusLabel("已通过");
+                vo.setInspectionStatusClass("status-approved");
+            } else if (VehicleStatusEnum.REJECTED.getCode().equals(vehicleInfo.getStatus())) {
+                vo.setInspectionStatus(3);
+                vo.setInspectionStatusLabel("已驳回");
+                vo.setInspectionStatusClass("status-rejected");
+            } else {
+                vo.setInspectionStatus(1);
+                vo.setInspectionStatusLabel("未查验");
+                vo.setInspectionStatusClass("");
+            }
+        } else {
+            vo.setInspectionStatus(1);
+            vo.setInspectionStatusLabel("未查验");
+            vo.setInspectionStatusClass("");
+        }
+        
+        // 填充安全员信息
+        if (vo.getOfficerId() != null) {
+            SafetyOfficer officer = safetyOfficerService.getById(vo.getOfficerId());
+            if (officer != null) {
+                vo.setOfficerName(officer.getOfficerName());
+            }
+        }
+        
+        return vo;
     }
 
     @Override
@@ -148,8 +245,9 @@ public class RoadPermissionApplicationServiceImpl extends ServiceImpl<RoadPermis
     public List<RoadPermissionApplicationVO> listAll(Integer status, Integer type) {
         List<RoadPermissionApplicationVO> voList = this.baseMapper.listWithEnterpriseName(status, type);
         
-        // 遍历每个申请，查询并填充查验状态
+        // 遍历每个申请，查询并填充查验状态和安全员信息
         for (RoadPermissionApplicationVO vo : voList) {
+            // 填充查验状态
             LambdaQueryWrapper<VehicleInfo> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(VehicleInfo::getApplicationId, vo.getId());
             VehicleInfo vehicleInfo = vehicleInfoService.getOne(wrapper);
@@ -177,6 +275,14 @@ public class RoadPermissionApplicationServiceImpl extends ServiceImpl<RoadPermis
                 vo.setInspectionStatus(1);
                 vo.setInspectionStatusLabel("未查验");
                 vo.setInspectionStatusClass("");
+            }
+            
+            // 填充安全员信息
+            if (vo.getOfficerId() != null) {
+                SafetyOfficer officer = safetyOfficerService.getById(vo.getOfficerId());
+                if (officer != null) {
+                    vo.setOfficerName(officer.getOfficerName());
+                }
             }
         }
         

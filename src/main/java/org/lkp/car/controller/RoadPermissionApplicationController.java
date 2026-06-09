@@ -41,19 +41,19 @@ public class RoadPermissionApplicationController {
 
     @GetMapping("/myList")
     @ApiOperation("查询当前用户申请列表")
-    public Result<List<RoadPermissionApplication>> myList(HttpServletRequest request) {
+    public Result<List<RoadPermissionApplicationVO>> myList(HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         return Result.success(roadPermissionApplicationService.listMyApplications(currentUser.getUserId()));
     }
 
     @GetMapping("/enterpriseList")
     @ApiOperation("根据企业ID查询申请列表")
-    public Result<List<RoadPermissionApplication>> enterpriseList(@RequestParam(required = false) Long enterpriseId,
+    public Result<List<RoadPermissionApplicationVO>> enterpriseList(@RequestParam(required = false) Long enterpriseId,
                                                                   HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (AuthContext.isPolice(currentUser)) {
             if (enterpriseId == null) {
-                return Result.success(roadPermissionApplicationService.list());
+                return Result.success(roadPermissionApplicationService.listAll(null, null));
             }
             return Result.success(roadPermissionApplicationService.listByEnterprise(enterpriseId));
         }
@@ -61,6 +61,26 @@ public class RoadPermissionApplicationController {
             return Result.error(403, "请先完成企业资质认证和企业绑定");
         }
         return Result.success(roadPermissionApplicationService.listByEnterprise(currentUser.getAuthEnterpriseId()));
+    }
+
+    @GetMapping("/{id}")
+    @ApiOperation("查询申请详情")
+    public Result<RoadPermissionApplicationVO> getDetail(@PathVariable Long id, HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        RoadPermissionApplicationVO vo = roadPermissionApplicationService.getDetail(id);
+        
+        if (vo == null) {
+            return Result.success(null);
+        }
+        
+        // 权限校验
+        if (!AuthContext.isPolice(currentUser)
+                && (!AuthContext.hasEnterprise(currentUser)
+                || !currentUser.getAuthEnterpriseId().equals(vo.getEnterpriseId()))) {
+            return Result.error(403, "无权限查看该申请");
+        }
+        
+        return Result.success(vo);
     }
 
     @PutMapping("/audit")

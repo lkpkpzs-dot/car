@@ -74,6 +74,18 @@ function deleteSafetyOfficer(id) {
   return request.del(`/safetyOfficer/${id}`);
 }
 
+function getEnterpriseValidSafetyOfficers() {
+  return request.get('/safetyOfficer/enterpriseValidList');
+}
+
+function assignSafetyOfficerToCar(carId, officerId) {
+  return request.post('/carArchive/assignSafetyOfficer', { carId, officerId });
+}
+
+function getCarsBySafetyOfficer(officerId) {
+  return request.get(`/carArchive/byOfficer/${officerId}`);
+}
+
 function getStatusMeta(status) {
   return STATUS_META[Number(status)] || { label: '未知', color: '#64748b', bg: '#f1f5f9' };
 }
@@ -143,6 +155,9 @@ module.exports = {
   handleSafetyOfficerAccident,
   getSafetyOfficerPenalties,
   deleteSafetyOfficer,
+  getEnterpriseValidSafetyOfficers,
+  assignSafetyOfficerToCar,
+  getCarsBySafetyOfficer,
   getStatusMeta,
   parseData,
   parseList,

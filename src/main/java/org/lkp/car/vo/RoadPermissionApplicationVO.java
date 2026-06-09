@@ -26,6 +26,12 @@ public class RoadPermissionApplicationVO implements Serializable {
     @ApiModelProperty("申请人ID")
     private Long applicantId;
 
+    @ApiModelProperty("安全员ID")
+    private Long officerId;
+
+    @ApiModelProperty("安全员姓名")
+    private String officerName;
+
     @ApiModelProperty("类型：1-道路测试 2-示范应用 3-应用试点")
     private Integer type;
 

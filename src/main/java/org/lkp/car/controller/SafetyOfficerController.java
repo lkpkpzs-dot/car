@@ -7,9 +7,8 @@ import org.lkp.car.common.Result;
 import org.lkp.car.dto.SafetyOfficerApplyRequest;
 import org.lkp.car.dto.SafetyOfficerAuditRequest;
 import org.lkp.car.dto.SafetyOfficerPenaltyRequest;
-import org.lkp.car.entity.SafetyOfficer;
-import org.lkp.car.entity.SafetyOfficerPenalty;
-import org.lkp.car.entity.SysUser;
+import org.lkp.car.entity.*;
+import org.lkp.car.service.RoadPermissionApplicationService;
 import org.lkp.car.service.SafetyOfficerPenaltyService;
 import org.lkp.car.service.SafetyOfficerService;
 import org.lkp.car.utils.AuthContext;
@@ -32,6 +31,9 @@ public class SafetyOfficerController {
 
     @Autowired
     private SafetyOfficerPenaltyService safetyOfficerPenaltyService;
+
+    @Autowired
+    private RoadPermissionApplicationService roadPermissionApplicationService;
 
     @PostMapping("/apply")
     @ApiOperation("提交/重新提交安全员资质申请")
@@ -149,5 +151,73 @@ public class SafetyOfficerController {
             return Result.error(403, "无安全员记录删除权限");
         }
         return Result.success(safetyOfficerService.removeById(id));
+    }
+
+    @GetMapping("/enterpriseValidList")
+    @ApiOperation("查询当前企业有效安全员列表（用于申请时选择）")
+    public Result<List<SafetyOfficer>> enterpriseValidList(HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.hasEnterprise(currentUser)) {
+            return Result.error(403, "请先完成企业资质认证和企业绑定");
+        }
+        LambdaQueryWrapper<SafetyOfficer> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SafetyOfficer::getEnterpriseId, currentUser.getAuthEnterpriseId())
+               .eq(SafetyOfficer::getStatus, 1) // 只查询有效状态的安全员
+               .orderByDesc(SafetyOfficer::getCreateTime);
+        List<SafetyOfficer> list = safetyOfficerService.list(wrapper);
+        
+        // 为每个安全员补充已关联车辆数
+        for (SafetyOfficer officer : list) {
+            // 1. 查询已关联正式档案的车辆数
+            int archiveCount = safetyOfficerService.getOfficerVehicleCount(officer.getOfficerId());
+            
+            // 2. 查询已选该安全员且状态为待审核/已通过的申请数
+            LambdaQueryWrapper<RoadPermissionApplication> applyWrapper = new LambdaQueryWrapper<>();
+            applyWrapper.eq(RoadPermissionApplication::getOfficerId, officer.getOfficerId())
+                       .in(RoadPermissionApplication::getStatus, 1, 2); // 1=待审核, 2=已通过
+            int applyCount = (int) roadPermissionApplicationService.count(applyWrapper);
+            
+            officer.setTotalVehicleCount(archiveCount + applyCount);
+        }
+        
+        return Result.success(list);
+    }
+
+    /**
+     * 获取安全员关联的车辆列表
+     */
+    @GetMapping("/{id}/vehicles")
+    @ApiOperation("获取安全员关联的车辆列表")
+    public Result<List<CarArchive>> getOfficerVehicles(@PathVariable Long id, HttpServletRequest request) {
+        SafetyOfficer officer = safetyOfficerService.getById(id);
+        if (officer == null) {
+            return Result.success(null);
+        }
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)
+                && (!AuthContext.hasEnterprise(currentUser)
+                || !currentUser.getAuthEnterpriseId().equals(officer.getEnterpriseId()))) {
+            return Result.error(403, "无权限查看");
+        }
+        return Result.success(safetyOfficerService.getOfficerVehicles(id));
+    }
+
+    /**
+     * 获取安全员已关联的车辆数量
+     */
+    @GetMapping("/{id}/vehicleCount")
+    @ApiOperation("获取安全员已关联的车辆数量")
+    public Result<Integer> getOfficerVehicleCount(@PathVariable Long id, HttpServletRequest request) {
+        SafetyOfficer officer = safetyOfficerService.getById(id);
+        if (officer == null) {
+            return Result.success(0);
+        }
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)
+                && (!AuthContext.hasEnterprise(currentUser)
+                || !currentUser.getAuthEnterpriseId().equals(officer.getEnterpriseId()))) {
+            return Result.error(403, "无权限查看");
+        }
+        return Result.success(safetyOfficerService.getOfficerVehicleCount(id));
     }
 }

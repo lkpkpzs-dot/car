@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.lkp.car.common.enums.VehicleStatusEnum;
+import org.lkp.car.dto.AssignSafetyOfficerRequest;
 import org.lkp.car.dto.GenerateArchiveRequest;
 import org.lkp.car.dto.IssuePlateRequest;
 import org.lkp.car.entity.*;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,6 +37,9 @@ public class CarArchiveServiceImpl extends ServiceImpl<CarArchiveMapper, CarArch
 
     @Autowired
     private SysUserService sysUserService;
+
+    @Autowired
+    private SafetyOfficerService safetyOfficerService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -94,6 +99,14 @@ public class CarArchiveServiceImpl extends ServiceImpl<CarArchiveMapper, CarArch
         archive.setVehicleBrand(vehicleInfo.getVehicleBrand());
         archive.setVehicleModel(vehicleInfo.getVehicleModel());
         archive.setCurrentPlateType(application.getType());
+        // 同步道路许可申请中的安全员信息
+        if (application.getOfficerId() != null) {
+            // 检查安全员是否已达到3辆车限制
+            int currentCount = countVehiclesByOfficerId(application.getOfficerId());
+            if (currentCount < 3) {
+                archive.setOfficerId(application.getOfficerId());
+            }
+        }
 
         archive.setStatus(1); // 正常营运
         archive.setTotalMileage(BigDecimal.ZERO);
@@ -192,5 +205,63 @@ public class CarArchiveServiceImpl extends ServiceImpl<CarArchiveMapper, CarArch
         }
 
         return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean assignSafetyOfficer(AssignSafetyOfficerRequest request) {
+        // 1. 校验参数
+        if (request.getVin() == null || request.getVin().trim().isEmpty()) {
+            throw new RuntimeException("VIN码不能为空");
+        }
+        if (request.getOfficerId() == null) {
+            throw new RuntimeException("安全员ID不能为空");
+        }
+
+        // 2. 查询车辆档案
+        CarArchive archive = this.getById(request.getVin());
+        if (archive.getOfficerId() != null) {
+            throw new RuntimeException("该车辆已分配安全员");
+        }
+
+        // 3. 查询安全员
+        SafetyOfficer officer = safetyOfficerService.getById(request.getOfficerId());
+        if (officer == null) {
+            throw new RuntimeException("安全员不存在");
+        }
+
+        // 4. 校验安全员状态必须为有效
+        if (officer.getStatus() != 1) {
+            throw new RuntimeException("安全员资质无效，无法分配");
+        }
+
+        // 5. 校验安全员所属企业与车辆所属企业必须一致
+        if (!officer.getEnterpriseId().equals(archive.getEnterpriseId())) {
+            throw new RuntimeException("安全员与车辆不属于同一企业");
+        }
+
+        // 6. 检查安全员已关联的车辆数量（最多3辆）
+        int currentCount = countVehiclesByOfficerId(request.getOfficerId());
+        if (currentCount >= 3) {
+            throw new RuntimeException("该安全员已达到最多3辆车的限制");
+        }
+
+        // 7. 分配安全员
+        archive.setOfficerId(request.getOfficerId());
+        return this.updateById(archive);
+    }
+
+    @Override
+    public List<CarArchive> getVehiclesByOfficerId(Long officerId) {
+        LambdaQueryWrapper<CarArchive> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CarArchive::getOfficerId, officerId);
+        return this.list(wrapper);
+    }
+
+    @Override
+    public int countVehiclesByOfficerId(Long officerId) {
+        LambdaQueryWrapper<CarArchive> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CarArchive::getOfficerId, officerId);
+        return (int) this.count(wrapper);
     }
 }

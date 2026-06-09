@@ -21,12 +21,17 @@ public interface RoadPermissionApplicationService extends IService<RoadPermissio
     /**
      * 查询我的申请列表
      */
-    List<RoadPermissionApplication> listMyApplications(Long applicantId);
+    List<RoadPermissionApplicationVO> listMyApplications(Long applicantId);
 
     /**
      * 企业查询申请列表
      */
-    List<RoadPermissionApplication> listByEnterprise(Long enterpriseId);
+    List<RoadPermissionApplicationVO> listByEnterprise(Long enterpriseId);
+
+    /**
+     * 查询申请详情
+     */
+    RoadPermissionApplicationVO getDetail(Long id);
 
     /**
      * 民警审核申请

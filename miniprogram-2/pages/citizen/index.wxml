@@ -9,8 +9,8 @@
           <text class="message-icon">🔔</text>
           <view wx:if="{{unreadCount > 0}}" class="message-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
         </view>
-        <view class="logout-btn" bindtap="onLogout">
-          <text class="logout-text">退出</text>
+        <view class="logout-btn" bindtap="onRefresh">
+          <text class="logout-text">刷新</text>
         </view>
       </view>
     </view>
@@ -30,21 +30,22 @@
     <view class="stats-card">
       <view class="stats-header">
         <text class="stats-title">市民参与数据</text>
+        <text class="view-all" bindtap="goToMyReports">查看全部 ></text>
       </view>
       <view class="stats-grid">
-        <view class="stat-item">
+        <view class="stat-item" bindtap="goToMyReportsByStatus" data-status="all">
           <text class="stat-value">{{stats.totalReport}}</text>
           <text class="stat-label">举报总数</text>
         </view>
-        <view class="stat-item">
+        <view class="stat-item" bindtap="goToMyReportsByStatus" data-status="pending">
           <text class="stat-value">{{stats.pendingCount}}</text>
           <text class="stat-label">待核实</text>
         </view>
-        <view class="stat-item">
+        <view class="stat-item" bindtap="goToMyReportsByStatus" data-status="approved">
           <text class="stat-value">{{stats.approvedCount}}</text>
           <text class="stat-label">已处理</text>
         </view>
-        <view class="stat-item">
+        <view class="stat-item" bindtap="goToMyReportsByStatus" data-status="rejected">
           <text class="stat-value">{{stats.rejectedCount}}</text>
           <text class="stat-label">无效举报</text>
         </view>

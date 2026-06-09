@@ -1,7 +1,12 @@
 <view class="page">
   <view class="header">
-    <text class="header-title">企业工作台</text>
-    <text class="header-sub">智慧出行政务服务平台</text>
+    <view class="header-left">
+      <text class="header-title">企业工作台</text>
+      <text class="header-sub">智慧出行政务服务平台</text>
+    </view>
+    <view class="refresh-btn" bindtap="onRefresh">
+      <text class="refresh-text">刷新</text>
+    </view>
   </view>
 
   <view class="status-card card">
@@ -43,6 +48,9 @@
       >
         <view class="action-icon-wrap">
           <image src="/assets/images/{{item.icon}}-icon.png" mode="aspectFit" />
+          <view class="action-badge" wx:if="{{item.badgeCount > 0}}">
+            <text class="action-badge-text">{{item.badgeCount > 99 ? '99+' : item.badgeCount}}</text>
+          </view>
         </view>
         <text class="action-name">{{item.name}}</text>
         <text class="action-desc">{{item.desc}}</text>

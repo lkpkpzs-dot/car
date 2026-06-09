@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "消息中心",
+  "navigationBarBackgroundColor": "#ea580c",
+  "navigationBarTextStyle": "white",
   "usingComponents": {}
 }

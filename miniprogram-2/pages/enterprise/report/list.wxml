@@ -1,0 +1,91 @@
+<view class="page-container">
+  <!-- Tab 切换 -->
+  <view class="tab-container">
+    <view 
+      wx:for="{{tabs}}" 
+      wx:key="*this" 
+      class="tab-item {{currentTab === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onTabChange"
+    >
+      <text>{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <scroll-view class="list-container" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <view class="report-list" wx:if="{{list.length > 0}}">
+      <view 
+        wx:for="{{list}}" 
+        wx:key="reportId" 
+        class="report-card"
+        data-report-id="{{item.reportId}}"
+        bindtap="onViewDetail"
+      >
+        <!-- 头部 -->
+        <view class="card-header">
+          <view class="header-left">
+            <text class="report-type">{{item.reportTypeName}}</text>
+            <view class="tags">
+              <text class="tag risk-{{item.riskClass}}">{{item.riskLabel}}</text>
+            </view>
+          </view>
+          <view class="status-badge status-{{item.statusClass}}">{{item.statusLabel}}</view>
+        </view>
+
+        <!-- 内容 -->
+        <view class="card-content">
+          <!-- 车牌号 -->
+          <view class="content-row" wx:if="{{item.targetPlate}}">
+            <text class="row-label">车辆号牌</text>
+            <text class="row-value">{{item.targetPlate}}</text>
+          </view>
+
+          <!-- 地点 -->
+          <view class="content-row">
+            <text class="row-label">发生地点</text>
+            <text class="row-value">{{item.locationText}}</text>
+          </view>
+
+          <!-- 图片 -->
+          <view class="image-list" wx:if="{{item.images && item.images.length > 0}}">
+            <image 
+              wx:for="{{item.images}}" 
+              wx:key="*this" 
+              wx:for-item="img"
+              wx:for-index="imgIdx"
+              class="preview-image" 
+              src="{{img}}" 
+              mode="aspectFill"
+              data-index="{{index}}"
+              data-image-index="{{imgIdx}}"
+              bindtap="onPreviewImage"
+              catchtap="true"
+            />
+          </view>
+        </view>
+
+        <!-- 底部 -->
+        <view class="card-footer">
+          <text class="create-time">{{item.createTimeText}}</text>
+          <!-- 处理按钮 -->
+          <button 
+            wx:if="{{item.processStatus === 1}}"
+            class="handle-btn" 
+            data-report-id="{{item.reportId}}"
+            bindtap="onHandleReport"
+            catchtap="true"
+          >
+            处理举报
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty-state">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无举报记录</text>
+    </view>
+  </scroll-view>
+</view>

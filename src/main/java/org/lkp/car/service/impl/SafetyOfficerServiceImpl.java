@@ -5,19 +5,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.lkp.car.dto.SafetyOfficerApplyRequest;
 import org.lkp.car.dto.SafetyOfficerAuditRequest;
 import org.lkp.car.dto.SafetyOfficerPenaltyRequest;
+import org.lkp.car.entity.CarArchive;
 import org.lkp.car.entity.SafetyOfficer;
 import org.lkp.car.entity.SafetyOfficerPenalty;
 import org.lkp.car.mapper.SafetyOfficerMapper;
+import org.lkp.car.service.CarArchiveService;
 import org.lkp.car.service.SafetyOfficerPenaltyService;
 import org.lkp.car.service.SafetyOfficerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 安全员资质监管 服务实现类
@@ -43,6 +47,10 @@ public class SafetyOfficerServiceImpl extends ServiceImpl<SafetyOfficerMapper, S
 
     @Autowired
     private SafetyOfficerPenaltyService safetyOfficerPenaltyService;
+
+    @Autowired
+    @Lazy
+    private CarArchiveService carArchiveService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -262,5 +270,15 @@ public class SafetyOfficerServiceImpl extends ServiceImpl<SafetyOfficerMapper, S
             return "发生同等及以上责任交通事故致人受伤，按规定处理安全员资格";
         }
         return "发生同等及以上责任交通事故，暂停安全员资格3个月";
+    }
+
+    @Override
+    public List<CarArchive> getOfficerVehicles(Long officerId) {
+        return carArchiveService.getVehiclesByOfficerId(officerId);
+    }
+
+    @Override
+    public int getOfficerVehicleCount(Long officerId) {
+        return carArchiveService.countVehiclesByOfficerId(officerId);
     }
 }

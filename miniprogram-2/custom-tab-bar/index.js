@@ -32,12 +32,12 @@ Component({
         }
       };
       
-      // 1. 民警端
+      // 1. 民警端（优先级最高）
       if (role === 'admin') {
         homePath = '/pages/admin/index';
         selectedColor = "#3B82F6";
       } 
-      // 2. 企业端 (必须认证通过)
+      // 2. 企业端 (必须认证通过，且不是民警端)
       else if (userInfo.authEnterpriseId && userInfo.qualificationStatus === 1) {
         homePath = '/pages/enterprise/index';
         selectedColor = "#10B981";

@@ -1,3 +1,5 @@
+const app = getApp();
+const auth = require('../../utils/auth.js');
 const request = require('../../utils/request.js');
 const enterpriseUtil = require('../../utils/enterprise.js');
 
@@ -15,9 +17,10 @@ Page({
       reviewingCount: 0
     },
     quickActions: [
-      { id: 'roadApply', name: '道路许可申请', icon: 'monitor', desc: '道路测试/示范应用/应用试点' },
-      { id: 'safety', name: '安全员监管', icon: 'check', desc: '资质申请与人员管理' },
-      { id: 'myVehicles', name: '我的车辆', icon: 'vehicle', desc: '查看已通过查验的车辆' }
+      { id: 'roadApply', name: '道路许可申请', icon: 'monitor', desc: '道路测试/示范应用/应用试点', badgeCount: 0 },
+      { id: 'safety', name: '安全员监管', icon: 'monitor', desc: '资质申请与人员管理', badgeCount: 0 },
+      { id: 'myVehicles', name: '我的车辆', icon: 'vehicle', desc: '查看已通过查验的车辆', badgeCount: 0 },
+      { id: 'reportManage', name: '举报管理', icon: 'jubao', desc: '处理市民举报', badgeCount: 0 }
     ]
   },
 
@@ -46,7 +49,10 @@ Page({
       statusBg: meta.bg
     });
 
-    await this.loadDashboardData();
+    await Promise.all([
+      this.loadDashboardData(),
+      this.loadPendingCounts()
+    ]);
   },
 
   async loadDashboardData() {
@@ -89,6 +95,11 @@ Page({
       return;
     }
 
+    if (id === 'reportManage') {
+      wx.navigateTo({ url: '/pages/enterprise/report/list' });
+      return;
+    }
+
     if (id === 'qualification') {
       this.goQualification();
     }
@@ -103,6 +114,58 @@ Page({
       wx.navigateTo({ url: '/pages/road/list/index' });
     } else if (type === 'pending') {
       wx.navigateTo({ url: '/pages/road/list/index?tab=1' });
+    }
+  },
+
+  async loadPendingCounts() {
+    try {
+      // 获取待处理举报数量
+      const reportRes = await request.get('/citizenReport/enterpriseList');
+      let reportPendingCount = 0;
+      if (reportRes.code === 200 && reportRes.data) {
+        const list = request.parseListData(reportRes) || [];
+        reportPendingCount = list.filter(item => item.processStatus === 1).length;
+      }
+
+      // 更新 quickActions 中的 badgeCount
+      const quickActions = this.data.quickActions.map(item => {
+        if (item.id === 'reportManage') {
+          return { ...item, badgeCount: reportPendingCount };
+        }
+        // 对于其他功能，暂时设置为 0，需要后端接口支持
+        return { ...item, badgeCount: 0 };
+      });
+
+      this.setData({ quickActions });
+    } catch (err) {
+      console.error('[Load Pending Counts] Failed:', err);
+    }
+  },
+
+  async onRefresh() {
+    wx.showLoading({ title: '刷新中...' });
+    try {
+      // 清理缓存并重新登录
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
+      wx.removeStorageSync('role');
+      if (app && app.globalData) {
+        app.globalData.role = null;
+      }
+      
+      // 重新登录
+      const loginResult = await auth.login();
+      if (loginResult) {
+        // 根据最新角色跳转到正确页面
+        auth.navigateByRole(loginResult.roleType);
+        return;
+      }
+      wx.showToast({ title: '刷新成功', icon: 'success' });
+    } catch (err) {
+      console.error('[Refresh] Failed:', err);
+      wx.showToast({ title: '刷新失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
     }
   },
 

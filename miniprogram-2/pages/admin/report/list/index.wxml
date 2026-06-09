@@ -7,17 +7,27 @@
   <view class="tab-container">
     <view 
       class="tab-item {{currentTab === 0 ? 'active' : ''}}"
-      data-index="0"
+      data-index="{{0}}"
+      hover-class="tab-hover"
       bindtap="onTabChange"
     >
       <text>未审核</text>
     </view>
     <view 
       class="tab-item {{currentTab === 1 ? 'active' : ''}}"
-      data-index="1"
+      data-index="{{1}}"
+      hover-class="tab-hover"
       bindtap="onTabChange"
     >
-      <text>已审核</text>
+      <text>企业审核</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 2 ? 'active' : ''}}"
+      data-index="{{2}}"
+      hover-class="tab-hover"
+      bindtap="onTabChange"
+    >
+      <text>民警审核</text>
     </view>
   </view>
 
@@ -43,8 +53,11 @@
         <view class="type-badge">
           <text class="type-text">{{item.reportTypeName}}</text>
         </view>
-        <view class="status-badge status-{{item.processStatus}}">
-          <text>{{processStatusMap[item.processStatus]}}</text>
+        <view class="header-tags">
+          <text class="risk-tag risk-{{item.riskClass}}" wx:if="{{item.riskLabel}}">{{item.riskLabel}}</text>
+          <view class="status-badge status-{{item.statusClass}}">
+            <text>{{item.statusLabel}}</text>
+          </view>
         </view>
       </view>
       

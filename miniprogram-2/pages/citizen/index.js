@@ -1,4 +1,5 @@
 const app = getApp();
+const auth = require('../../utils/auth.js');
 const enterpriseUtil = require('../../utils/enterprise.js');
 const request = require('../../utils/request.js');
 
@@ -20,12 +21,14 @@ Page({
     },
     quickActions: [
       { id: 'report', name: '违规举报', icon: 'report', desc: '举报违规行为' },
-      { id: 'apply', name: '申请企业资质', icon: 'archive', desc: '提交企业认证申请' },
-      { id: 'about', name: '关于我们', icon: 'about', desc: '了解详情' }
+      { id: 'myReports', name: '我的举报', icon: 'check', desc: '查看我的举报' },
+      { id: 'apply', name: '申请企业资质', icon: 'archivee', desc: '提交企业认证申请' },
+      { id: 'messages', name: '我的消息', icon: 'users', desc: '查看消息通知' },
+      { id: 'about', name: '使用手册', icon: 'about', desc: '了解使用说明' }
     ],
     tips: [
       { id: 1, title: '如何举报违规行为', desc: '点击"违规举报"，选择举报类型，上传证据图片' },
-      { id: 2, title: '处理进度查询', desc: '提交后可在"查询进度"中查看处理状态' }
+      { id: 2, title: '处理进度查询', desc: '提交后可在"我的消息"中查看处理状态' }
     ]
   },
 
@@ -114,18 +117,34 @@ Page({
       wx.navigateTo({
         url: '/pages/citizen/report/index'
       });
-    } else if (actionId === 'query') {
-      wx.showToast({
-        title: '暂无待处理事项',
-        icon: 'none'
+    } else if (actionId === 'myReports') {
+      wx.navigateTo({
+        url: '/pages/citizen/report/list/index'
+      });
+    } else if (actionId === 'messages') {
+      wx.navigateTo({
+        url: '/pages/citizen/messages/index'
       });
     } else if (actionId === 'about') {
       wx.showModal({
-        title: '关于智车通',
-        content: '智车通是政务专属无人车综合管理服务小程序，旨在提供便捷高效的政务服务体验。',
+        title: '使用手册',
+        content: '智车通是政务专属无人车综合管理服务小程序，市民朋友可以通过本小程序进行违规举报、申请企业资质，以及查看处理进度和消息通知。',
         showCancel: false
       });
     }
+  },
+
+  goToMyReports() {
+    wx.navigateTo({
+      url: '/pages/citizen/report/list/index'
+    });
+  },
+
+  goToMyReportsByStatus(e) {
+    const status = e.currentTarget.dataset.status;
+    wx.navigateTo({
+      url: `/pages/citizen/report/list/index?status=${status}`
+    });
   },
 
   onGoToMessages() {
@@ -134,11 +153,30 @@ Page({
     });
   },
 
-  onLogout() {
-    app.globalData.role = null;
-    wx.removeStorageSync('role');
-    wx.reLaunch({
-      url: '/pages/index/index'
-    });
+  async onRefresh() {
+    wx.showLoading({ title: '刷新中...' });
+    try {
+      // 清理缓存并重新登录
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
+      wx.removeStorageSync('role');
+      if (app && app.globalData) {
+        app.globalData.role = null;
+      }
+      
+      // 重新登录
+      const loginResult = await auth.login();
+      if (loginResult) {
+        // 根据最新角色跳转到正确页面
+        auth.navigateByRole(loginResult.roleType);
+        return;
+      }
+      wx.showToast({ title: '刷新成功', icon: 'success' });
+    } catch (error) {
+      console.error('Refresh failed:', error);
+      wx.showToast({ title: '刷新失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   }
 });

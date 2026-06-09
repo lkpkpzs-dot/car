@@ -1,10 +1,11 @@
 {
   "pages": [
-    "pages/index/index",
+    "pages/splash/index",
     "pages/admin/index",
     "pages/enterprise/index",
     "pages/citizen/index",
     "pages/citizen/report/index",
+    "pages/citizen/report/list/index",
     "pages/citizen/messages/index",
     "pages/citizen/messages/detail/index",
     "pages/profile/index",
@@ -25,6 +26,8 @@
     "pages/enterprise/safety/form",
     "pages/enterprise/safety/detail",
     "pages/enterprise/vehicles/index",
+    "pages/enterprise/report/list",
+    "pages/enterprise/report/handle",
     "pages/road/apply/index",
     "pages/road/list/index",
     "pages/enterprise/qualification/index",

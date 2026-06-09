@@ -31,11 +31,11 @@ Page({
   async fetchList() {
     wx.showLoading({ title: '加载中...' });
     try {
-      const res = await request.get('/enterprise/dashboard');
+      const res = await request.get('/roadApplication/myList');
       
       let rawList = [];
-      if (res.code === 200 && res.data && res.data.applicationList) {
-        rawList = res.data.applicationList;
+      if (res.code === 200 && res.data) {
+        rawList = res.data;
       } else {
         rawList = this.getMockList();
       }
@@ -61,9 +61,9 @@ Page({
 
   getMockList() {
     return [
-      { id: 101, vehicleBrand: '宝马', vehicleModel: '宝马001', vin: '123123', type: 1, typeLabel: '道路测试', status: 1, statusLabel: '待审核', createTime: '2026-05-29', inspectionStatus: 1, plateStatus: 0 },
-      { id: 102, vehicleBrand: '奔驰', vehicleModel: 'bc001', vin: '123', type: 1, typeLabel: '道路测试', status: 2, statusLabel: '已通过', createTime: '2026-05-28', inspectionStatus: 2, plateStatus: 1 },
-      { id: 103, vehicleBrand: '智行者', vehicleModel: 'A1', vin: '456789', type: 1, typeLabel: '道路测试', status: 3, statusLabel: '已驳回', createTime: '2026-05-20', rejectReason: '车辆检测报告不完整，请补充上传。' }
+      { id: 101, vehicleBrand: '宝马', vehicleModel: '宝马001', vin: '123123', type: 1, typeLabel: '道路测试', status: 1, statusLabel: '待审核', createTime: '2026-05-29', inspectionStatus: 1, plateStatus: 0, officerName: '张三' },
+      { id: 102, vehicleBrand: '奔驰', vehicleModel: 'bc001', vin: '123', type: 1, typeLabel: '道路测试', status: 2, statusLabel: '已通过', createTime: '2026-05-28', inspectionStatus: 2, plateStatus: 1, officerName: '李四' },
+      { id: 103, vehicleBrand: '智行者', vehicleModel: 'A1', vin: '456789', type: 1, typeLabel: '道路测试', status: 3, statusLabel: '已驳回', createTime: '2026-05-20', rejectReason: '车辆检测报告不完整，请补充上传。', officerName: '王五' }
     ];
   },
 

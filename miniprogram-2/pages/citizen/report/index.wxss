@@ -89,6 +89,31 @@
   color: #374151;
 }
 
+.risk-grid {
+  display: flex;
+  gap: 16rpx;
+}
+
+.risk-item {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  transition: all 0.3s;
+  border: 2rpx solid transparent;
+}
+
+.risk-item.selected {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.risk-text {
+  font-size: 28rpx;
+  color: #374151;
+}
+
 .upload-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

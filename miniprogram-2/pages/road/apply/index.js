@@ -1,6 +1,7 @@
 const request = require('../../../utils/request.js');
 const enterpriseUtil = require('../../../utils/enterprise.js');
 const validator = require('../../../utils/validator.js');
+const safetyOfficerUtil = require('../../../utils/safetyOfficer.js');
 
 Page({
   data: {
@@ -25,6 +26,11 @@ Page({
     testProjects: '',
     supportPlan: '',
     
+    // 安全员相关
+    safetyOfficers: [],
+    safetyOfficerIndex: 0,
+    officerId: null,
+    
     // 材料字段（数组存储）
     docVehicleCert: [],
     docOwnerId: [],
@@ -37,13 +43,35 @@ Page({
   },
 
   onLoad(options) {
+    this.pendingItem = null;
     if (options.data) {
       try {
         const item = JSON.parse(decodeURIComponent(options.data));
-        this.initFormData(item);
+        if (item.id) {
+          this.fetchDetail(item.id);
+        } else {
+          this.pendingItem = item;
+        }
       } catch (e) {
         console.error('Parse data failed', e);
       }
+    }
+    this.loadSafetyOfficers();
+  },
+
+  async fetchDetail(id) {
+    wx.showLoading({ title: '加载中...' });
+    try {
+      const res = await request.get(`/roadApplication/${id}`);
+      wx.hideLoading();
+      if (res.code === 200 && res.data) {
+        this.pendingItem = res.data;
+        this.initFormDataIfReady();
+      }
+    } catch (err) {
+      wx.hideLoading();
+      console.error('Fetch detail failed', err);
+      wx.showToast({ title: '加载详情失败', icon: 'none' });
     }
   },
 
@@ -61,6 +89,15 @@ Page({
 
     const status = item.status;
     const readonly = status === 1 || status === 2;
+    
+    // 计算安全员索引
+    let safetyOfficerIndex = 0;
+    if (item.officerId && this.data.safetyOfficers.length > 0) {
+      const index = this.data.safetyOfficers.findIndex(o => o.value === item.officerId);
+      if (index > -1) {
+        safetyOfficerIndex = index;
+      }
+    }
 
     this.setData({
       id: item.id,
@@ -76,6 +113,8 @@ Page({
       endDate: item.endDate || '',
       testProjects: item.testProjects || item.testProject || '',
       supportPlan: item.supportPlan || item.safetyPlan || '',
+      officerId: item.officerId || null,
+      safetyOfficerIndex,
       docVehicleCert: parseMaterial(item.docVehicleCert),
       docOwnerId: parseMaterial(item.docOwnerId),
       docSafetyInspection: parseMaterial(item.docSafetyInspection),
@@ -84,6 +123,41 @@ Page({
       docAgentId: parseMaterial(item.docAgentId),
       docSafetyDeclaration: parseMaterial(item.docSafetyDeclaration),
       docApplicationDoc: parseMaterial(item.docApplicationDoc)
+    });
+  },
+
+  initFormDataIfReady() {
+    if (this.pendingItem && this.data.safetyOfficers.length > 0) {
+      this.initFormData(this.pendingItem);
+      this.pendingItem = null;
+    }
+  },
+
+  async loadSafetyOfficers() {
+    try {
+      const res = await safetyOfficerUtil.getEnterpriseValidSafetyOfficers();
+      if (res.code === 200 && res.data) {
+        const officers = res.data.map(item => ({
+          value: item.officerId,
+          label: `${item.officerName} (${item.licenseType} - 已关联 ${item.totalVehicleCount || 0} 辆车)`
+        }));
+        // 添加默认选项
+        const safetyOfficers = [{ value: null, label: '请选择安全员' }, ...officers];
+        this.setData({ safetyOfficers });
+        // 检查是否有待初始化的表单数据
+        this.initFormDataIfReady();
+      }
+    } catch (error) {
+      console.error('Load safety officers failed', error);
+    }
+  },
+
+  onSafetyOfficerChange(e) {
+    const index = e.detail.value;
+    const officer = this.data.safetyOfficers[index];
+    this.setData({
+      safetyOfficerIndex: index,
+      officerId: officer ? officer.value : null
     });
   },
 
@@ -243,6 +317,11 @@ Page({
       return false;
     }
 
+    if (!d.officerId) {
+      wx.showToast({ title: '请选择安全员', icon: 'none' });
+      return false;
+    }
+
     if (d.docVehicleCert.length === 0 || d.docOwnerId.length === 0 || d.docSafetyInspection.length === 0 || d.docInsurance.length === 0 || d.docSafetyDeclaration.length === 0 || d.docApplicationDoc.length === 0) {
       wx.showToast({ title: '请上传必要证明材料', icon: 'none' });
       return false;
@@ -277,6 +356,7 @@ Page({
       endDate: d.endDate,
       testProjects: d.testProjects,
       supportPlan: d.supportPlan,
+      officerId: d.officerId,
       // 提交时直接发送数组，后端 DTO 配置 List<String>
       docVehicleCert: d.docVehicleCert,
       docOwnerId: d.docOwnerId,

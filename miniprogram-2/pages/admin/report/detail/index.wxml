@@ -11,8 +11,11 @@
     <view class="info-section">
       <view class="section-header">
         <text class="section-title">举报信息</text>
-        <view class="status-badge status-{{detail.processStatus}}">
-          <text>{{processStatusMap[detail.processStatus]}}</text>
+        <view class="header-tags">
+          <text class="risk-tag risk-{{detail.riskClass}}" wx:if="{{detail.riskLabel}}">{{detail.riskLabel}}</text>
+          <view class="status-badge status-{{detail.statusClass}}">
+            <text>{{detail.statusLabel}}</text>
+          </view>
         </view>
       </view>
 
@@ -61,7 +64,7 @@
     </view>
 
     <!-- 审核信息（仅在已审核时显示） -->
-    <view class="review-section" wx:if="{{detail.processStatus !== 0}}">
+    <view class="review-section" wx:if="{{detail.processStatus !== 0 && detail.processStatus !== 4}}">
       <view class="section-header">
         <text class="section-title">审核信息</text>
       </view>
@@ -81,6 +84,24 @@
         </view>
       </view>
     </view>
+
+    <!-- 企业处理信息（仅在有处理时显示） -->
+    <view class="review-section" wx:if="{{detail.enterpriseHandleRemark}}">
+      <view class="section-header">
+        <text class="section-title">企业处理</text>
+      </view>
+
+      <view class="info-list">
+        <view class="info-item" wx:if="{{detail.enterpriseHandleTime}}">
+          <text class="info-label">处理时间</text>
+          <text class="info-value">{{detail.enterpriseHandleTime}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.enterpriseHandleRemark}}">
+          <text class="info-label">处理备注</text>
+          <text class="info-value">{{detail.enterpriseHandleRemark}}</text>
+        </view>
+      </view>
+    </view>
   </view>
 
   <!-- 空状态 -->
@@ -89,8 +110,8 @@
     <text class="empty-text">举报信息不存在</text>
   </view>
 
-  <!-- 底部操作区 -->
-  <view wx:if="{{detail && detail.processStatus === 0}}" class="footer-actions">
+  <!-- 底部操作区 - 只有待核实或待民警审核时显示 -->
+  <view wx:if="{{detail && (detail.processStatus === 0 || detail.processStatus === 4)}}" class="footer-actions">
     <button class="action-btn btn-reject" bindtap="onReject" disabled="{{submitting}}" loading="{{submitting}}">
       判定无效
     </button>

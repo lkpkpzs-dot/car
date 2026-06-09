@@ -30,6 +30,10 @@
         <text class="value">{{info.testArea || info.test_area}}</text>
       </view>
       <view class="info-item">
+        <text class="label">安全员</text>
+        <text class="value highlight">{{info.officerName || '未指定'}}</text>
+      </view>
+      <view class="info-item">
         <text class="label">有效日期</text>
         <text class="value">{{info.startDate || info.start_date}} 至 {{info.endDate || info.end_date}}</text>
       </view>

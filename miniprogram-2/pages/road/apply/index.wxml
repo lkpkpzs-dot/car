@@ -50,6 +50,15 @@
         <view class="form-picker {{readonly ? 'readonly' : ''}}">{{endDate || '请选择结束日期'}}</view>
       </picker>
     </view>
+
+    <view class="form-item">
+      <text class="form-label required">安全员</text>
+      <picker bindchange="onSafetyOfficerChange" value="{{safetyOfficerIndex}}" range="{{safetyOfficers}}" range-key="label" disabled="{{readonly}}">
+        <view class="form-picker {{readonly ? 'readonly' : ''}}">
+          {{safetyOfficers[safetyOfficerIndex] ? safetyOfficers[safetyOfficerIndex].label : '请选择安全员'}}
+        </view>
+      </picker>
+    </view>
   </view>
 
   <view class="form-card card">

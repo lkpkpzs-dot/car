@@ -158,7 +158,11 @@ Page({
       });
 
       if (res.code !== undefined && res.code !== 200) {
-        wx.showToast({ title: res.msg || '提交失败', icon: 'none' });
+        wx.showModal({
+          title: '提示',
+          content: res.msg || '提交失败',
+          showCancel: false
+        });
         return;
       }
 
@@ -174,7 +178,20 @@ Page({
       });
     } catch (err) {
       console.error('Enterprise qualification apply failed:', err);
-      wx.showToast({ title: '提交失败，请稍后重试', icon: 'none' });
+      let errorMsg = '提交失败，请稍后重试';
+      // 尝试从错误中提取更友好的提示
+      if (err && err.data && err.data.msg) {
+        errorMsg = err.data.msg;
+      } else if (err && err.msg) {
+        errorMsg = err.msg;
+      } else if (err && err.message) {
+        errorMsg = err.message;
+      }
+      wx.showModal({
+        title: '提示',
+        content: errorMsg,
+        showCancel: false
+      });
     } finally {
       wx.hideLoading();
     }

@@ -4,8 +4,8 @@
       <view class="role-badge">
         <text class="badge-text">{{roleName}}</text>
       </view>
-      <view class="logout-btn" bindtap="onLogout">
-        <text class="logout-text">退出</text>
+      <view class="logout-btn" bindtap="onRefresh">
+        <text class="logout-text">刷新</text>
       </view>
     </view>
     <text class="greeting">欢迎回来，管理员</text>

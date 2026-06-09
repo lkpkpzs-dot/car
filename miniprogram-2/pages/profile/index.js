@@ -45,6 +45,7 @@ Page({
 
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().updateTabList(); // 确保 tabBar 重新计算首页路径
       this.getTabBar().setData({ selected: 1 });
     }
     this.loadUserInfo();

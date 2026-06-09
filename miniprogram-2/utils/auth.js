@@ -49,14 +49,14 @@ function requireRole(requiredRole) {
   
   if (!currentRole) {
     wx.reLaunch({
-      url: '/pages/index/index'
+      url: '/pages/splash/index'
     });
     return false;
   }
   
   if (requiredRole && currentRole !== requiredRole) {
     wx.reLaunch({
-      url: '/pages/index/index'
+      url: '/pages/splash/index'
     });
     return false;
   }
@@ -96,14 +96,20 @@ function navigateByRole(roleTypeRaw) {
   const enterpriseUtil = require('./enterprise.js');
   const userInfo = enterpriseUtil.normalizeUserInfo(wx.getStorageSync('userInfo'));
   
-  // 1 = 民警
+  // 1 = 民警（优先级最高）
   if (roleTypeRaw === 1 || roleTypeRaw === '1') {
     wx.reLaunch({ url: '/pages/admin/index' });
     return;
   }
   
+  // 2 = 企业端
+  if (roleTypeRaw === 2 || roleTypeRaw === '2') {
+    wx.reLaunch({ url: '/pages/enterprise/index' });
+    return;
+  }
+  
   // 3 = 普通用户/企业用户
-  // 关键：通过企业资质字段判断跳转目标
+  // 通过企业资质字段判断跳转目标
   if (userInfo.authEnterpriseId && userInfo.qualificationStatus === 1) {
     wx.reLaunch({ url: '/pages/enterprise/index' });
   } else {
@@ -135,7 +141,7 @@ function login() {
       success: (res) => {
         if (res.code) {
           wx.request({
-            url: 'https://rdd285a4.natappfree.cc/auth/login',
+            url: 'https://q32d54e8.natappfree.cc/auth/login',
             method: 'POST',
             timeout: 10000,
             data: { code: res.code },

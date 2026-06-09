@@ -27,6 +27,9 @@ public class RoadApplyRequest {
     @ApiModelProperty(value = "申请人ID", required = true)
     private Long applicantId;
 
+    @ApiModelProperty("安全员ID")
+    private Long officerId;
+
     @ApiModelProperty("车辆品牌")
     private String vehicleBrand;
 

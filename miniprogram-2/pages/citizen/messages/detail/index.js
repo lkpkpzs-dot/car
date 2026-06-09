@@ -1,4 +1,5 @@
 const request = require('../../../../utils/request.js');
+const reportStatus = require('../../../../utils/reportStatus.js');
 
 Page({
   data: {
@@ -6,11 +7,7 @@ Page({
     detail: null,
     images: [],
     loading: true,
-    processStatusMap: {
-      0: '待核实',
-      1: '已处理',
-      2: '无效举报'
-    }
+    processStatusMap: reportStatus.getReportStatusLabelMap()
   },
 
   onLoad(options) {
@@ -52,6 +49,7 @@ Page({
   },
 
   async loadDetail() {
+    
     this.setData({ loading: true });
 
     try {
@@ -63,12 +61,13 @@ Page({
           icon: 'none'
         });
         this.setData({ detail: null });
+        
         return;
       }
 
       const detail = res.data;
       const images = this.safeParseImages(detail.evidenceJson);
-
+      console.log('processStatuslkps:', detail.processStatus, typeof detail.processStatus);
       this.setData({
         detail,
         images

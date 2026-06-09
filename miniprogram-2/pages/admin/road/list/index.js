@@ -111,11 +111,11 @@ Page({
 
   getMockList() {
     return [
-      { id: 101, enterpriseId: 10088, enterpriseName: '广州海纳进出口贸易有限公司', type: 1, typeLabel: '道路测试', status: 1, vehicleBrand: '智行者', vehicleModel: 'A1', vin: 'LH1234567890ABCDE', createTimeShort: '2026-05-27', inspectionStatus: 1, plateStatus: 0 },
-      { id: 102, enterpriseId: 10089, enterpriseName: '极速自动驾驶科技', type: 2, typeLabel: '示范应用', status: 1, vehicleBrand: '文远知行', vehicleModel: 'W1', vin: 'LH9876543210FEDCB', createTimeShort: '2026-05-26', inspectionStatus: 1, plateStatus: 0 },
-      { id: 103, enterpriseId: 10088, enterpriseName: '广州海纳进出口贸易有限公司', type: 1, typeLabel: '道路测试', status: 2, vehicleBrand: '智行者', vehicleModel: 'A1', vin: 'VIN003_PASSED', createTimeShort: '2026-05-25', inspectionStatus: 2, plateStatus: 0 },
-      { id: 104, enterpriseId: 10088, enterpriseName: '广州海纳进出口贸易有限公司', type: 1, typeLabel: '道路测试', status: 2, vehicleBrand: '智行者', vehicleModel: 'A1', vin: 'VIN004_INSPECTION_REJECTED', createTimeShort: '2026-05-24', inspectionStatus: 3, plateStatus: 0 },
-      { id: 105, enterpriseId: 10090, enterpriseName: '智驾科技有限公司', type: 3, typeLabel: '应用试点', status: 2, vehicleBrand: '百度阿波罗', vehicleModel: 'Robotaxi', vin: 'VIN005_PLATE_ISSUED', createTimeShort: '2026-05-20', inspectionStatus: 2, plateStatus: 1 }
+      { id: 101, enterpriseId: 10088, enterpriseName: '广州海纳进出口贸易有限公司', type: 1, typeLabel: '道路测试', status: 1, vehicleBrand: '智行者', vehicleModel: 'A1', vin: 'LH1234567890ABCDE', createTimeShort: '2026-05-27', inspectionStatus: 1, plateStatus: 0, officerName: '张三' },
+      { id: 102, enterpriseId: 10089, enterpriseName: '极速自动驾驶科技', type: 2, typeLabel: '示范应用', status: 1, vehicleBrand: '文远知行', vehicleModel: 'W1', vin: 'LH9876543210FEDCB', createTimeShort: '2026-05-26', inspectionStatus: 1, plateStatus: 0, officerName: '李四' },
+      { id: 103, enterpriseId: 10088, enterpriseName: '广州海纳进出口贸易有限公司', type: 1, typeLabel: '道路测试', status: 2, vehicleBrand: '智行者', vehicleModel: 'A1', vin: 'VIN003_PASSED', createTimeShort: '2026-05-25', inspectionStatus: 2, plateStatus: 0, officerName: '王五' },
+      { id: 104, enterpriseId: 10088, enterpriseName: '广州海纳进出口贸易有限公司', type: 1, typeLabel: '道路测试', status: 2, vehicleBrand: '智行者', vehicleModel: 'A1', vin: 'VIN004_INSPECTION_REJECTED', createTimeShort: '2026-05-24', inspectionStatus: 3, plateStatus: 0, officerName: '赵六' },
+      { id: 105, enterpriseId: 10090, enterpriseName: '智驾科技有限公司', type: 3, typeLabel: '应用试点', status: 2, vehicleBrand: '百度阿波罗', vehicleModel: 'Robotaxi', vin: 'VIN005_PLATE_ISSUED', createTimeShort: '2026-05-20', inspectionStatus: 2, plateStatus: 1, officerName: '孙七' }
     ];
   },
 
