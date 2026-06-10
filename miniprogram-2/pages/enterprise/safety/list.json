@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "安全员监管",
+  "navigationBarBackgroundColor": "#16606b",
   "usingComponents": {
     "status-tag": "/components/status-tag/status-tag"
   },

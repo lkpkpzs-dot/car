@@ -1,0 +1,87 @@
+<view class="feedback-container">
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">类型选择</text>
+    </view>
+    
+    <view class="type-grid">
+      <view 
+        wx:for="{{types}}" 
+        wx:key="id" 
+        class="type-item {{selectedType === item.id ? 'selected' : ''}}"
+        data-type="{{item.id}}"
+        bindtap="onSelectType"
+      >
+        <text class="type-icon">{{item.icon}}</text>
+        <text class="type-text">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">基本信息</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">标题</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入标题" 
+        value="{{formData.title}}"
+        data-field="title"
+        bindinput="onInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label required">详细内容</text>
+      <textarea 
+        class="form-textarea" 
+        placeholder="请详细描述您的意见或建议" 
+        value="{{formData.content}}"
+        data-field="content"
+        bindinput="onInput"
+        maxlength="500"
+      />
+      <text class="char-count">{{formData.content.length}}/500</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">联系方式（选填）</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入手机号或其他联系方式" 
+        value="{{formData.contact}}"
+        data-field="contact"
+        bindinput="onInput"
+      />
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">图片上传</text>
+      <text class="section-desc">最多上传 9 张</text>
+    </view>
+
+    <view class="upload-grid">
+      <view class="image-item" wx:for="{{formData.images}}" wx:key="index">
+        <image class="image-preview" src="{{item}}" mode="aspectFill" bindtap="onPreviewImage" data-index="{{index}}" />
+        <view class="image-delete" bindtap="onDeleteImage" data-index="{{index}}">
+          <text class="delete-icon">×</text>
+        </view>
+      </view>
+      <view class="upload-btn" wx:if="{{formData.images.length < 9}}" bindtap="onChooseImage">
+        <text class="upload-icon">+</text>
+        <text class="upload-text">上传图片</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer-section">
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}" loading="{{submitting}}">
+      {{submitting ? '提交中...' : '提交反馈'}}
+    </button>
+  </view>
+</view>

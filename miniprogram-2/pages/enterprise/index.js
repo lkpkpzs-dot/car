@@ -16,11 +16,13 @@ Page({
       applyCount: 0,
       reviewingCount: 0
     },
+    unreadCount: 0,
     quickActions: [
       { id: 'roadApply', name: '道路许可申请', icon: 'monitor', desc: '道路测试/示范应用/应用试点', badgeCount: 0 },
       { id: 'safety', name: '安全员监管', icon: 'monitor', desc: '资质申请与人员管理', badgeCount: 0 },
       { id: 'myVehicles', name: '我的车辆', icon: 'vehicle', desc: '查看已通过查验的车辆', badgeCount: 0 },
-      { id: 'reportManage', name: '举报管理', icon: 'jubao', desc: '处理市民举报', badgeCount: 0 }
+      { id: 'reportManage', name: '举报管理', icon: 'jubao', desc: '处理市民举报', badgeCount: 0 },
+      { id: 'messages', name: '消息中心', icon: 'messages', desc: '查看系统通知', badgeCount: 0 }
     ]
   },
 
@@ -77,6 +79,10 @@ Page({
     }
   },
 
+  onGoToMessages() {
+    wx.navigateTo({ url: '/pages/enterprise/messages/index' });
+  },
+
   onQuickAction(e) {
     const { id } = e.currentTarget.dataset;
 
@@ -97,6 +103,11 @@ Page({
 
     if (id === 'reportManage') {
       wx.navigateTo({ url: '/pages/enterprise/report/list' });
+      return;
+    }
+
+    if (id === 'messages') {
+      wx.navigateTo({ url: '/pages/enterprise/messages/index' });
       return;
     }
 
@@ -127,16 +138,33 @@ Page({
         reportPendingCount = list.filter(item => item.processStatus === 1).length;
       }
 
-      // 更新 quickActions 中的 badgeCount
+      // 获取未读消息数量
+      let unreadCount = 0;
+      try {
+        const messagesRes = await request.get('/sysMessage/myMessages');
+        if (messagesRes.code === 200 && messagesRes.data) {
+          const messages = messagesRes.data || [];
+          unreadCount = messages.filter(item => item.isRead === 0).length;
+        }
+      } catch (msgErr) {
+        console.error('[Load Unread Messages] Failed:', msgErr);
+      }
+
+      // 更新 quickActions 中的 badgeCount 和右上角的 unreadCount
       const quickActions = this.data.quickActions.map(item => {
         if (item.id === 'reportManage') {
           return { ...item, badgeCount: reportPendingCount };
         }
-        // 对于其他功能，暂时设置为 0，需要后端接口支持
+        if (item.id === 'messages') {
+          return { ...item, badgeCount: unreadCount };
+        }
         return { ...item, badgeCount: 0 };
       });
 
-      this.setData({ quickActions });
+      this.setData({ 
+        quickActions,
+        unreadCount
+      });
     } catch (err) {
       console.error('[Load Pending Counts] Failed:', err);
     }

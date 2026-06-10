@@ -22,4 +22,37 @@ public interface SysUserService extends IService<SysUser> {
      * @return 企业用户列表
      */
     List<SysUser> getEnterpriseUsers(Long enterpriseId);
+
+    /**
+     * 封禁用户举报权限
+     * @param userId 用户ID
+     * @param banHours 封禁时长（小时）
+     * @param reason 封禁原因
+     */
+    void banUserReport(Long userId, int banHours, String reason);
+
+    /**
+     * 解封用户举报权限
+     * @param userId 用户ID
+     */
+    void unbanUserReport(Long userId);
+
+    /**
+     * 检查用户是否被封禁
+     * @param userId 用户ID
+     * @return 是否被封禁
+     */
+    boolean isUserBanned(Long userId);
+
+    /**
+     * 增加用户总举报次数
+     * @param userId 用户ID
+     */
+    void incrementTotalReportCount(Long userId);
+
+    /**
+     * 增加用户无效举报次数
+     * @param userId 用户ID
+     */
+    void incrementInvalidReportCount(Long userId);
 }

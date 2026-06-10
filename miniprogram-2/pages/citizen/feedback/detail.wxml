@@ -1,0 +1,64 @@
+<view class="feedback-detail-container" wx:if="{{detail}}">
+  <view class="detail-section">
+    <view class="section-header">
+      <text class="section-title">反馈信息</text>
+    </view>
+    
+    <view class="detail-title">
+      <view class="title-text">{{detail.title}}</view>
+      <view class="title-status" style="color: {{getStatusConfig(detail.status).color}}; background: {{getStatusConfig(detail.status).bgColor}};">
+        {{getStatusConfig(detail.status).text}}
+      </view>
+    </view>
+
+    <view class="detail-meta">
+      <view class="meta-item">
+        <text class="meta-label">类型</text>
+        <text class="meta-value">{{getTypeText(detail.type)}}</text>
+      </view>
+      <view class="meta-item">
+        <text class="meta-label">提交时间</text>
+        <text class="meta-value">{{detail.createTime}}</text>
+      </view>
+    </view>
+
+    <view class="detail-content">
+      <text class="content-text">{{detail.content}}</text>
+    </view>
+
+    <view class="detail-contact" wx:if="{{detail.contact}}">
+      <text class="contact-label">联系方式：</text>
+      <text class="contact-value">{{detail.contact}}</text>
+    </view>
+
+    <view class="detail-images" wx:if="{{images.length > 0}}">
+      <view class="images-title">图片附件</view>
+      <view class="images-grid">
+        <view 
+          class="image-item" 
+          wx:for="{{images}}" 
+          wx:key="index"
+          bindtap="onPreviewImage"
+          data-index="{{index}}"
+        >
+          <image class="image-preview" src="{{item}}" mode="aspectFill" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="detail-section" wx:if="{{detail.status === 'completed' && detail.handleRemark}}">
+    <view class="section-header">
+      <text class="section-title">处理结果</text>
+    </view>
+    
+    <view class="handle-result">
+      <view class="handle-remark">{{detail.handleRemark}}</view>
+      <view class="handle-time" wx:if="{{detail.handleTime}}">{{detail.handleTime}}</view>
+    </view>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <text class="loading-text">加载中...</text>
+</view>

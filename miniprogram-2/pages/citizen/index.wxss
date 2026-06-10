@@ -291,10 +291,15 @@ page {
   opacity: 1;
 }
 
+.action-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 18rpx;
+}
+
 .action-icon {
   width: 86rpx;
   height: 86rpx;
-  margin: 0 auto 18rpx;
   background: #fff1df;
   border-radius: 16rpx;
   display: flex;
@@ -302,6 +307,25 @@ page {
   justify-content: center;
   position: relative;
   z-index: 1;
+}
+
+.action-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 8rpx;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 36rpx;
+  text-align: center;
+  border-radius: 18rpx;
+  border: 3rpx solid #ffffff;
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.4);
+  z-index: 10;
 }
 
 .action-icon image {

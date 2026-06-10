@@ -116,11 +116,36 @@ Page({
     return true;
   },
 
+  checkUserProfile() {
+    const userInfo = wx.getStorageSync('userInfo');
+    const hasRealName = userInfo && (userInfo.realName || userInfo.real_name);
+    const hasPhone = userInfo && userInfo.phone;
+    
+    return hasRealName && hasPhone;
+  },
+
   async onSubmit() {
     if (this.data.readonly) {
       wx.navigateBack();
       return;
     }
+    
+    // 检查是否填写了真实姓名和手机号
+    if (!this.checkUserProfile()) {
+      wx.showModal({
+        title: '需要完善信息',
+        content: '申请企业资质前需要先填写您的真实姓名和手机号',
+        confirmText: '去填写',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/account-settings/index' });
+          }
+        }
+      });
+      return;
+    }
+    
     if (!this.validate()) return;
 
     const { enterpriseName, creditCode, legalPerson, contactPhone, licenseImg } = this.data;

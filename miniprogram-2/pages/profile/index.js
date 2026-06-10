@@ -8,6 +8,7 @@ Page({
     role: '',
     roleName: '',
     roleColor: '',
+    roleClass: '',
     isEnterprise: false,
     qualificationStatus: enterpriseUtil.QUALIFICATION_STATUS.NONE,
     statusLabel: '未申请',
@@ -86,12 +87,15 @@ Page({
     let roleColor = auth.getRoleColor(role);
 
     // 根据角色显示不同的名称和颜色
+    let roleClass = 'role-citizen'; // 默认市民端
     if (role === 'admin') {
       roleName = '管理员用户';
       roleColor = '#3b82f6'; // 蓝色
+      roleClass = 'role-admin';
     } else if (isEnterpriseCertified) {
       roleName = '企业用户';
       roleColor = '#2f855a'; // 企业绿
+      roleClass = 'role-enterprise';
     }
 
     this.setData({
@@ -99,6 +103,7 @@ Page({
       role,
       roleName,
       roleColor,
+      roleClass,
       isEnterprise: isEnterpriseCertified, // 用于控制显示企业信息块
       qualificationStatus: userInfo.qualificationStatus,
       statusLabel: meta.label,
@@ -107,6 +112,25 @@ Page({
       qualBtnText,
       qualBtnMode,
       showQualBtn
+    });
+
+    // 根据角色动态设置导航栏颜色
+    let navBarColor = '#1a365d'; // 默认蓝色
+    if (role === 'admin') {
+      navBarColor = '#1e3a8a'; // 民警端深蓝色
+    } else if (isEnterpriseCertified) {
+      navBarColor = '#16606b'; // 企业端青绿色
+    } else {
+      navBarColor = '#ea580c'; // 市民端橙色
+    }
+
+    wx.setNavigationBarColor({
+      frontColor: '#ffffff',
+      backgroundColor: navBarColor,
+      animation: {
+        duration: 400,
+        timingFunc: 'easeInOut'
+      }
     });
 
     // 如果是已认证企业且不是民警端，获取企业详细信息

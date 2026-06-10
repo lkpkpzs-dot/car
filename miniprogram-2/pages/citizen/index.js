@@ -20,10 +20,11 @@ Page({
       rejectedCount: 0
     },
     quickActions: [
-      { id: 'report', name: '违规举报', icon: 'report', desc: '举报违规行为' },
-      { id: 'myReports', name: '我的举报', icon: 'check', desc: '查看我的举报' },
+      { id: 'report', name: '违规举报', icon: 'check', desc: '举报违规行为' },
+      { id: 'myReports', name: '我的举报', icon: 'myreport', desc: '查看我的举报' },
       { id: 'apply', name: '申请企业资质', icon: 'archivee', desc: '提交企业认证申请' },
       { id: 'messages', name: '我的消息', icon: 'users', desc: '查看消息通知' },
+      { id: 'feedback', name: '意见建议', icon: 'shiminsuggest', desc: '提交意见建议' },
       { id: 'about', name: '使用手册', icon: 'about', desc: '了解使用说明' }
     ],
     tips: [
@@ -125,10 +126,14 @@ Page({
       wx.navigateTo({
         url: '/pages/citizen/messages/index'
       });
+    } else if (actionId === 'feedback') {
+      wx.navigateTo({
+        url: '/pages/citizen/feedback/submit'
+      });
     } else if (actionId === 'about') {
       wx.showModal({
         title: '使用手册',
-        content: '智车通是政务专属无人车综合管理服务小程序，市民朋友可以通过本小程序进行违规举报、申请企业资质，以及查看处理进度和消息通知。',
+        content: '智驾廉盟是政务专属无人车综合管理服务小程序，市民朋友可以通过本小程序进行违规举报、申请企业资质，以及查看处理进度和消息通知。',
         showCancel: false
       });
     }

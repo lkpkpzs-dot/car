@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://q32d54e8.natappfree.cc';
+const API_BASE_URL = 'https://e2a7a72b.natappfree.cc';
 
 const auth = require('./auth');
 

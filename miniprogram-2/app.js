@@ -91,7 +91,7 @@ App({
   // 不带 token 的请求（用于登录时）
   requestWithoutToken(options) {
     return new Promise((resolve, reject) => {
-      const API_BASE_URL = 'https://q32d54e8.natappfree.cc';
+      const API_BASE_URL = 'https://e2a7a72b.natappfree.cc';
       wx.request({
         url: options.url.startsWith('http') ? options.url : API_BASE_URL + options.url,
         method: options.method || 'GET',
@@ -144,6 +144,6 @@ App({
   globalData: {
     userInfo: null,
     role: null,
-    baseUrl: 'https://q32d54e8.natappfree.cc'
+    baseUrl: 'https://e2a7a72b.natappfree.cc'
   }
 });

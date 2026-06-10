@@ -14,12 +14,14 @@ Page({
       todayProcess: 23
     },
     quickActions: [
-      { id: 'audit', name: '资质审核', icon: 'apply', desc: '企业资质与号牌申请' },
-      { id: 'roadAudit', name: '道路审核', icon: 'monitor', desc: '道路测试与示范应用' },
-      { id: 'report', name: '举报审核', icon: 'jubao', desc: '群众举报审核处理' },
-      { id: 'safety', name: '安全员监管', icon: 'jianguan', desc: '资质审核与事故处分' },
-      { id: 'archive', name: '档案管理', icon: 'archives', desc: '车辆档案查询' },
-      { id: 'logs', name: '系统日志', icon: 'records', desc: '操作日志记录' }
+      { id: 'audit', name: '资质审核', icon: 'apply', desc: '企业资质审核', unreadCount: 0 },
+      { id: 'roadAudit', name: '道路审核', icon: 'monitor', desc: '审核/查验/发牌', unreadCount: 0 },
+      { id: 'report', name: '举报审核', icon: 'jubao', desc: '群众举报审核处理', unreadCount: 0 },
+      { id: 'feedback', name: '意见建议', icon: 'suggest', desc: '意见建议处理', unreadCount: 0 },
+      { id: 'reportMgmt', name: '防恶意举报', icon: 'admin', desc: '用户举报权限管理', unreadCount: 0 },
+      { id: 'safety', name: '安全员监管', icon: 'jianguan', desc: '资质审核与事故处分', unreadCount: 0 },
+      { id: 'archive', name: '档案管理', icon: 'archives', desc: '车辆档案查询', unreadCount: 0 },
+      { id: 'logs', name: '系统日志', icon: 'records', desc: '操作日志记录', unreadCount: 0 }
     ],
     recentApproval: []
   },
@@ -78,8 +80,78 @@ Page({
           businessType: item.businessType
         }))
       });
+
+      // 加载各个模块的未处理数量
+      await this.loadUnreadCounts();
     } catch (err) {
       console.error('Load admin data failed:', err);
+    }
+  },
+
+  async loadUnreadCounts() {
+    const quickActions = [...this.data.quickActions];
+    
+    try {
+      // 1. 资质审核未处理数量
+      try {
+        const auditRes = await request.get('/audit/list', {
+          isProcessed: false,
+          businessType: auditUtil.BUSINESS_TYPE.ENTERPRISE
+        });
+        const auditList = request.parseListData(auditRes);
+        const auditIndex = quickActions.findIndex(a => a.id === 'audit');
+        if (auditIndex !== -1) {
+          quickActions[auditIndex].unreadCount = auditList.length;
+        }
+      } catch (e) {
+        console.error('Load audit count failed:', e);
+      }
+
+      // 2. 群众举报未处理数量
+      try {
+        const reportRes = await request.get('/citizenReport/list', {});
+        const reportList = request.parseListData(reportRes);
+        const pendingReports = reportList.filter(item => this.toNumber(item.processStatus) === 0);
+        const reportIndex = quickActions.findIndex(a => a.id === 'report');
+        if (reportIndex !== -1) {
+          quickActions[reportIndex].unreadCount = pendingReports.length;
+        }
+      } catch (e) {
+        console.error('Load report count failed:', e);
+      }
+
+      // 3. 意见建议未处理数量
+      try {
+        const feedbackRes = await request.get('/feedback/admin/list', {});
+        const feedbackList = request.parseListData(feedbackRes);
+        const pendingFeedback = feedbackList.filter(item => {
+          const status = item.processStatus !== undefined ? item.processStatus : item.status;
+          return typeof status === 'number' ? status === 0 : status === 'pending';
+        });
+        const feedbackIndex = quickActions.findIndex(a => a.id === 'feedback');
+        if (feedbackIndex !== -1) {
+          quickActions[feedbackIndex].unreadCount = pendingFeedback.length;
+        }
+      } catch (e) {
+        console.error('Load feedback count failed:', e);
+      }
+
+      // 4. 道路审核未处理数量
+      try {
+        const roadRes = await request.get('/roadAudit/list', {});
+        const roadList = request.parseListData(roadRes);
+        const pendingRoad = roadList.filter(item => this.toNumber(item.status) === 1);
+        const roadIndex = quickActions.findIndex(a => a.id === 'roadAudit');
+        if (roadIndex !== -1) {
+          quickActions[roadIndex].unreadCount = pendingRoad.length;
+        }
+      } catch (e) {
+        console.error('Load road audit count failed:', e);
+      }
+
+      this.setData({ quickActions });
+    } catch (error) {
+      console.error('Load unread counts failed:', error);
     }
   },
 
@@ -124,6 +196,8 @@ Page({
       audit: '/pages/admin/audit/index',
       roadAudit: '/pages/admin/road/list/index',
       report: '/pages/admin/report/list/index',
+      feedback: '/pages/admin/feedback/list',
+      reportMgmt: '/pages/admin/report/user-mgmt/index',
       safety: '/pages/admin/safety/list',
       archive: '/pages/admin/archive/index',
       logs: '/pages/logs/logs'

@@ -1,0 +1,112 @@
+<view class="container">
+
+  <view class="user-info-card" wx:if="{{user}}">
+    <view class="card-decoration"></view>
+    <view class="warning-header">
+      <view class="warning-icon-circle">
+        <text class="warning-icon">⚠️</text>
+      </view>
+      <view class="warning-text-group">
+        <text class="warning-title">即将封禁</text>
+        <text class="warning-desc">此操作将限制用户的举报权限</text>
+      </view>
+    </view>
+    <view class="user-details">
+      <view class="user-avatar">
+        <text>{{avatarText}}</text>
+      </view>
+      <view class="user-info">
+        <text class="user-name">{{user.realName || '用户' + user.userId}}</text>
+        <view class="user-meta">
+          <text class="meta-item">
+            <text class="meta-label">ID:</text>
+            <text class="meta-value">{{user.userId}}</text>
+          </text>
+          <text class="meta-item" wx:if="{{user.phone}}">
+            <text class="meta-label">电话:</text>
+            <text class="meta-value">{{user.phone}}</text>
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">
+      <text class="title-text">封禁时长</text>
+      <text class="title-hint">选择封禁时长</text>
+    </view>
+    <view class="hour-options">
+      <view 
+        wx:for="{{hourOptions}}" 
+        wx:key="value"
+        class="hour-option {{selectedHours === item.value && !showCustomInput ? 'active' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="onSelectHours"
+      >
+        <text class="hour-label">{{item.label}}</text>
+        <view class="check-mark" wx:if="{{selectedHours === item.value && !showCustomInput}}"></view>
+      </view>
+    </view>
+    
+    <view class="custom-hour" wx:if="{{showCustomInput}}">
+      <input 
+        class="custom-input"
+        type="number"
+        
+        value="{{customHours}}"
+        bindinput="onCustomInput"
+      />
+      <text class="unit">小时</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">
+      <text class="title-text">封禁原因</text>
+      <text class="title-hint">选择原因</text>
+    </view>
+    <view class="hour-options">
+      <view 
+        wx:for="{{reasons}}" 
+        wx:key="*this"
+        class="reason-option {{selectedReason === item ? 'active' : ''}}"
+        data-reason="{{item}}"
+        bindtap="onSelectReason"
+      >
+        <text class="reason-text">{{item}}</text>
+        <view class="radio-dot" wx:if="{{selectedReason === item}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="summary-card">
+    <view class="summary-header">
+      <text class="summary-title">封禁确认</text>
+    </view>
+    <view class="hour-options">
+      <view class="summary-row">
+        <text class="label">用户</text>
+        <text class="value">{{user.realName || '用户' + user.userId}}</text>
+      </view>
+      <view class="summary-divider"></view>
+      <view class="summary-row">
+        <text class="label">时长</text>
+        <text class="value value-highlight">{{selectedHours}} 小时</text>
+      </view>
+      <view class="summary-divider"></view>
+      <view class="summary-row">
+        <text class="label">原因</text>
+        <text class="value">{{selectedReason}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="button-group">
+    <button class="cancel-btn" bindtap="wx.navigateBack" disabled="{{loading}}">取消</button>
+    <button class="confirm-btn" bindtap="onConfirm" disabled="{{loading}}">
+      <text wx:if="{{loading}}">处理中...</text>
+      <text wx:else>确认封禁</text>
+    </button>
+  </view>
+</view>

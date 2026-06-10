@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "防恶意举报管理",
+  "navigationBarBackgroundColor": "#1e3a8a",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f5f7fa",
+  "backgroundTextStyle": "dark"
+}

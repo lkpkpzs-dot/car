@@ -51,7 +51,7 @@ Page({
     
     try {
       // 获取全量数据
-      const res = await request.get('/roadApplication/list');
+      const res = await request.get('/roadAudit/list');
       wx.hideLoading();
       
       const rawList = request.parseListData(res);

@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "安全员资质申请",
+  "navigationBarBackgroundColor": "#16606b",
   "usingComponents": {
     "image-uploader": "/components/image-uploader/image-uploader"
   }

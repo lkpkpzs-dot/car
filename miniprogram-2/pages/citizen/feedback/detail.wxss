@@ -1,0 +1,162 @@
+.feedback-detail-container {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 20rpx 32rpx;
+}
+
+.detail-section {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.05);
+}
+
+.section-header {
+  margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.detail-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.title-text {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.4;
+  margin-right: 16rpx;
+}
+
+.title-status {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.meta-label {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.meta-value {
+  font-size: 26rpx;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.detail-content {
+  margin-bottom: 24rpx;
+}
+
+.content-text {
+  font-size: 28rpx;
+  color: #374151;
+  line-height: 1.8;
+}
+
+.detail-contact {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: #f9fafb;
+  border-radius: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.contact-label {
+  font-size: 26rpx;
+  color: #6b7280;
+}
+
+.contact-value {
+  font-size: 26rpx;
+  color: #374151;
+  font-weight: 500;
+}
+
+.detail-images {
+  margin-top: 24rpx;
+}
+
+.images-title {
+  font-size: 26rpx;
+  color: #6b7280;
+  margin-bottom: 16rpx;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+}
+
+.image-item {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.handle-result {
+  padding: 24rpx;
+  background: #ecfdf5;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #10b981;
+}
+
+.handle-remark {
+  font-size: 28rpx;
+  color: #065f46;
+  line-height: 1.8;
+  margin-bottom: 16rpx;
+}
+
+.handle-time {
+  font-size: 24rpx;
+  color: #6ee7b7;
+  text-align: right;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx 0;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #9ca3af;
+}

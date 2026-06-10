@@ -55,7 +55,59 @@
   box-sizing: border-box;
 }
 
+.location-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
 
+.location-input {
+  flex: 1;
+}
+
+.location-btn {
+  width: 88rpx;
+  height: 88rpx;
+  background: linear-gradient(135deg, #ea580c 0%, #f59e0b 100%);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.location-icon {
+  font-size: 36rpx;
+}
+
+.location-info {
+  margin-top: 20rpx;
+  padding: 24rpx;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 16rpx;
+  border: 2rpx solid #bae6fd;
+}
+
+.location-coords {
+  display: block;
+  font-size: 26rpx;
+  color: #0369a1;
+  margin-bottom: 16rpx;
+}
+
+.location-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  font-size: 26rpx;
+  color: #0284c7;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  background: #fff;
+  border: 1rpx solid #7dd3fc;
+}
 
 .type-grid {
   display: grid;

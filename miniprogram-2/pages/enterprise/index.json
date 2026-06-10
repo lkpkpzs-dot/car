@@ -2,7 +2,7 @@
   "usingComponents": {
     "status-tag": "/components/status-tag/status-tag"
   },
-  "navigationBarTitleText": "企业工作台",
-  "navigationBarBackgroundColor": "#1a365d",
+  "navigationBarTitleText": "智驾廉盟",
+  "navigationBarBackgroundColor": "#16606b",
   "navigationBarTextStyle": "white"
 }

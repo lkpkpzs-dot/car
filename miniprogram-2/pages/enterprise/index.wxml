@@ -4,8 +4,14 @@
       <text class="header-title">企业工作台</text>
       <text class="header-sub">智慧出行政务服务平台</text>
     </view>
-    <view class="refresh-btn" bindtap="onRefresh">
-      <text class="refresh-text">刷新</text>
+    <view class="header-right">
+      <view class="message-btn" bindtap="onGoToMessages">
+        <text class="message-icon">🔔</text>
+        <view wx:if="{{unreadCount > 0}}" class="message-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
+      </view>
+      <view class="refresh-btn" bindtap="onRefresh">
+        <text class="refresh-text">刷新</text>
+      </view>
     </view>
   </view>
 

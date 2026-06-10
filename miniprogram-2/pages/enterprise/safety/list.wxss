@@ -7,7 +7,7 @@
 .primary-btn {
   height: 84rpx;
   line-height: 84rpx;
-  background: #1a365d;
+  background: #16606b;
   color: #fff;
   border-radius: 42rpx;
   font-size: 30rpx;

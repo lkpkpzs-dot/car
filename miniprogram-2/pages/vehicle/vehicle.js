@@ -51,7 +51,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '智车通 - 车辆详情',
+      title: '智驾廉盟 - 车辆详情',
       path: `/pages/vehicle/vehicle?id=${this.data.vehicle.id}`
     };
   }

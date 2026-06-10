@@ -1,4 +1,4 @@
-<view class="profile-container">
+<view class="profile-container {{roleClass}}">
   <view class="user-card">
     <view class="avatar-section">
       <view class="avatar-wrapper">

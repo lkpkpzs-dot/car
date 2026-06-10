@@ -7,8 +7,11 @@ import org.lkp.car.common.Result;
 import org.lkp.car.dto.CitizenReportEnterpriseHandleRequest;
 import org.lkp.car.dto.CitizenReportReviewRequest;
 import org.lkp.car.entity.CitizenReport;
+import org.lkp.car.entity.SysMessage;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.CitizenReportService;
+import org.lkp.car.service.SysMessageService;
+import org.lkp.car.service.SysUserService;
 import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,12 @@ public class CitizenReportController {
 
     @Autowired
     private CitizenReportService citizenReportService;
+
+    @Autowired
+    private SysUserService sysUserService;
+    
+    @Autowired
+    private SysMessageService sysMessageService;
 
     /**
      * 提交举报（新流程）
@@ -183,5 +192,105 @@ public class CitizenReportController {
             citizenReport.setUserId(currentUser.getUserId());
         }
         return Result.success(citizenReportService.save(citizenReport));
+    }
+
+    /**
+     * 封禁用户举报权限（民警专用）
+     */
+    @PostMapping("/admin/ban-user")
+    @ApiOperation("封禁用户举报权限（民警专用）")
+    public Result<Void> banUserReport(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "24") int banHours,
+            @RequestParam String reason,
+            HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无权限操作");
+        }
+        try {
+            sysUserService.banUserReport(userId, banHours, reason);
+            
+            // 发送封禁通知消息给用户
+            sendBanNotification(userId, banHours, reason, currentUser);
+            
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 解封用户举报权限（民警专用）
+     */
+    @PostMapping("/admin/unban-user")
+    @ApiOperation("解封用户举报权限（民警专用）")
+    public Result<Void> unbanUserReport(
+            @RequestParam Long userId,
+            HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无权限操作");
+        }
+        try {
+            sysUserService.unbanUserReport(userId);
+            
+            // 发送解封通知消息给用户
+            sendUnbanNotification(userId, currentUser);
+            
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * 发送封禁通知消息
+     */
+    private void sendBanNotification(Long userId, int banHours, String reason, SysUser police) {
+        SysMessage message = new SysMessage();
+        message.setReceiverId(userId);
+        message.setMsgType(4); // 举报处理通知类型
+        message.setBusinessType(null); // 不关联具体业务
+        message.setBusinessId(null);
+        message.setTitle("举报功能封禁通知");
+        message.setContent(String.format(
+            "您的举报功能已被封禁%d小时，原因：%s。封禁由民警%s执行。",
+            banHours, reason, police.getRealName() != null ? police.getRealName() : "管理员"
+        ));
+        message.setIsRead(0);
+        sysMessageService.save(message);
+    }
+    
+    /**
+     * 发送解封通知消息
+     */
+    private void sendUnbanNotification(Long userId, SysUser police) {
+        SysMessage message = new SysMessage();
+        message.setReceiverId(userId);
+        message.setMsgType(4); // 举报处理通知类型
+        message.setBusinessType(null); // 不关联具体业务
+        message.setBusinessId(null);
+        message.setTitle("举报功能解封通知");
+        message.setContent(String.format(
+            "您的举报功能已解封，现在可以正常使用了。解封由民警%s执行。",
+            police.getRealName() != null ? police.getRealName() : "管理员"
+        ));
+        message.setIsRead(0);
+        sysMessageService.save(message);
+    }
+
+    /**
+     * 获取用户列表（民警专用，用于查看举报统计）
+     */
+    @GetMapping("/admin/users")
+    @ApiOperation("获取用户列表（民警专用）")
+    public Result<List<SysUser>> getUserList(HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!AuthContext.isPolice(currentUser)) {
+            return Result.error(403, "无权限访问");
+        }
+        List<SysUser> users = sysUserService.list();
+        return Result.success(users);
     }
 }

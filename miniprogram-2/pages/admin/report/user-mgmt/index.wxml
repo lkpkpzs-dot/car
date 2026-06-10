@@ -1,0 +1,85 @@
+<view class="page-container">
+  <!-- 头部 -->
+  <view class="header">
+    <text class="title">防恶意举报管理</text>
+    <text class="subtitle">管理用户举报权限</text>
+  </view>
+
+  <!-- 标签栏 -->
+  <view class="tabs">
+    <view 
+      wx:for="{{tabs}}" 
+      wx:key="*this" 
+      class="tab {{currentTab === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onTabChange"
+    >
+      <text>{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 用户列表 -->
+  <view wx:elif="{{filteredList && filteredList.length > 0}}" class="user-list">
+    <view wx:for="{{filteredList}}" wx:key="userId" class="user-card">
+      <view class="card-header">
+        <view class="user-info">
+          <text class="user-name">{{item.realName || '用户' + item.userId}}</text>
+          <text class="user-phone" wx:if="{{item.phone}}">电话: {{item.phone}}</text>
+          <text class="user-id">ID: {{item.userId}}</text>
+        </view>
+        <view class="status-badge status-{{item.banStatusClass}}">
+          <text>{{item.isReportBanned ? '已封禁' : '正常'}}</text>
+        </view>
+      </view>
+
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{item.totalReportCount}}</text>
+          <text class="stat-label">总举报数</text>
+        </view>
+        <view class="stat-item invalid">
+          <text class="stat-value">{{item.invalidReportCount}}</text>
+          <text class="stat-label">无效举报</text>
+        </view>
+      </view>
+
+      <view class="card-footer">
+        <view wx:if="{{item.isReportBanned && item.banEndTime}}" class="ban-info">
+          <text class="ban-label">封禁截止：</text>
+          <text class="ban-time">{{item.banEndTime}}</text>
+        </view>
+        
+        <view class="actions">
+          <button 
+            wx:if="{{!item.isReportBanned}}" 
+            class="action-btn btn-ban"
+            bindtap="showBanConfirm"
+            data-user="{{item}}"
+          >
+            封禁
+          </button>
+          <button 
+            wx:if="{{item.isReportBanned}}" 
+            class="action-btn btn-unban"
+            bindtap="showUnbanConfirm"
+            data-user="{{item}}"
+          >
+            解封
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty-state">
+    <image src="/assets/images/empty.png" mode="aspectFit" class="empty-image"></image>
+    <text class="empty-text">暂无用户数据</text>
+  </view>
+</view>

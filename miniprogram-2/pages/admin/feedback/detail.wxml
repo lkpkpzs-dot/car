@@ -1,0 +1,114 @@
+<view class="feedback-detail-container" wx:if="{{detail}}">
+  <!-- 基础信息 -->
+  <view class="detail-section">
+    <view class="section-header">
+      <text class="section-title">反馈信息</text>
+    </view>
+    
+    <view class="detail-header">
+      <view class="detail-title">
+        <text class="title-text">{{detail.title}}</text>
+      </view>
+      <view class="status-badge status-{{detail.statusClass}}">
+        <text>{{detail.statusLabel}}</text>
+      </view>
+    </view>
+
+    <view class="detail-meta">
+      <view class="meta-item">
+        <text class="meta-label">反馈类型</text>
+        <text class="meta-value">{{detail.typeName}}</text>
+      </view>
+      <view class="meta-item" wx:if="{{detail.contact}}">
+        <text class="meta-label">联系方式</text>
+        <text class="meta-value">{{detail.contact}}</text>
+      </view>
+      <view class="meta-item">
+        <text class="meta-label">提交时间</text>
+        <text class="meta-value">{{detail.createTime}}</text>
+      </view>
+    </view>
+
+    <view class="detail-content">
+      <text class="content-label">详细内容</text>
+      <text class="content-text">{{detail.content}}</text>
+    </view>
+
+    <view class="detail-images" wx:if="{{images.length > 0}}">
+      <text class="images-label">图片附件</text>
+      <view class="images-grid">
+        <view 
+          class="image-item" 
+          wx:for="{{images}}" 
+          wx:key="index"
+          bindtap="onPreviewImage"
+          data-index="{{index}}"
+        >
+          <image class="image-preview" src="{{item}}" mode="aspectFill"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 处理记录 -->
+  <view class="detail-section" wx:if="{{detail.handleRemark || detail.handleTime}}">
+    <view class="section-header">
+      <text class="section-title">处理记录</text>
+    </view>
+    
+    <view class="handle-record">
+      <view class="record-remark" wx:if="{{detail.handleRemark}}">
+        <text class="remark-label">处理备注</text>
+        <text class="remark-text">{{detail.handleRemark}}</text>
+      </view>
+      <view class="record-time" wx:if="{{detail.handleTime}}">
+        <text class="time-label">处理时间</text>
+        <text class="time-text">{{detail.handleTime}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 处理操作 -->
+  <view class="action-section" wx:if="{{detail.status !== 'completed'}}">
+    <view class="section-header">
+      <text class="section-title">处理操作</text>
+    </view>
+    
+    <view class="action-content">
+      <view class="form-item">
+        <text class="form-label">处理备注</text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入处理备注（选填）"
+          value="{{handleRemark}}"
+          bindinput="onRemarkInput"
+          maxlength="500"
+        ></textarea>
+        <text class="char-count">{{handleRemark.length}}/500</text>
+      </view>
+
+      <view class="action-buttons">
+        <button 
+          class="action-btn btn-secondary" 
+          wx:if="{{detail.status === 'pending'}}"
+          bindtap="onStartProcessing"
+          disabled="{{submitting}}"
+        >
+          开始处理
+        </button>
+        <button 
+          class="action-btn btn-primary" 
+          bindtap="onComplete"
+          disabled="{{submitting}}"
+        >
+          {{submitting ? '处理中...' : '完成处理'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

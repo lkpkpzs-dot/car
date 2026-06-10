@@ -77,4 +77,29 @@ public class SysUser implements Serializable {
     @TableLogic
     @ApiModelProperty("逻辑删除: 0-未删除, 1-已删除")
     private Integer isDeleted = 0;
+
+    /**
+     * 是否被封禁举报: 0-未封禁, 1-已封禁
+     */
+    @ApiModelProperty("是否被封禁举报: 0-未封禁, 1-已封禁")
+    private Integer isReportBanned = 0;
+
+    /**
+     * 总举报次数
+     */
+    @ApiModelProperty("总举报次数")
+    private Integer totalReportCount = 0;
+
+    /**
+     * 无效举报次数
+     */
+    @ApiModelProperty("无效举报次数")
+    private Integer invalidReportCount = 0;
+
+    /**
+     * 封禁截止时间
+     */
+    @ApiModelProperty("封禁截止时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date banEndTime;
 }

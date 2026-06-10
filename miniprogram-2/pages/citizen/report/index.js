@@ -19,8 +19,11 @@ Page({
     formData: {
       targetPlate: '',
       locationExt: '',
+      locationLat: '', // 纬度
+      locationLng: '', // 经度
       images: []
-    }
+    },
+    hasLocation: false // 标记是否已获取位置
   },
 
   onLoad() {
@@ -40,6 +43,11 @@ Page({
     const field = e.currentTarget.dataset.field;
     const value = e.detail.value;
     this.setData({ [`formData.${field}`]: value });
+    
+    // 如果用户手动修改了地址，不要清除经纬度，只更新 hasLocation 标记
+    if (field === 'locationExt' && this.data.formData.locationLat && this.data.formData.locationLng) {
+      this.setData({ hasLocation: true });
+    }
   },
 
   onChooseImage() {
@@ -95,10 +103,132 @@ Page({
     });
   },
 
+  async onGetLocation() {
+    const that = this;
+    wx.showActionSheet({
+      itemList: ['获取当前位置', '在地图上选择位置'],
+      success: async (res) => {
+        if (res.tapIndex === 0) {
+          await this.getCurrentLocation();
+        } else if (res.tapIndex === 1) {
+          await this.chooseLocationOnMap();
+        }
+      }
+    });
+  },
+
+  async getCurrentLocation() {
+    wx.showLoading({ title: '获取位置中...' });
+    
+    try {
+      const location = await this.getLocation();
+      if (location) {
+        const address = await this.reverseGeocode(location.latitude, location.longitude);
+        this.setData({
+          'formData.locationExt': address,
+          'formData.locationLat': location.latitude,
+          'formData.locationLng': location.longitude,
+          hasLocation: true
+        });
+        wx.showToast({
+          title: '获取位置成功',
+          icon: 'success'
+        });
+      }
+    } catch (error) {
+      console.error('获取位置失败:', error);
+      wx.showToast({
+        title: '获取位置失败，请手动输入',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  async chooseLocationOnMap() {
+    const that = this;
+    wx.chooseLocation({
+      success: (res) => {
+        console.log('地图选择结果:', res);
+        let address = res.address || res.name || `${res.latitude.toFixed(4)},${res.longitude.toFixed(4)}`;
+        
+        this.setData({
+          'formData.locationExt': address,
+          'formData.locationLat': res.latitude,
+          'formData.locationLng': res.longitude,
+          hasLocation: true
+        });
+        
+        wx.showToast({
+          title: '位置已选择',
+          icon: 'success'
+        });
+      },
+      fail: (error) => {
+        console.error('选择位置失败:', error);
+        wx.showToast({
+          title: '选择位置失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  getLocation() {
+    return new Promise((resolve, reject) => {
+      wx.getLocation({
+        type: 'gcj02',
+        altitude: false,
+        success: (res) => {
+          resolve({
+            latitude: res.latitude,
+            longitude: res.longitude
+          });
+        },
+        fail: (error) => {
+          // 如果用户拒绝授权，给出友好提示
+          if (error.errMsg && error.errMsg.includes('auth deny')) {
+            wx.showModal({
+              title: '需要位置权限',
+              content: '请授权允许使用位置信息，才能自动获取地址',
+              confirmText: '去授权',
+              success: (modalRes) => {
+                if (modalRes.confirm) {
+                  wx.openSetting();
+                }
+              }
+            });
+          }
+          reject(error);
+        }
+      });
+    });
+  },
+
+  async reverseGeocode(latitude, longitude) {
+    try {
+      // 尝试调用后端API进行逆地理编码
+      const res = await request.get('/common/reverseGeocode', {
+        latitude,
+        longitude
+      });
+      
+      if (res.code === 200 && res.data) {
+        return res.data.address || res.data.formatted_address || `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+      }
+    } catch (error) {
+      console.error('逆地理编码API调用失败:', error);
+    }
+    
+    // 如果API调用失败，返回经纬度格式
+    return `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+  },
+
   // 车牌格式校验
   validatePlateNumber(plate) {
     if (!plate || !plate.trim()) {
-      return true; // 车牌是选填的，空的没问题
+      return false; // 车牌是必填的，不能为空
     }
     
     // 中国车牌正则：包含新能源
@@ -117,6 +247,10 @@ Page({
       wx.showToast({ title: '请选择风险等级', icon: 'none' });
       return false;
     }
+    if (!formData.targetPlate.trim()) {
+      wx.showToast({ title: '请输入车辆号牌', icon: 'none' });
+      return false;
+    }
     if (!formData.locationExt.trim()) {
       wx.showToast({ title: '请输入发生地点', icon: 'none' });
       return false;
@@ -126,7 +260,7 @@ Page({
       return false;
     }
     // 车牌格式校验
-    if (formData.targetPlate && !this.validatePlateNumber(formData.targetPlate)) {
+    if (!this.validatePlateNumber(formData.targetPlate)) {
       wx.showModal({
         title: '提示',
         content: '您填写的车牌格式不正确。车牌格式应为：省份简称+字母+5-6位字符（如：京A12345）。是否继续提交？',
@@ -155,6 +289,8 @@ Page({
         riskLevel: this.data.selectedRiskLevel,
         targetPlate: this.data.formData.targetPlate,
         locationExt: this.data.formData.locationExt,
+        locationLat: this.data.formData.locationLat,
+        locationLng: this.data.formData.locationLng,
         evidenceJson: JSON.stringify(this.data.formData.images),
         userId: userInfo.userId
       });
@@ -169,23 +305,78 @@ Page({
           }
         });
       } else {
+        // 处理防恶意举报相关的错误信息
+        let message = res.msg || '提交失败';
+        
+        // 根据不同的错误类型显示更友好的提示
+        if (res.code === 403) {
+          if (res.msg && res.msg.includes('封禁')) {
+            message = res.msg;
+          } else if (res.msg && res.msg.includes('次数')) {
+            message = res.msg;
+          } else if (res.msg && res.msg.includes('间隔')) {
+            message = res.msg;
+          }
+        }
+        
         wx.showToast({
-          title: res.msg || '提交失败',
-          icon: 'none'
+          title: message,
+          icon: 'none',
+          duration: 3000
         });
       }
     } catch (error) {
+      console.error('提交举报失败:', error);
+      let message = '提交失败，请重试';
+      
+      if (error.statusCode === 403) {
+        try {
+          const data = error.data;
+          if (data && data.msg) {
+            message = data.msg;
+          }
+        } catch (e) {
+          message = '您的举报权限可能已被限制';
+        }
+      }
+      
       wx.showToast({
-        title: '提交失败，请重试',
-        icon: 'none'
+        title: message,
+        icon: 'none',
+        duration: 3000
       });
     } finally {
       this.setData({ submitting: false });
     }
   },
 
+  checkUserProfile() {
+    const userInfo = wx.getStorageSync('userInfo');
+    const hasRealName = userInfo && (userInfo.realName || userInfo.real_name);
+    const hasPhone = userInfo && userInfo.phone;
+    
+    return hasRealName && hasPhone;
+  },
+
   async onSubmit() {
     if (this.data.submitting) return;
+    
+    // 检查是否填写了真实姓名和手机号
+    if (!this.checkUserProfile()) {
+      wx.showModal({
+        title: '需要完善信息',
+        content: '提交举报前需要先填写您的真实姓名和手机号',
+        confirmText: '去填写',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/account-settings/index' });
+          }
+        }
+      });
+      return;
+    }
+    
     if (!this.validate()) return;
 
     // 正常校验通过，直接提交

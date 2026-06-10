@@ -48,9 +48,25 @@ file:
   upload-path: uploads/
   access-path: /uploads/**
 app:
-  base-url: https://q32d54e8.natappfree.cc
+  base-url: https://e2a7a72b.natappfree.cc
+
+# 腾讯地图API配置（可选，用于更精确的逆地理编码）
+tencent:
+  map:
+    key: DS3BZ-MGRYZ-WBPXJ-ZZENM-NRBNZ-2YF5B # 在此处填入腾讯地图WebService API Key
 
 citizen-report:
-  enterprise-handle-timeout-hours: 24   # 默认低风险
+  enterprise-handle-timeout-hours: 2   # 默认低风险
+  high-risk-handle-timeout-hours: 1
+  # 防恶意举报配置
+  anti-spam:
+    # 每日最大举报次数
+    max-reports-per-day: 10
+    # 触发封禁的无效举报次数
+    invalid-report-threshold: 3
+    # 封禁时长（小时）
+    ban-duration-hours: 24
+    # 短时间内举报间隔限制（分钟）
+    min-report-interval-minutes: 1
 
 

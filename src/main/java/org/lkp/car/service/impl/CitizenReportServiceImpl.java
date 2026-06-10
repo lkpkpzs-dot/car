@@ -43,10 +43,26 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
     // 企业处理超时时间（小时），从配置文件读取
     @Value("${citizen-report.enterprise-handle-timeout-hours}")
     private int enterpriseHandleTimeoutHours;
+    @Value("${citizen-report.high-risk-handle-timeout-hours:2}")
+    private int highRiskHandleTimeoutHours; // 可选，默认2小时
+
+    // 防恶意举报配置
+    @Value("${citizen-report.anti-spam.max-reports-per-day:10}")
+    private int maxReportsPerDay;
+    @Value("${citizen-report.anti-spam.invalid-report-threshold:3}")
+    private int invalidReportThreshold;
+    @Value("${citizen-report.anti-spam.ban-duration-hours:24}")
+    private int banDurationHours;
+    @Value("${citizen-report.anti-spam.min-report-interval-minutes:1}")
+    private int minReportIntervalMinutes;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long submitReport(CitizenReport report, Long userId) {
         report.setUserId(userId);
+
+        // 0. 防恶意举报检查
+        checkAntiSpam(userId);
 
         // 1. 如果前端没传风险等级，给默认值
         if (report.getRiskLevel() == null) {
@@ -69,7 +85,10 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
             report.setProcessStatus(1);
             // 设置企业处理截止时间
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.HOUR, enterpriseHandleTimeoutHours);
+            int timeoutHours = report.getRiskLevel() == 1
+                    ? enterpriseHandleTimeoutHours
+                    : highRiskHandleTimeoutHours;
+            calendar.add(Calendar.HOUR, timeoutHours);
             report.setEnterpriseDeadline(calendar.getTime());
         } else {
             // 高风险：待民警核实
@@ -79,10 +98,58 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
         // 4. 保存举报
         this.save(report);
 
-        // 5. 发送通知
+        // 5. 增加用户举报次数
+        sysUserService.incrementTotalReportCount(userId);
+
+        // 6. 发送通知
         sendNotificationAfterSubmit(report);
 
         return report.getReportId();
+    }
+
+    /**
+     * 防恶意举报检查
+     */
+    private void checkAntiSpam(Long userId) {
+        // 检查是否被封禁
+        if (sysUserService.isUserBanned(userId)) {
+            SysUser user = sysUserService.getById(userId);
+            String banEndTime = user.getBanEndTime() != null 
+                ? user.getBanEndTime().toString() 
+                : "永久";
+            throw new RuntimeException("您的举报功能已被封禁，封禁截止时间：" + banEndTime);
+        }
+
+        // 检查今日举报次数
+        Calendar todayStart = Calendar.getInstance();
+        todayStart.set(Calendar.HOUR_OF_DAY, 0);
+        todayStart.set(Calendar.MINUTE, 0);
+        todayStart.set(Calendar.SECOND, 0);
+        todayStart.set(Calendar.MILLISECOND, 0);
+
+        LambdaQueryWrapper<CitizenReport> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.eq(CitizenReport::getUserId, userId)
+                   .ge(CitizenReport::getCreateTime, todayStart.getTime());
+        long todayReportCount = this.count(countWrapper);
+
+        if (todayReportCount >= maxReportsPerDay) {
+            throw new RuntimeException("今日举报次数已达上限（" + maxReportsPerDay + "次），请明天再试");
+        }
+
+        // 检查最短举报间隔
+        if (minReportIntervalMinutes > 0) {
+            LambdaQueryWrapper<CitizenReport> lastReportWrapper = new LambdaQueryWrapper<>();
+            lastReportWrapper.eq(CitizenReport::getUserId, userId)
+                            .orderByDesc(CitizenReport::getCreateTime)
+                            .last("LIMIT 1");
+            CitizenReport lastReport = this.getOne(lastReportWrapper);
+            if (lastReport != null) {
+                long minutesSinceLastReport = (System.currentTimeMillis() - lastReport.getCreateTime().getTime()) / (1000 * 60);
+                if (minutesSinceLastReport < minReportIntervalMinutes) {
+                    throw new RuntimeException("举报过于频繁，请稍后再试（最短间隔" + minReportIntervalMinutes + "分钟）");
+                }
+            }
+        }
     }
 
     /**
@@ -149,6 +216,11 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
 
         boolean result = this.updateById(report);
 
+        // 如果标记为无效举报，增加无效举报计数
+        if (result && request.getProcessStatus() == 3 && report.getUserId() != null) {
+            handleInvalidReport(report.getUserId());
+        }
+
         // 通知市民
         if (result) {
             String notificationContent;
@@ -181,12 +253,32 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
         // 3. 保存更新
         boolean result = this.updateById(report);
 
+        // 如果标记为无效举报，增加无效举报计数
+        if (result && request.getProcessStatus() == 3 && report.getUserId() != null) {
+            handleInvalidReport(report.getUserId());
+        }
+
         // 4. 审核完成后自动发送系统消息给举报人
         if (result) {
             sendNotification(report, request.getProcessStatus());
         }
 
         return result;
+    }
+
+    /**
+     * 处理无效举报，增加计数并检查是否需要封禁
+     */
+    private void handleInvalidReport(Long userId) {
+        sysUserService.incrementInvalidReportCount(userId);
+
+        // 检查是否达到封禁阈值
+        SysUser user = sysUserService.getById(userId);
+        if (user != null && user.getInvalidReportCount() != null 
+            && user.getInvalidReportCount() >= invalidReportThreshold) {
+            sysUserService.banUserReport(userId, banDurationHours, 
+                "无效举报次数达到" + invalidReportThreshold + "次，自动封禁");
+        }
     }
 
     @Override

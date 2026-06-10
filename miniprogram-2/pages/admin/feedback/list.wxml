@@ -1,0 +1,83 @@
+<view class="feedback-list-container">
+  <view class="header">
+    <text class="title">意见建议管理</text>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-container">
+    <view 
+      class="tab-item {{currentTab === 0 ? 'active' : ''}}"
+      data-index="{{0}}"
+      hover-class="tab-hover"
+      bindtap="onTabChange"
+    >
+      <text>待处理</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 1 ? 'active' : ''}}"
+      data-index="{{1}}"
+      hover-class="tab-hover"
+      bindtap="onTabChange"
+    >
+      <text>处理中</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 2 ? 'active' : ''}}"
+      data-index="{{2}}"
+      hover-class="tab-hover"
+      bindtap="onTabChange"
+    >
+      <text>已处理</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{list.length === 0}}" class="empty-state">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">
+      {{currentTab === 0 ? '暂无待处理反馈' : (currentTab === 1 ? '暂无处理中反馈' : '暂无已处理反馈')}}
+    </text>
+  </view>
+
+  <view wx:else class="list-content">
+    <view 
+      wx:for="{{list}}" 
+      wx:key="feedbackId" 
+      class="feedback-item"
+      data-feedback-id="{{item.feedbackId}}"
+      bindtap="onViewDetail"
+    >
+      <view class="item-header">
+        <view class="type-badge">
+          <text class="type-text">{{item.typeName}}</text>
+        </view>
+        <view class="status-badge status-{{item.statusClass}}">
+          <text>{{item.statusLabel}}</text>
+        </view>
+      </view>
+      
+      <view class="item-title">
+        <text class="title-text">{{item.title}}</text>
+      </view>
+
+      <view class="item-info">
+        <view class="info-row" wx:if="{{item.contact}}">
+          <text class="info-label">联系方式</text>
+          <text class="info-value">{{item.contact}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">提交时间</text>
+          <text class="info-value">{{item.createTime}}</text>
+        </view>
+      </view>
+
+      <view class="item-arrow">
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+</view>

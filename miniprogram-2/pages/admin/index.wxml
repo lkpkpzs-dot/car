@@ -49,6 +49,9 @@
         </view>
         <text class="action-name">{{item.name}}</text>
         <text class="action-desc">{{item.desc}}</text>
+        <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">
+          <text class="unread-text">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</text>
+        </view>
       </view>
     </view>
   </view>

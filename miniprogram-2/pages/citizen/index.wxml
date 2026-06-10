@@ -65,8 +65,11 @@
         data-action-id="{{item.id}}"
         bindtap="onQuickAction"
       >
-        <view class="action-icon">
-          <image src="/assets/images/{{item.icon}}-icon.png" mode="aspectFit"></image>
+        <view class="action-icon-wrapper">
+          <view class="action-icon">
+            <image src="/assets/images/{{item.icon}}-icon.png" mode="aspectFit"></image>
+          </view>
+          <view wx:if="{{item.id === 'messages' && unreadCount > 0}}" class="action-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
         </view>
         <text class="action-name">{{item.name}}</text>
         <text class="action-desc">{{item.desc}}</text>
