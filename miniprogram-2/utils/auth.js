@@ -141,7 +141,7 @@ function login() {
       success: (res) => {
         if (res.code) {
           wx.request({
-            url: 'https://e2a7a72b.natappfree.cc/auth/login',
+            url: 'https://xa67b267.natappfree.cc/auth/login',
             method: 'POST',
             timeout: 10000,
             data: { code: res.code },

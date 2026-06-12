@@ -49,7 +49,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/webjars/**",
                         "/v2/api-docs",
                         "/uploads/**",
-                        "/doc.html"
+                        "/doc.html",
+                        "/introduce.html"
                 );
     }
 }

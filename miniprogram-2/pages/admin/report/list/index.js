@@ -146,8 +146,12 @@ Page({
     const validList = Array.isArray(allList) ? allList : [];
     
     if (currentTab === 0) {
-      // 未审核：显示待核实或待民警审核
-      list = validList.filter(item => item && (item.processStatus === 0 || item.processStatus === 4));
+      // 未审核：显示待核实、待民警审核，以及高风险企业处理中
+      list = validList.filter(item => item && (
+        item.processStatus === 0 || 
+        item.processStatus === 4 || 
+        (item.processStatus === 1 && item.riskLevel === 2)
+      ));
     } else if (currentTab === 1) {
       // 企业审核：显示企业处理中
       list = validList.filter(item => item && item.processStatus === 1);

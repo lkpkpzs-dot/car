@@ -79,20 +79,22 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
             }
         }
 
-        // 3. 根据风险等级设置初始状态
-        if (report.getRiskLevel() == 1) {
-            // 低风险：企业处理中
-            report.setProcessStatus(1);
+        // 3. 根据风险等级设置初始状态（方案B：低风险和高风险都先给企业处理）
+        if (report.getRiskLevel() == 1 || report.getRiskLevel() == 2) {
+            // 低风险和高风险都先给企业处理，只是时限不同
+            report.setProcessStatus(1);  // 企业处理中
             // 设置企业处理截止时间
             Calendar calendar = Calendar.getInstance();
             int timeoutHours = report.getRiskLevel() == 1
-                    ? enterpriseHandleTimeoutHours
-                    : highRiskHandleTimeoutHours;
+                    ? enterpriseHandleTimeoutHours   // 低风险：2小时
+                    : highRiskHandleTimeoutHours;     // 高风险：1小时（更短）
             calendar.add(Calendar.HOUR, timeoutHours);
             report.setEnterpriseDeadline(calendar.getTime());
-        } else {
-            // 高风险：待民警核实
-            report.setProcessStatus(0);
+            
+            // 【新增】高风险同时通知民警关注
+            if (report.getRiskLevel() == 2) {
+                sendHighRiskPoliceNotification(report);
+            }
         }
 
         // 4. 保存举报
@@ -340,9 +342,18 @@ public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, C
      * 发送通知给企业
      */
     private void sendEnterpriseNotification(CitizenReport report) {
-        String title = report.getRiskLevel() == 1 ? "收到新的举报，请处理" : "收到高风险举报，请关注";
+        String title = report.getRiskLevel() == 1 ? "收到新的举报，请处理" : "收到高风险举报，请立即处理";
         String content = String.format("车牌号 %s 被举报，请及时处理", report.getTargetPlate());
         sendNotificationToEnterpriseUsers(report.getEnterpriseId(), title, content, report.getReportId());
+    }
+    
+    /**
+     * 【新增】发送高风险举报民警关注通知
+     */
+    private void sendHighRiskPoliceNotification(CitizenReport report) {
+        String title = "收到高风险举报，请关注";
+        String content = String.format("车牌号 %s 有高风险举报，企业正在处理，民警可随时介入", report.getTargetPlate());
+        sendNotificationToAllPolice(title, content, report.getReportId());
     }
 
     /**
