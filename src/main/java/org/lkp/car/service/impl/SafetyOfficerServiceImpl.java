@@ -2,6 +2,8 @@ package org.lkp.car.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.cache.CacheConstants;
 import org.lkp.car.dto.SafetyOfficerApplyRequest;
 import org.lkp.car.dto.SafetyOfficerAuditRequest;
 import org.lkp.car.dto.SafetyOfficerPenaltyRequest;
@@ -14,6 +16,8 @@ import org.lkp.car.service.SafetyOfficerPenaltyService;
 import org.lkp.car.service.SafetyOfficerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +28,20 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 安全员资质监管 服务实现类
+ * 安全员资质监管服务实现类
+ * <p>
+ * 处理安全员资质相关业务，包括：
+ * 1. 安全员申请注册
+ * 2. 民警审核安全员资质
+ * 3. 事故处理与处罚（暂停/取消资格）
+ * 4. 安全员关联车辆管理
+ * </p>
+ * <p>
+ * 处罚规则：
+ * - 致人死亡事故（同等及以上责任）：取消资格
+ * - 致人受伤事故（同等及以上责任）：累计3次取消资格，单次暂停6个月
+ * - 无伤亡事故（同等及以上责任）：暂停3个月
+ * </p>
  */
 @Service
 public class SafetyOfficerServiceImpl extends ServiceImpl<SafetyOfficerMapper, SafetyOfficer>

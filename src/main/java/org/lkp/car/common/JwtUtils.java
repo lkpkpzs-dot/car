@@ -2,8 +2,8 @@ package org.lkp.car.common;
 
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTUtil;
-import cn.hutool.jwt.signers.JWTSigner;
-import cn.hutool.jwt.signers.JWTSignerUtil;
+import org.lkp.car.config.JwtConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -17,25 +17,49 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    // 密钥 (请在生产环境中妥善保管)
-    private static final byte[] KEY = "car-management-system-secret-key-2024".getBytes(StandardCharsets.UTF_8);
-    
-    // 过期时间: 7天
-    private static final long EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
+    private static final String PAYLOAD_USER_ID = "userId";
+    private static final String PAYLOAD_TYPE = "type";
+    private static final String PAYLOAD_TIMESTAMP = "ts";
+    private static final String TOKEN_TYPE_ACCESS = "access";
+    private static final String TOKEN_TYPE_REFRESH = "refresh";
+
+    @Autowired
+    private JwtConfig jwtConfig;
 
     /**
-     * 生成 Token
+     * 生成 Access Token (2小时过期)
      * @param userId 用户ID
      * @return token
      */
-    public String createToken(Long userId) {
+    public String createAccessToken(Long userId) {
+        Map<String, Object> payload = buildTokenPayload(userId, TOKEN_TYPE_ACCESS);
+        payload.put(JWT.EXPIRES_AT, new Date(System.currentTimeMillis() + jwtConfig.getAccessTokenExpireTime()));
+        return JWTUtil.createToken(payload, jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * 生成 Refresh Token (7天过期)
+     * @param userId 用户ID
+     * @return token
+     */
+    public String createRefreshToken(Long userId) {
+        Map<String, Object> payload = buildTokenPayload(userId, TOKEN_TYPE_REFRESH);
+        payload.put(JWT.EXPIRES_AT, new Date(System.currentTimeMillis() + jwtConfig.getRefreshTokenExpireTime()));
+        return JWTUtil.createToken(payload, jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * 构建 Token Payload
+     * @param userId 用户ID
+     * @param tokenType token类型
+     * @return payload map
+     */
+    private Map<String, Object> buildTokenPayload(Long userId, String tokenType) {
         Map<String, Object> payload = new HashMap<>();
-        payload.put("userId", userId);
-        payload.put("ts", System.currentTimeMillis());
-        // 过期时间
-        payload.put(JWT.EXPIRES_AT, new Date(System.currentTimeMillis() + EXPIRE_TIME));
-        
-        return JWTUtil.createToken(payload, KEY);
+        payload.put(PAYLOAD_USER_ID, userId);
+        payload.put(PAYLOAD_TYPE, tokenType);
+        payload.put(PAYLOAD_TIMESTAMP, System.currentTimeMillis());
+        return payload;
     }
 
     /**
@@ -45,7 +69,7 @@ public class JwtUtils {
      */
     public boolean validateToken(String token) {
         try {
-            if (!JWTUtil.verify(token, KEY)) {
+            if (!JWTUtil.verify(token, jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8))) {
                 return false;
             }
             JWT jwt = JWTUtil.parseToken(token);
@@ -66,6 +90,30 @@ public class JwtUtils {
      */
     public Long getUserId(String token) {
         JWT jwt = JWTUtil.parseToken(token);
-        return Long.parseLong(jwt.getPayload("userId").toString());
+        return Long.parseLong(jwt.getPayload(PAYLOAD_USER_ID).toString());
+    }
+
+    /**
+     * 从 Token 中获取类型
+     * @param token token
+     * @return token 类型
+     */
+    public String getTokenType(String token) {
+        try {
+            JWT jwt = JWTUtil.parseToken(token);
+            Object type = jwt.getPayload(PAYLOAD_TYPE);
+            return type != null ? type.toString() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 检查是否为 Refresh Token
+     * @param token token
+     * @return 是否为 Refresh Token
+     */
+    public boolean isRefreshToken(String token) {
+        return TOKEN_TYPE_REFRESH.equals(getTokenType(token));
     }
 }

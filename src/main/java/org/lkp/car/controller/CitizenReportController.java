@@ -4,6 +4,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.dto.CitizenReportEnterpriseHandleRequest;
 import org.lkp.car.dto.CitizenReportReviewRequest;
 import org.lkp.car.entity.CitizenReport;
@@ -41,6 +43,7 @@ public class CitizenReportController {
      */
     @PostMapping("/submit")
     @ApiOperation("提交举报（新流程）")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<Long> submit(@RequestBody CitizenReport citizenReport, HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (currentUser == null) {
@@ -55,9 +58,10 @@ public class CitizenReportController {
      */
     @GetMapping("/list")
     @ApiOperation("举报列表（民警端）")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<List<CitizenReport>> list(
             @ApiParam(value = "处理状态: 0-待核实 1-企业处理中 2-已处理 3-无效举报 4-待民警审核（超时升级）")
-            @RequestParam(required = false) Integer processStatus,
+            @RequestParam(required=false) Integer processStatus,
             HttpServletRequest request) {
         // 验证权限
         SysUser currentUser = AuthContext.currentUser(request);
@@ -73,9 +77,10 @@ public class CitizenReportController {
      */
     @GetMapping("/enterpriseList")
     @ApiOperation("举报列表（企业端）")
+    @RequireRole({RoleEnum.ENTERPRISE_CODE})
     public Result<List<CitizenReport>> enterpriseList(
             @ApiParam(value = "处理状态")
-            @RequestParam(required = false) Integer processStatus,
+            @RequestParam(required= false) Integer processStatus,
             HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (!AuthContext.hasEnterprise(currentUser)) {
@@ -91,9 +96,10 @@ public class CitizenReportController {
      */
     @GetMapping("/citizenList")
     @ApiOperation("举报列表（市民端）")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<List<CitizenReport>> citizenList(
             @ApiParam(value = "处理状态: 0-待核实 1-企业处理中 2-已处理 3-无效举报 4-待民警审核（超时升级）")
-            @RequestParam(required = false) Integer processStatus,
+            @RequestParam(required= false) Integer processStatus,
             HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (currentUser == null) {
@@ -109,6 +115,7 @@ public class CitizenReportController {
      */
     @GetMapping("/detail")
     @ApiOperation("举报详情")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<CitizenReport> detail(
             @ApiParam(value = "举报ID", required = true)
             @RequestParam Long reportId,
@@ -130,6 +137,7 @@ public class CitizenReportController {
      */
     @PostMapping("/enterpriseHandle")
     @ApiOperation("企业处理举报")
+    @RequireRole({RoleEnum.ENTERPRISE_CODE})
     public Result<Boolean> enterpriseHandle(
             @RequestBody CitizenReportEnterpriseHandleRequest request,
             HttpServletRequest httpRequest) {
@@ -158,6 +166,7 @@ public class CitizenReportController {
      */
     @PutMapping("/review")
     @ApiOperation("举报审核")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> review(
             @RequestBody CitizenReportReviewRequest request,
             HttpServletRequest httpRequest) {
@@ -186,6 +195,7 @@ public class CitizenReportController {
      */
     @PostMapping("/save")
     @ApiOperation("提交举报（兼容旧版）")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<Boolean> save(@RequestBody CitizenReport citizenReport, HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (currentUser != null) {
@@ -199,6 +209,7 @@ public class CitizenReportController {
      */
     @PostMapping("/admin/ban-user")
     @ApiOperation("封禁用户举报权限（民警专用）")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Void> banUserReport(
             @RequestParam Long userId,
             @RequestParam(defaultValue = "24") int banHours,
@@ -225,6 +236,7 @@ public class CitizenReportController {
      */
     @PostMapping("/admin/unban-user")
     @ApiOperation("解封用户举报权限（民警专用）")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Void> unbanUserReport(
             @RequestParam Long userId,
             HttpServletRequest request) {
@@ -285,6 +297,7 @@ public class CitizenReportController {
      */
     @GetMapping("/admin/users")
     @ApiOperation("获取用户列表（民警专用）")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<List<SysUser>> getUserList(HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (!AuthContext.isPolice(currentUser)) {

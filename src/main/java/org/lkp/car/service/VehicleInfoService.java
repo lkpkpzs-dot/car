@@ -10,7 +10,14 @@ import org.lkp.car.vo.VehicleInfoVO;
 import java.util.List;
 
 /**
- * 车辆查验信息 服务类
+ * 车辆查验信息服务接口
+ * <p>
+ * 处理车辆查验相关业务，包括：
+ * 1. 企业提交车辆查验申请
+ * 2. 民警提交车辆查验结果
+ * 3. 车辆审核流程处理
+ * 4. 查验通过后自动生成档案
+ * </p>
  */
 public interface VehicleInfoService extends IService<VehicleInfo> {
 

@@ -1,6 +1,7 @@
 package org.lkp.car.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.lkp.car.common.cache.CacheConstants;
 import org.lkp.car.common.enums.VehicleStatusEnum;
 import org.lkp.car.entity.CarArchive;
 import org.lkp.car.entity.CitizenReport;
@@ -21,6 +22,7 @@ import org.lkp.car.vo.DashboardVehicleVO;
 import org.lkp.car.vo.EnterpriseDashboardVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -30,6 +32,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 仪表盘数据服务实现类
+ * <p>
+ * 提供各角色仪表盘数据查询，包括：
+ * 1. 企业仪表盘：申请列表、车辆列表、统计数据
+ * 2. 管理员仪表盘：全局统计数据
+ * 3. 市民仪表盘：举报统计数据
+ * </p>
+ * <p>
+ * 所有仪表盘数据都使用Redis缓存，提升响应速度
+ * </p>
+ */
 @Service
 public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardService {
 
@@ -49,6 +63,11 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
     private CitizenReportService citizenReportService;
 
     @Override
+    @Cacheable(
+            value = CacheConstants.REDIS_DASHBOARD_ENTERPRISE,
+            key = "#enterpriseId",
+            cacheManager = "redisCacheManager"
+    )
     public EnterpriseDashboardVO getDashboardData(Long enterpriseId) {
         EnterpriseDashboardVO result = new EnterpriseDashboardVO();
 
@@ -163,6 +182,11 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
     }
 
     @Override
+    @Cacheable(
+            value = CacheConstants.REDIS_DASHBOARD_ADMIN,
+            key = "'global'",
+            cacheManager = "redisCacheManager"
+    )
     public AdminDashboardVO getAdminDashboardData() {
         AdminDashboardVO result = new AdminDashboardVO();
 
@@ -200,6 +224,11 @@ public class EnterpriseDashboardServiceImpl implements EnterpriseDashboardServic
     }
 
     @Override
+    @Cacheable(
+            value = CacheConstants.REDIS_DASHBOARD_CITIZEN,
+            key = "#userId",
+            cacheManager = "redisCacheManager"
+    )
     public CitizenDashboardVO getCitizenDashboardData(Long userId) {
         CitizenDashboardVO result = new CitizenDashboardVO();
 

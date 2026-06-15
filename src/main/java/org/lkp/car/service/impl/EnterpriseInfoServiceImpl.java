@@ -3,6 +3,8 @@ package org.lkp.car.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.lkp.car.common.cache.CacheConstants;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.dto.EnterpriseApplyRequest;
 import org.lkp.car.dto.EnterpriseAuditRequest;
 import org.lkp.car.dto.MyEnterpriseStatusResponse;
@@ -14,10 +16,14 @@ import org.lkp.car.service.ApprovalRecordService;
 import org.lkp.car.service.EnterpriseInfoService;
 import org.lkp.car.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +42,27 @@ public class EnterpriseInfoServiceImpl extends ServiceImpl<EnterpriseInfoMapper,
     @Autowired
     private SysUserService sysUserService;
 
+    @Autowired
+    @Lazy
+    private EnterpriseInfoService self;
+
+    @Override
+    @Cacheable(
+            value = CacheConstants.LOCAL_ENTERPRISE,
+            key = "#id",
+            cacheManager = "localCacheManager",
+            unless = "#result == null"
+    )
+    public EnterpriseInfo getById(Serializable id) {
+        return super.getById(id);
+    }
+
+    @Override
+    @CacheEvict(value = CacheConstants.LOCAL_ENTERPRISE, key = "#entity.enterpriseId", cacheManager = "localCacheManager")
+    public boolean updateById(EnterpriseInfo entity) {
+        return super.updateById(entity);
+    }
+
     @Override
     public MyEnterpriseStatusResponse getMyStatus(Long userId) {
         if (userId == null) {
@@ -50,32 +77,53 @@ public class EnterpriseInfoServiceImpl extends ServiceImpl<EnterpriseInfoMapper,
         MyEnterpriseStatusResponse response = new MyEnterpriseStatusResponse();
 
         if (user.getAuthEnterpriseId() != null) {
-            // 已绑定企业
-            EnterpriseInfo enterprise = this.getById(user.getAuthEnterpriseId());
-            if (enterprise != null) {
-                response.setEnterpriseName(enterprise.getEnterpriseName());
-                response.setQualificationStatus(enterprise.getAuditStatus());
-            }
+            fillEnterpriseStatusFromBoundEnterprise(user, response);
         } else {
-            // 尚未绑定：查询最近一次申请记录
-            ApprovalRecord latestApply = approvalRecordService.getOne(
-                    new LambdaQueryWrapper<ApprovalRecord>()
-                            .eq(ApprovalRecord::getApplicantId, userId)
-                            .eq(ApprovalRecord::getBusinessType, BUSINESS_ENTERPRISE)
-                            .eq(ApprovalRecord::getActionType, ACTION_SUBMIT)
-                            .orderByDesc(ApprovalRecord::getCreateTime)
-                            .last("LIMIT 1")
-            );
-
-            if (latestApply != null) {
-                EnterpriseInfo enterprise = this.getById(latestApply.getApplyId());
-                if (enterprise != null) {
-                    response.setEnterpriseName(enterprise.getEnterpriseName());
-                    response.setQualificationStatus(enterprise.getAuditStatus());
-                }
-            }
+            fillEnterpriseStatusFromLatestApply(userId, response);
         }
+
         return response;
+    }
+
+    /**
+     * 从已绑定企业填充状态信息
+     */
+    private void fillEnterpriseStatusFromBoundEnterprise(SysUser user, MyEnterpriseStatusResponse response) {
+        EnterpriseInfo enterprise = self.getById(user.getAuthEnterpriseId());
+        if (enterprise != null) {
+            response.setEnterpriseName(enterprise.getEnterpriseName());
+            response.setQualificationStatus(enterprise.getAuditStatus());
+        }
+    }
+
+    /**
+     * 从最近一次申请记录填充状态信息
+     */
+    private void fillEnterpriseStatusFromLatestApply(Long userId, MyEnterpriseStatusResponse response) {
+        ApprovalRecord latestApply = findLatestEnterpriseApply(userId);
+        if (latestApply == null) {
+            return;
+        }
+
+        EnterpriseInfo enterprise = self.getById(latestApply.getApplyId());
+        if (enterprise != null) {
+            response.setEnterpriseName(enterprise.getEnterpriseName());
+            response.setQualificationStatus(enterprise.getAuditStatus());
+        }
+    }
+
+    /**
+     * 查询用户最近一次企业申请记录
+     */
+    private ApprovalRecord findLatestEnterpriseApply(Long userId) {
+        return approvalRecordService.getOne(
+                new LambdaQueryWrapper<ApprovalRecord>()
+                        .eq(ApprovalRecord::getApplicantId, userId)
+                        .eq(ApprovalRecord::getBusinessType, BUSINESS_ENTERPRISE)
+                        .eq(ApprovalRecord::getActionType, ACTION_SUBMIT)
+                        .orderByDesc(ApprovalRecord::getCreateTime)
+                        .last("LIMIT 1")
+        );
     }
 
     @Override
@@ -87,6 +135,22 @@ public class EnterpriseInfoServiceImpl extends ServiceImpl<EnterpriseInfoMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long apply(EnterpriseApplyRequest applyRequest) {
+        validateApplyRequest(applyRequest);
+
+        EnterpriseInfo enterprise = applyRequest.getEnterprise();
+        enterprise.setAuditStatus(0);
+
+        saveOrUpdateEnterprise(enterprise);
+
+        createApprovalRecord(applyRequest, enterprise);
+
+        return enterprise.getEnterpriseId();
+    }
+
+    /**
+     * 校验申请请求参数
+     */
+    private void validateApplyRequest(EnterpriseApplyRequest applyRequest) {
         if (applyRequest == null || applyRequest.getEnterprise() == null) {
             throw new RuntimeException("企业信息不能为空");
         }
@@ -106,92 +170,153 @@ public class EnterpriseInfoServiceImpl extends ServiceImpl<EnterpriseInfoMapper,
         if (applicant == null) {
             throw new RuntimeException("申请人不存在");
         }
+    }
 
-        enterprise.setAuditStatus(0);
-
+    /**
+     * 保存或更新企业信息
+     */
+    private void saveOrUpdateEnterprise(EnterpriseInfo enterprise) {
         if (enterprise.getEnterpriseId() == null) {
-            // 新建申请：检查信用代码是否已存在
-            LambdaQueryWrapper<EnterpriseInfo> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(EnterpriseInfo::getCreditCode, enterprise.getCreditCode());
-            EnterpriseInfo existingByCreditCode = this.getOne(wrapper);
-            if (existingByCreditCode != null) {
+            saveNewEnterprise(enterprise);
+        } else {
+            updateExistingEnterprise(enterprise);
+        }
+    }
+
+    /**
+     * 保存新企业（新建申请）
+     */
+    private void saveNewEnterprise(EnterpriseInfo enterprise) {
+        checkCreditCodeUnique(enterprise.getCreditCode(), null);
+        super.save(enterprise);
+    }
+
+    /**
+     * 更新现有企业（重新申请）
+     */
+    private void updateExistingEnterprise(EnterpriseInfo enterprise) {
+        EnterpriseInfo existing = self.getById(enterprise.getEnterpriseId());
+        if (existing == null) {
+            throw new RuntimeException("企业信息不存在，无法重新申请");
+        }
+        // 检查信用代码是否被其他企业占用
+        if (!existing.getCreditCode().equals(enterprise.getCreditCode())) {
+            checkCreditCodeUnique(enterprise.getCreditCode(), enterprise.getEnterpriseId());
+        }
+        this.updateById(enterprise);
+    }
+
+    /**
+     * 检查信用代码是否唯一
+     * @param creditCode 信用代码
+     * @param excludeId 排除的企业ID（更新时使用）
+     */
+    private void checkCreditCodeUnique(String creditCode, Long excludeId) {
+        LambdaQueryWrapper<EnterpriseInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(EnterpriseInfo::getCreditCode, creditCode);
+        EnterpriseInfo existingByCreditCode = this.getOne(wrapper);
+        
+        if (existingByCreditCode != null) {
+            if (excludeId == null) {
                 throw new RuntimeException("该统一社会信用代码已提交过申请，请联系管理员或使用其他代码");
             }
-            super.save(enterprise);
-        } else {
-            // 重新申请：检查信用代码是否被其他企业占用
-            EnterpriseInfo existing = this.getById(enterprise.getEnterpriseId());
-            if (existing == null) {
-                throw new RuntimeException("企业信息不存在，无法重新申请");
+            if (!existingByCreditCode.getEnterpriseId().equals(excludeId)) {
+                throw new RuntimeException("该统一社会信用代码已被其他企业使用");
             }
-            // 检查信用代码是否被其他企业占用
-            if (!existing.getCreditCode().equals(enterprise.getCreditCode())) {
-                LambdaQueryWrapper<EnterpriseInfo> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(EnterpriseInfo::getCreditCode, enterprise.getCreditCode());
-                EnterpriseInfo existingByCreditCode = this.getOne(wrapper);
-                if (existingByCreditCode != null && !existingByCreditCode.getEnterpriseId().equals(enterprise.getEnterpriseId())) {
-                    throw new RuntimeException("该统一社会信用代码已被其他企业使用");
-                }
-            }
-            this.updateById(enterprise);
         }
+    }
 
+    /**
+     * 创建审批记录
+     */
+    private void createApprovalRecord(EnterpriseApplyRequest applyRequest, EnterpriseInfo enterprise) {
         ApprovalRecord record = new ApprovalRecord();
         record.setApplyId(enterprise.getEnterpriseId());
         record.setApplicantId(applyRequest.getApplicantId());
         record.setBusinessType(BUSINESS_ENTERPRISE);
         record.setNodeName("提交申请");
-        record.setReviewerId(applyRequest.getApplicantId()); // 初始提交操作人也是申请人
+        record.setReviewerId(applyRequest.getApplicantId());
         record.setActionType(ACTION_SUBMIT);
         record.setComment(StringUtils.hasText(applyRequest.getComment())
                 ? applyRequest.getComment()
                 : "企业提交资质认证申请");
         record.setSnapshotJson(buildSnapshotJson(enterprise));
         approvalRecordService.save(record);
-
-        return enterprise.getEnterpriseId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean audit(EnterpriseAuditRequest auditRequest) {
-        SysUser reviewer = sysUserService.getById(auditRequest.getReviewerId());
-        if (reviewer == null || reviewer.getRoleType() != 1) {
-            throw new RuntimeException("操作失败：审核人必须是民警身份");
-        }
+        validateAuditRequest(auditRequest);
 
-        EnterpriseInfo enterprise = this.getById(auditRequest.getEnterpriseId());
+        EnterpriseInfo enterprise = self.getById(auditRequest.getEnterpriseId());
         if (enterprise == null) {
             throw new RuntimeException("企业信息不存在");
         }
 
-        enterprise.setAuditStatus(auditRequest.getAuditStatus());
-        this.updateById(enterprise);
+        updateEnterpriseAuditStatus(enterprise, auditRequest.getAuditStatus());
 
-        // 如果审核通过，则需要更新申请人的 auth_enterprise_id
         if (auditRequest.getAuditStatus() == 1) {
-            // 联表查询：从审批留痕中找到该企业的提交人（使用 applicant_id 字段）
-            ApprovalRecord submitRecord = approvalRecordService.getOne(
-                    new LambdaQueryWrapper<ApprovalRecord>()
-                            .eq(ApprovalRecord::getApplyId, auditRequest.getEnterpriseId())
-                            .eq(ApprovalRecord::getBusinessType, BUSINESS_ENTERPRISE)
-                            .eq(ApprovalRecord::getActionType, ACTION_SUBMIT)
-                            .orderByDesc(ApprovalRecord::getCreateTime)
-                            .last("LIMIT 1")
-            );
-
-            if (submitRecord != null && submitRecord.getApplicantId() != null) {
-                SysUser applicant = sysUserService.getById(submitRecord.getApplicantId());
-                if (applicant != null) {
-                    applicant.setAuthEnterpriseId(auditRequest.getEnterpriseId());
-                    sysUserService.updateById(applicant);
-                }
-            }
+            bindEnterpriseToApplicant(auditRequest.getEnterpriseId());
         }
 
+        return createAuditRecord(auditRequest, enterprise);
+    }
+
+    /**
+     * 校验审核请求参数
+     */
+    private void validateAuditRequest(EnterpriseAuditRequest auditRequest) {
+        SysUser reviewer = sysUserService.getById(auditRequest.getReviewerId());
+        if (reviewer == null || reviewer.getRoleType() != RoleEnum.POLICE_CODE) {
+            throw new RuntimeException("操作失败：审核人必须是民警身份");
+        }
+    }
+
+    /**
+     * 更新企业审核状态
+     */
+    private void updateEnterpriseAuditStatus(EnterpriseInfo enterprise, Integer auditStatus) {
+        enterprise.setAuditStatus(auditStatus);
+        this.updateById(enterprise);
+    }
+
+    /**
+     * 将企业绑定到申请人
+     */
+    private void bindEnterpriseToApplicant(Long enterpriseId) {
+        ApprovalRecord submitRecord = findLatestSubmitRecord(enterpriseId);
+        if (submitRecord == null || submitRecord.getApplicantId() == null) {
+            return;
+        }
+
+        SysUser applicant = sysUserService.getById(submitRecord.getApplicantId());
+        if (applicant != null) {
+            applicant.setAuthEnterpriseId(enterpriseId);
+            sysUserService.updateById(applicant);
+        }
+    }
+
+    /**
+     * 查询企业最近一次提交记录
+     */
+    private ApprovalRecord findLatestSubmitRecord(Long enterpriseId) {
+        return approvalRecordService.getOne(
+                new LambdaQueryWrapper<ApprovalRecord>()
+                        .eq(ApprovalRecord::getApplyId, enterpriseId)
+                        .eq(ApprovalRecord::getBusinessType, BUSINESS_ENTERPRISE)
+                        .eq(ApprovalRecord::getActionType, ACTION_SUBMIT)
+                        .orderByDesc(ApprovalRecord::getCreateTime)
+                        .last("LIMIT 1")
+        );
+    }
+
+    /**
+     * 创建审核记录
+     */
+    private boolean createAuditRecord(EnterpriseAuditRequest auditRequest, EnterpriseInfo enterprise) {
         ApprovalRecord record = new ApprovalRecord();
         record.setApplyId(auditRequest.getEnterpriseId());
-        // 审核记录不需要 applicant_id，但为了保持逻辑清晰，此处不设置 applicant_id
         record.setBusinessType(BUSINESS_ENTERPRISE);
         record.setNodeName("民警审核");
         record.setReviewerId(auditRequest.getReviewerId());

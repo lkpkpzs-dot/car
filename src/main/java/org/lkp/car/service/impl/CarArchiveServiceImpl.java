@@ -3,6 +3,7 @@ package org.lkp.car.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.common.enums.VehicleStatusEnum;
 import org.lkp.car.dto.AssignSafetyOfficerRequest;
 import org.lkp.car.dto.GenerateArchiveRequest;
@@ -11,6 +12,7 @@ import org.lkp.car.entity.*;
 import org.lkp.car.mapper.CarArchiveMapper;
 import org.lkp.car.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +23,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 车辆电子档案 服务实现类
+ * 车辆电子档案服务实现类
+ * <p>
+ * 处理车辆电子档案相关业务，包括：
+ * 1. 从查验记录生成电子档案
+ * 2. 牌照发放与管理
+ * 3. 安全员分配
+ * 4. 档案查询与统计
+ * </p>
+ * <p>
+ * 档案生成流程：
+ * - 车辆查验通过后自动生成档案
+ * - 档案包含技术参数、照片等信息
+ * - 可关联安全员（最多3辆车/人）
+ * </p>
  */
 @Service
 public class CarArchiveServiceImpl extends ServiceImpl<CarArchiveMapper, CarArchive> implements CarArchiveService {
@@ -41,10 +56,14 @@ public class CarArchiveServiceImpl extends ServiceImpl<CarArchiveMapper, CarArch
     @Autowired
     private SafetyOfficerService safetyOfficerService;
 
+    @Autowired
+    @Lazy
+    private CarArchiveService self;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CarArchive generateFromInspection(GenerateArchiveRequest request) {
-        return generateFromInspection(request.getVehicleInfoId());
+        return self.generateFromInspection(request.getVehicleInfoId());
     }
 
     @Override
@@ -161,7 +180,7 @@ public class CarArchiveServiceImpl extends ServiceImpl<CarArchiveMapper, CarArch
 
         // 2. 校验民警身份
         SysUser issuer = sysUserService.getById(request.getIssuerId());
-        if (issuer == null || issuer.getRoleType() != 1) {
+        if (issuer == null || issuer.getRoleType() != RoleEnum.POLICE_CODE) {
             throw new RuntimeException("只有民警才能发牌");
         }
 

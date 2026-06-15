@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.ApprovalRecord;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.ApprovalRecordService;
@@ -26,11 +28,16 @@ import java.util.List;
 @Api(tags = "审批流转记录接口")
 public class ApprovalRecordController {
 
+    private static final String NO_APPROVAL_HISTORY_VIEW_PERMISSION = "无审批历史查看权限";
+    private static final String NO_APPROVAL_RECORD_MAINTENANCE_PERMISSION = "无审批记录维护权限";
+    private static final String NO_APPROVAL_RECORD_VIEW_PERMISSION = "无审批记录查看权限";
+
     @Autowired
     private ApprovalRecordService approvalRecordService;
 
     @GetMapping("/history")
     @ApiOperation("获取业务审批历史记录")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE})
     public Result<List<ApprovalRecord>> getHistory(
             @RequestParam Integer businessType,
             @RequestParam Long applyId,
@@ -50,7 +57,7 @@ public class ApprovalRecordController {
         boolean belongsToCurrentUser = records.stream()
                 .anyMatch(record -> currentUser.getUserId().equals(record.getApplicantId()));
         if (!belongsToCurrentUser) {
-            return Result.error(403, "无审批历史查看权限");
+            return Result.error(403, NO_APPROVAL_HISTORY_VIEW_PERMISSION);
         }
         return Result.success(records);
     }
@@ -75,7 +82,7 @@ public class ApprovalRecordController {
             return Result.success(null);
         }
         if (!AuthContext.isPolice(currentUser) && !currentUser.getUserId().equals(record.getApplicantId())) {
-            return Result.error(403, "无审批记录查看权限");
+            return Result.error(403, NO_APPROVAL_RECORD_VIEW_PERMISSION);
         }
         return Result.success(record);
     }
@@ -88,7 +95,7 @@ public class ApprovalRecordController {
     @ApiOperation("新增审批留痕（底层；企业资质请用 /enterpriseInfo/apply）")
     public Result<Boolean> save(@RequestBody ApprovalRecord approvalRecord, HttpServletRequest request) {
         if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
-            return Result.error(403, "无审批记录维护权限");
+            return Result.error(403, NO_APPROVAL_RECORD_MAINTENANCE_PERMISSION);
         }
         return Result.success(approvalRecordService.save(approvalRecord));
     }
@@ -97,7 +104,7 @@ public class ApprovalRecordController {
     @ApiOperation("修改审批记录")
     public Result<Boolean> update(@RequestBody ApprovalRecord approvalRecord, HttpServletRequest request) {
         if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
-            return Result.error(403, "无审批记录维护权限");
+            return Result.error(403, NO_APPROVAL_RECORD_MAINTENANCE_PERMISSION);
         }
         return Result.success(approvalRecordService.updateById(approvalRecord));
     }
@@ -106,7 +113,7 @@ public class ApprovalRecordController {
     @ApiOperation("删除审批记录")
     public Result<Boolean> delete(@PathVariable Long id, HttpServletRequest request) {
         if (!AuthContext.isPolice(AuthContext.currentUser(request))) {
-            return Result.error(403, "无审批记录维护权限");
+            return Result.error(403, NO_APPROVAL_RECORD_MAINTENANCE_PERMISSION);
         }
         return Result.success(approvalRecordService.removeById(id));
     }

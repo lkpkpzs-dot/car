@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.LicenseApplication;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.LicenseApplicationService;
@@ -31,6 +33,7 @@ public class LicenseApplicationController {
      */
     @GetMapping("/myList")
     @ApiOperation("获取当前登录企业的申请列表")
+    @RequireRole({RoleEnum.ENTERPRISE_CODE})
     public Result<List<LicenseApplication>> myList(HttpServletRequest request) {
         SysUser user = AuthContext.currentUser(request);
         if (user == null || user.getAuthEnterpriseId() == null) {

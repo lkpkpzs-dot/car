@@ -3,6 +3,8 @@ package org.lkp.car.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.dto.UserProfileUpdateRequest;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.SysUserService;
@@ -29,6 +31,7 @@ public class SysUserController {
      */
     @GetMapping("/list")
     @ApiOperation("获取用户列表")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<List<SysUser>> list() {
         return Result.success(sysUserService.list());
     }

@@ -2,6 +2,7 @@ package org.lkp.car.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.common.enums.VehicleStatusEnum;
 import org.lkp.car.dto.VehicleApplyRequest;
 import org.lkp.car.dto.VehicleAuditRequest;
@@ -26,7 +27,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 车辆查验信息 服务实现类
+ * 车辆查验信息服务实现类
+ * <p>
+ * 处理车辆查验相关业务，包括：
+ * 1. 企业提交车辆查验申请
+ * 2. 民警进行车辆查验并提交查验结果
+ * 3. 车辆审核流程处理
+ * 4. 查验通过后自动生成车辆档案
+ * </p>
  */
 @Service
 public class VehicleInfoServiceImpl extends ServiceImpl<VehicleInfoMapper, VehicleInfo> implements VehicleInfoService {
@@ -171,9 +179,9 @@ public class VehicleInfoServiceImpl extends ServiceImpl<VehicleInfoMapper, Vehic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean audit(VehicleAuditRequest auditRequest) {
-        // 1. 校验审核人权限 (roleType = 1 为民警)
+        // 1. 校验审核人权限
         SysUser reviewer = sysUserService.getById(auditRequest.getReviewerId());
-        if (reviewer == null || reviewer.getRoleType() != 1) {
+        if (reviewer == null || reviewer.getRoleType() != RoleEnum.POLICE_CODE) {
             throw new RuntimeException("操作失败：审核人必须是民警身份");
         }
 

@@ -3,6 +3,8 @@ package org.lkp.car.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.ServiceEvaluation;
 import org.lkp.car.service.ServiceEvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ public class ServiceEvaluationController {
      */
     @GetMapping("/list")
     @ApiOperation("获取评价列表")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.CITIZEN_CODE})
     public Result<List<ServiceEvaluation>> list() {
         return Result.success(serviceEvaluationService.list());
     }

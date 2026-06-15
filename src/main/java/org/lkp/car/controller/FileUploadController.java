@@ -4,6 +4,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.utils.AuthContext;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +50,7 @@ public class FileUploadController {
      */
     @PostMapping("/upload")
     @ApiOperation("图片上传")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<String> upload(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         // 1. 验证用户登录
         SysUser currentUser = AuthContext.currentUser(request);

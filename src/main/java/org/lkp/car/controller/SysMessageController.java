@@ -3,6 +3,8 @@ package org.lkp.car.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.SysMessage;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.SysMessageService;
@@ -30,6 +32,7 @@ public class SysMessageController {
      */
     @GetMapping("/list")
     @ApiOperation("获取消息列表")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<List<SysMessage>> list() {
         return Result.success(sysMessageService.list());
     }
@@ -39,6 +42,7 @@ public class SysMessageController {
      */
     @GetMapping("/myMessages")
     @ApiOperation("获取当前用户的消息列表")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<List<SysMessage>> getMyMessages(HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (currentUser == null) {
@@ -53,6 +57,7 @@ public class SysMessageController {
      */
     @GetMapping("/unreadCount")
     @ApiOperation("获取当前用户未读消息数量")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
     public Result<Long> getUnreadCount(HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (currentUser == null) {
@@ -113,6 +118,20 @@ public class SysMessageController {
     @ApiOperation("标记消息为已读")
     public Result<Boolean> markAsRead(@PathVariable Long id) {
         return Result.success(sysMessageService.markAsRead(id));
+    }
+
+    /**
+     * 标记当前用户所有消息为已读
+     */
+    @PutMapping("/markAllRead")
+    @ApiOperation("标记当前用户所有消息为已读")
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
+    public Result<Boolean> markAllRead(HttpServletRequest request) {
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (currentUser == null) {
+            return Result.error("请先登录");
+        }
+        return Result.success(sysMessageService.markAllRead(currentUser.getUserId()));
     }
 
     /**

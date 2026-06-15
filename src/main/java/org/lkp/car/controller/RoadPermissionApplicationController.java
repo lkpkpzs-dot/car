@@ -3,6 +3,8 @@ package org.lkp.car.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.dto.RoadApplyRequest;
 import org.lkp.car.dto.RoadAuditRequest;
 import org.lkp.car.entity.RoadPermissionApplication;
@@ -29,6 +31,7 @@ public class RoadPermissionApplicationController {
 
     @PostMapping("/apply")
     @ApiOperation("提交道路测试/应用申请")
+    @RequireRole({RoleEnum.ENTERPRISE_CODE})
     public Result<Long> apply(@RequestBody RoadApplyRequest applyRequest, HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (!AuthContext.hasEnterprise(currentUser)) {
@@ -41,6 +44,7 @@ public class RoadPermissionApplicationController {
 
     @GetMapping("/myList")
     @ApiOperation("查询当前用户申请列表")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.CITIZEN_CODE})
     public Result<List<RoadPermissionApplicationVO>> myList(HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         return Result.success(roadPermissionApplicationService.listMyApplications(currentUser.getUserId()));
@@ -48,7 +52,8 @@ public class RoadPermissionApplicationController {
 
     @GetMapping("/enterpriseList")
     @ApiOperation("根据企业ID查询申请列表")
-    public Result<List<RoadPermissionApplicationVO>> enterpriseList(@RequestParam(required = false) Long enterpriseId,
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE})
+    public Result<List<RoadPermissionApplicationVO>> enterpriseList(@RequestParam(required= false) Long enterpriseId,
                                                                   HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (AuthContext.isPolice(currentUser)) {
@@ -65,6 +70,7 @@ public class RoadPermissionApplicationController {
 
     @GetMapping("/{id}")
     @ApiOperation("查询申请详情")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE})
     public Result<RoadPermissionApplicationVO> getDetail(@PathVariable Long id, HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         RoadPermissionApplicationVO vo = roadPermissionApplicationService.getDetail(id);
@@ -85,6 +91,7 @@ public class RoadPermissionApplicationController {
 
     @PutMapping("/audit")
     @ApiOperation("民警审核道路测试申请")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> audit(@RequestBody RoadAuditRequest auditRequest, HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         if (!AuthContext.isPolice(currentUser)) {
@@ -96,9 +103,10 @@ public class RoadPermissionApplicationController {
 
     @GetMapping("/list")
     @ApiOperation("民警审核列表")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<List<RoadPermissionApplicationVO>> list(
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Integer type,
+            @RequestParam(required= false) Integer status,
+            @RequestParam(required= false) Integer type,
             HttpServletRequest request
     ) {
         if (!AuthContext.isPolice(AuthContext.currentUser(request))) {

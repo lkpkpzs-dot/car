@@ -24,6 +24,22 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 市民举报服务实现类
+ * <p>
+ * 处理市民举报业务，包括：
+ * 1. 举报提交与防恶意举报检查
+ * 2. 企业处理举报流程
+ * 3. 民警审核举报流程
+ * 4. 举报超时自动升级机制
+ * 5. 举报通知推送
+ * </p>
+ * <p>
+ * 举报处理流程：
+ * - 低风险举报(level=1)：先由企业处理，超时未处理升级为民警审核
+ * - 高风险举报(level=2)：企业处理 + 民警关注，超时时间更短
+ * </p>
+ */
 @Service
 public class CitizenReportServiceImpl extends ServiceImpl<CitizenReportMapper, CitizenReport> implements CitizenReportService {
 

@@ -2,12 +2,19 @@ package org.lkp.car.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.lkp.car.common.cache.CacheConstants;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.mapper.SysUserMapper;
 import org.lkp.car.service.SysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,10 +25,37 @@ import java.util.List;
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
 
+    @Autowired
+    @Lazy
+    private SysUserService self;
+
+    @Override
+    @Cacheable(
+            value = CacheConstants.LOCAL_SYS_USER,
+            key = "#id",
+            cacheManager = "localCacheManager",
+            unless = "#result == null"
+    )
+    public SysUser getById(Serializable id) {
+        return super.getById(id);
+    }
+
+    @Override
+    @CacheEvict(value = CacheConstants.LOCAL_SYS_USER, key = "#entity.id", cacheManager = "localCacheManager")
+    public boolean updateById(SysUser entity) {
+        return super.updateById(entity);
+    }
+
+    @Override
+    @CacheEvict(value = CacheConstants.LOCAL_SYS_USER, key = "#id", cacheManager = "localCacheManager")
+    public boolean removeById(Serializable id) {
+        return super.removeById(id);
+    }
+
     @Override
     public List<SysUser> getAllPoliceUsers() {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUser::getRoleType, 1); // 角色1是民警
+        wrapper.eq(SysUser::getRoleType, RoleEnum.POLICE_CODE);
         return this.list(wrapper);
     }
 
@@ -35,7 +69,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void banUserReport(Long userId, int banHours, String reason) {
-        SysUser user = this.getById(userId);
+        SysUser user = self.getById(userId);
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
@@ -43,33 +77,32 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.HOUR, banHours);
         user.setBanEndTime(calendar.getTime());
-        this.updateById(user);
+        self.updateById(user);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void unbanUserReport(Long userId) {
-        SysUser user = this.getById(userId);
+        SysUser user = self.getById(userId);
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
         user.setIsReportBanned(0);
         user.setBanEndTime(null);
-        this.updateById(user);
+        self.updateById(user);
     }
 
     @Override
     public boolean isUserBanned(Long userId) {
-        SysUser user = this.getById(userId);
+        SysUser user = self.getById(userId);
         if (user == null) {
             return false;
         }
-        // 检查是否被封禁且未过封禁时间
         if (user.getIsReportBanned() == null || user.getIsReportBanned() != 1) {
             return false;
         }
         if (user.getBanEndTime() == null) {
-            return true; // 永久封禁（当前没设置永久，暂时按有结束时间处理）
+            return true;
         }
         return user.getBanEndTime().after(new Date());
     }
@@ -77,20 +110,20 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void incrementTotalReportCount(Long userId) {
-        SysUser user = this.getById(userId);
+        SysUser user = self.getById(userId);
         if (user != null) {
             user.setTotalReportCount((user.getTotalReportCount() == null ? 0 : user.getTotalReportCount()) + 1);
-            this.updateById(user);
+            self.updateById(user);
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void incrementInvalidReportCount(Long userId) {
-        SysUser user = this.getById(userId);
+        SysUser user = self.getById(userId);
         if (user != null) {
             user.setInvalidReportCount((user.getInvalidReportCount() == null ? 0 : user.getInvalidReportCount()) + 1);
-            this.updateById(user);
+            self.updateById(user);
         }
     }
 }

@@ -4,6 +4,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.lkp.car.common.Result;
+import org.lkp.car.common.annotation.RequireRole;
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.dto.AuditTaskVO;
 import org.lkp.car.entity.SysUser;
 import org.lkp.car.service.AuditService;
@@ -37,6 +39,7 @@ public class AuditController {
      */
     @GetMapping("/list")
     @ApiOperation("待审核/已处理列表（企业资质建议传 businessType=2）")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<List<AuditTaskVO>> getAuditList(
             @RequestParam boolean isProcessed,
             @ApiParam("兼容旧前端参数，实际以后端 token 中的当前民警为准")

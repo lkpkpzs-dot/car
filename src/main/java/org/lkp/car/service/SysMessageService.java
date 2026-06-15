@@ -27,6 +27,11 @@ public interface SysMessageService extends IService<SysMessage> {
     boolean markAsRead(Long msgId);
 
     /**
+     * 标记当前用户所有消息为已读
+     */
+    boolean markAllRead(Long userId);
+
+    /**
      * 获取系统消息详情（包含关联的举报信息）
      */
     SysMessageDetailVO getMessageDetail(Long msgId);

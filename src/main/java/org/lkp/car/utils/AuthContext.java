@@ -1,5 +1,6 @@
 package org.lkp.car.utils;
 
+import org.lkp.car.common.enums.RoleEnum;
 import org.lkp.car.entity.SysUser;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,12 +22,11 @@ public class AuthContext {
 
     /**
      * 判断是否为民警角色
-     * 约定：roleType = 1 表示民警
      */
     public static boolean isPolice(SysUser user) {
         return user != null
                 && user.getRoleType() != null
-                && user.getRoleType() == 1;
+                && user.getRoleType() == RoleEnum.POLICE_CODE;
     }
 
     /**

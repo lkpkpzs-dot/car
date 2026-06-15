@@ -2,13 +2,40 @@
 server:
   port: 8080
   address: 0.0.0.0
-# 数据库连接配置
+
 spring:
+  main:
+    allow-circular-references: true
+
+  # 数据库连接配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/car_admin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
     username: root
     password: 123456
+    hikari:
+      pool-name: CarHikariPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 2
+        max-wait: 3000ms
+
+  cache:
+    type: redis
 
   # Jackson 配置 (解决日期解析错误)
   jackson:
@@ -25,8 +52,10 @@ spring:
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
     map-underscore-to-camel-case: true
+    default-executor-type: REUSE
+    local-cache-scope: SESSION
   global-config:
     db-config:
       logic-delete-field: is_deleted
@@ -48,12 +77,21 @@ file:
   upload-path: uploads/
   access-path: /uploads/**
 app:
-  base-url: https://e2a7a72b.natappfree.cc
+  base-url: https://wbd726ad.natappfree.cc
 
 # 腾讯地图API配置（可选，用于更精确的逆地理编码）
 tencent:
   map:
     key: DS3BZ-MGRYZ-WBPXJ-ZZENM-NRBNZ-2YF5B # 在此处填入腾讯地图WebService API Key
+
+# JWT 配置
+jwt:
+  # 密钥 (生产环境请使用强密码并妥善保管)
+  secret: car-management-system-secret-key-2024
+  # Access Token 过期时间 (毫秒)，默认2小时
+  access-token-expire-time: 7200000
+  # Refresh Token 过期时间 (毫秒)，默认7天
+  refresh-token-expire-time: 604800000
 
 citizen-report:
   enterprise-handle-timeout-hours: 2   # 默认低风险
@@ -68,5 +106,3 @@ citizen-report:
     ban-duration-hours: 24
     # 短时间内举报间隔限制（分钟）
     min-report-interval-minutes: 1
-
-

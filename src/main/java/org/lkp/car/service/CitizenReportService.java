@@ -9,7 +9,15 @@ import org.lkp.car.entity.SysUser;
 import java.util.List;
 
 /**
- * 群众举报 服务类
+ * 市民举报服务接口
+ * <p>
+ * 处理市民举报业务，包括：
+ * 1. 举报提交（含防恶意举报检查）
+ * 2. 企业处理举报
+ * 3. 民警审核举报
+ * 4. 超时举报自动升级
+ * 5. 举报查询（按角色权限）
+ * </p>
  */
 public interface CitizenReportService extends IService<CitizenReport> {
 
