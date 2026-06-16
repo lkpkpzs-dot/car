@@ -72,8 +72,17 @@ public class SysMessageController {
      */
     @GetMapping("/{id}")
     @ApiOperation("根据ID获取消息详情")
-    public Result<SysMessage> getById(@PathVariable Long id) {
-        return Result.success(sysMessageService.getById(id));
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
+    public Result<SysMessage> getById(@PathVariable Long id, HttpServletRequest request) {
+        SysMessage message = sysMessageService.getById(id);
+        if (message == null) {
+            return Result.success(null);
+        }
+        SysUser currentUser = AuthContext.currentUser(request);
+        if (!canAccessMessage(currentUser, message)) {
+            return Result.error(403, "无消息查看权限");
+        }
+        return Result.success(message);
     }
 
     /**
@@ -90,6 +99,10 @@ public class SysMessageController {
         if (detail == null) {
             return Result.error("消息不存在");
         }
+        SysMessage message = sysMessageService.getById(id);
+        if (!canAccessMessage(currentUser, message)) {
+            return Result.error(403, "无消息查看权限");
+        }
         return Result.success(detail);
     }
 
@@ -98,6 +111,7 @@ public class SysMessageController {
      */
     @PostMapping("/save")
     @ApiOperation("发送系统消息")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> save(@RequestBody SysMessage sysMessage) {
         return Result.success(sysMessageService.save(sysMessage));
     }
@@ -107,6 +121,7 @@ public class SysMessageController {
      */
     @PutMapping("/update")
     @ApiOperation("修改消息（如标记已读）")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> update(@RequestBody SysMessage sysMessage) {
         return Result.success(sysMessageService.updateById(sysMessage));
     }
@@ -116,7 +131,15 @@ public class SysMessageController {
      */
     @PutMapping("/markRead/{id}")
     @ApiOperation("标记消息为已读")
-    public Result<Boolean> markAsRead(@PathVariable Long id) {
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.POLICE_CODE})
+    public Result<Boolean> markAsRead(@PathVariable Long id, HttpServletRequest request) {
+        SysMessage message = sysMessageService.getById(id);
+        if (message == null) {
+            return Result.error("消息不存在");
+        }
+        if (!canAccessMessage(AuthContext.currentUser(request), message)) {
+            return Result.error(403, "无消息操作权限");
+        }
         return Result.success(sysMessageService.markAsRead(id));
     }
 
@@ -139,7 +162,16 @@ public class SysMessageController {
      */
     @DeleteMapping("/{id}")
     @ApiOperation("删除消息")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(sysMessageService.removeById(id));
+    }
+
+    private boolean canAccessMessage(SysUser currentUser, SysMessage message) {
+        if (currentUser == null || message == null) {
+            return false;
+        }
+        return AuthContext.isPolice(currentUser)
+                || currentUser.getUserId().equals(message.getReceiverId());
     }
 }

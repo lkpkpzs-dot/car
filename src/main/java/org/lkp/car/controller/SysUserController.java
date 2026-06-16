@@ -41,6 +41,7 @@ public class SysUserController {
      */
     @GetMapping("/{id}")
     @ApiOperation("根据ID获取用户详情")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<SysUser> getById(@PathVariable Long id) {
         return Result.success(sysUserService.getById(id));
     }
@@ -50,6 +51,7 @@ public class SysUserController {
      */
     @PostMapping("/save")
     @ApiOperation("新增用户")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> save(@RequestBody SysUser sysUser) {
         return Result.success(sysUserService.save(sysUser));
     }
@@ -59,6 +61,7 @@ public class SysUserController {
      */
     @PutMapping("/update")
     @ApiOperation("修改用户")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> update(@RequestBody SysUser sysUser) {
         return Result.success(sysUserService.updateById(sysUser));
     }
@@ -68,6 +71,7 @@ public class SysUserController {
      */
     @DeleteMapping("/{id}")
     @ApiOperation("删除用户")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(sysUserService.removeById(id));
     }

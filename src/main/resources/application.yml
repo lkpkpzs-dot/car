@@ -11,7 +11,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/car_admin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
-    username: root
+    username: car
     password: 123456
     hikari:
       pool-name: CarHikariPool
@@ -77,7 +77,7 @@ file:
   upload-path: uploads/
   access-path: /uploads/**
 app:
-  base-url: https://wbd726ad.natappfree.cc
+  base-url: https://lkpzs.xyz/
 
 # 腾讯地图API配置（可选，用于更精确的逆地理编码）
 tencent:

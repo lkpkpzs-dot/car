@@ -38,6 +38,7 @@ public class ServiceEvaluationController {
      */
     @GetMapping("/{id}")
     @ApiOperation("根据ID获取评价详情")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.CITIZEN_CODE})
     public Result<ServiceEvaluation> getById(@PathVariable Long id) {
         return Result.success(serviceEvaluationService.getById(id));
     }
@@ -47,6 +48,7 @@ public class ServiceEvaluationController {
      */
     @PostMapping("/save")
     @ApiOperation("提交评价")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE, RoleEnum.CITIZEN_CODE})
     public Result<Boolean> save(@RequestBody ServiceEvaluation serviceEvaluation) {
         return Result.success(serviceEvaluationService.save(serviceEvaluation));
     }
@@ -56,6 +58,7 @@ public class ServiceEvaluationController {
      */
     @PutMapping("/update")
     @ApiOperation("修改评价内容")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> update(@RequestBody ServiceEvaluation serviceEvaluation) {
         return Result.success(serviceEvaluationService.updateById(serviceEvaluation));
     }
@@ -65,6 +68,7 @@ public class ServiceEvaluationController {
      */
     @DeleteMapping("/{id}")
     @ApiOperation("删除评价")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(serviceEvaluationService.removeById(id));
     }

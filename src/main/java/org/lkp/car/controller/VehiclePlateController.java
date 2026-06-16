@@ -32,24 +32,28 @@ public class VehiclePlateController {
 
     @GetMapping("/{plateId}")
     @ApiOperation("根据ID获取牌照详情")
+    @RequireRole({RoleEnum.POLICE_CODE, RoleEnum.ENTERPRISE_CODE})
     public Result<VehiclePlate> getById(@PathVariable Long plateId) {
         return Result.success(vehiclePlateService.getById(plateId));
     }
 
     @PostMapping("/save")
     @ApiOperation("新增牌照记录")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> save(@RequestBody VehiclePlate vehiclePlate) {
         return Result.success(vehiclePlateService.save(vehiclePlate));
     }
 
     @PutMapping("/update")
     @ApiOperation("修改牌照记录")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> update(@RequestBody VehiclePlate vehiclePlate) {
         return Result.success(vehiclePlateService.updateById(vehiclePlate));
     }
 
     @DeleteMapping("/{plateId}")
     @ApiOperation("删除牌照记录")
+    @RequireRole({RoleEnum.POLICE_CODE})
     public Result<Boolean> delete(@PathVariable Long plateId) {
         return Result.success(vehiclePlateService.removeById(plateId));
     }

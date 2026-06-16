@@ -1,0 +1,9 @@
+<view class="agreement-page">
+  <view class="title">{{title}}</view>
+  <view class="section" wx:for="{{sections}}" wx:key="heading">
+    <view class="section-title">{{item.heading}}</view>
+    <view class="paragraph" wx:for="{{item.paragraphs}}" wx:for-item="paragraph" wx:key="*this">
+      {{paragraph}}
+    </view>
+  </view>
+</view>

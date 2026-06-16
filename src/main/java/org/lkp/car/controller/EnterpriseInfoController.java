@@ -49,7 +49,7 @@ public class EnterpriseInfoController {
      */
     @PostMapping("/apply")
     @ApiOperation("企业资质申请（保存企业信息并写入审批留痕）")
-    @RequireRole({RoleEnum.ENTERPRISE_CODE})
+    @RequireRole({RoleEnum.CITIZEN_CODE, RoleEnum.ENTERPRISE_CODE})
     public Result<Long> apply(@RequestBody EnterpriseApplyRequest applyRequest, HttpServletRequest request) {
         SysUser currentUser = AuthContext.currentUser(request);
         applyRequest.setApplicantId(currentUser.getUserId());

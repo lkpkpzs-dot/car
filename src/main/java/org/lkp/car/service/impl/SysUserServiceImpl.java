@@ -41,7 +41,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.LOCAL_SYS_USER, key = "#entity.id", cacheManager = "localCacheManager")
+    @CacheEvict(value = CacheConstants.LOCAL_SYS_USER, key = "#entity.userId", cacheManager = "localCacheManager")
     public boolean updateById(SysUser entity) {
         return super.updateById(entity);
     }

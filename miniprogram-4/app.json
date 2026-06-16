@@ -1,0 +1,85 @@
+{
+  "pages": [
+    "pages/splash/index",
+    "pages/agreement/index",
+    "pages/admin/index",
+    "pages/enterprise/index",
+    "pages/citizen/index",
+    "pages/citizen/report/index",
+    "pages/citizen/report/list/index",
+    "pages/citizen/messages/index",
+    "pages/citizen/messages/detail/index",
+    "pages/citizen/feedback/submit",
+    "pages/admin/feedback/list",
+    "pages/admin/feedback/detail",
+    "pages/enterprise/messages/index",
+    "pages/enterprise/messages/detail/index",
+    "pages/profile/index",
+    "pages/account-settings/index",
+    "pages/admin/audit/index",
+    "pages/admin/audit/detail/index",
+    "pages/admin/report/list/index",
+    "pages/admin/report/detail/index",
+    "pages/admin/report/user-mgmt/index",
+    "pages/admin/report/ban-user/index",
+    "pages/admin/road/list/index",
+    "pages/admin/road/detail/index",
+    "pages/admin/road/inspection/index",
+    "pages/admin/road/issue-plate/index",
+    "pages/admin/safety/list",
+    "pages/admin/safety/detail",
+    "pages/admin/safety/penalty",
+    "pages/admin/archive/index",
+    "pages/enterprise/safety/list",
+    "pages/enterprise/safety/form",
+    "pages/enterprise/safety/detail",
+    "pages/enterprise/vehicles/index",
+    "pages/enterprise/report/list",
+    "pages/enterprise/report/handle",
+    "pages/road/apply/index",
+    "pages/road/list/index",
+    "pages/enterprise/qualification/index",
+    "pages/monitor/index",
+    "pages/vehicle/vehicle",
+    "pages/approve/approve",
+    "pages/scan/scan",
+    "pages/logs/logs"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "智驾廉盟",
+    "navigationBarBackgroundColor": "#1a365d",
+    "backgroundColor": "#f0f4f8"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#7A7E83",
+    "selectedColor": "#1a365d",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/admin/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/enterprise/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/citizen/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ]
+}
